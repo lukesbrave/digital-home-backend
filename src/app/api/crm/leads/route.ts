@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
   const status = params.get("status");
   const tag = params.get("tag");
   const emailStatus = params.get("email_status");
-  const sort = params.get("sort") || "last_activity_at";
+  const sort = params.get("sort") || "created_at";
   const ascending = params.get("dir") === "asc";
 
   let query = supabase.from("leads").select("*", { count: "exact" });
@@ -38,7 +38,7 @@ export async function GET(request: NextRequest) {
 
   const sortCol = ["last_activity_at", "created_at", "email", "score", "status"].includes(sort)
     ? sort
-    : "last_activity_at";
+    : "created_at";
 
   const { data, count, error } = await query
     .order(sortCol, { ascending })
