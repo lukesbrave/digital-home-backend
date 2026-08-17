@@ -83,8 +83,6 @@ export default function LoginPage() {
           {loading ? 'Signing in…' : 'Sign in'}
         </button>
 
-        {/* Footer */}
-        <div className="mt-16 text-xs text-minimal-muted/60 text-center">v0.1</div>
       </form>
     </div>
   );

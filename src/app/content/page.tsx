@@ -198,8 +198,7 @@ export default function ContentPipelinePage() {
       {view === 'board' ? <BoardView digitalHomeUrl={digitalHomeUrl} /> : <ListView />}
 
       {/* Footer */}
-      <footer className="h-16 px-12 flex items-center justify-between text-xs text-minimal-muted shrink-0">
-        <span>v0.1</span>
+      <footer className="h-16 px-12 flex items-center justify-end text-xs text-minimal-muted shrink-0">
         <span>Digital Home / {view === 'board' ? 'Pipeline' : 'Articles'}</span>
       </footer>
 

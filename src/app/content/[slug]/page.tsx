@@ -436,7 +436,6 @@ export default function ArticleEditorPage() {
           <span>{editing ? 'Editing' : 'Preview'}</span>
           <span>Words: {wordCount(editing ? editBody : article.body)}</span>
         </div>
-        <span>v0.1</span>
       </footer>
     </div>
   );

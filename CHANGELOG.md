@@ -2,6 +2,14 @@
 
 All notable changes to the Digital Home Backend Starter.
 
+## [2.5.8] — 2026-08-18
+
+Cosmetic cleanup: removed the leftover v0.1 and v0.2 labels from the
+login page, sidebar, and content pages. Those labels predated the
+current release numbering and made a freshly deployed backend look
+outdated. Your real version lives in the VERSION file and release tags.
+No database or environment changes are required.
+
 ## [2.5.7] — 2026-08-17
 
 Three quality-of-life and correctness fixes:

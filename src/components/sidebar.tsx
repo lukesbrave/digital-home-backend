@@ -207,10 +207,9 @@ export function Sidebar() {
         })}
       </nav>
 
-      {/* Theme + version */}
+      {/* Theme */}
       <div className="px-3 flex flex-col gap-1">
         <ThemeToggle collapsed={collapsed} />
-        {!collapsed && <div className="px-3 py-1 text-xs text-zinc-600">v0.2</div>}
       </div>
     </aside>
   );
