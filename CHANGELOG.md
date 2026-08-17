@@ -2,6 +2,22 @@
 
 All notable changes to the Digital Home Backend Starter.
 
+## [2.5.7] — 2026-08-17
+
+Three quality-of-life and correctness fixes:
+
+- The Leads list now defaults to newest-created records, adds explicit
+  priority and recent-activity views, and shows lead scores in the table.
+- Article status stays in sync with the content calendar: moving a calendar
+  entry to draft, published, or archived updates the linked article, a
+  publication date is preserved when unpublishing and set on first
+  publication, and the article state is restored if the calendar update
+  fails. Previously, dragging a published article back to Draft left it
+  live on the public site while the CMS showed it as a draft.
+- Clean-checkout builds no longer fail on the generated-module import in
+  `worker.ts` — a fresh clone now builds first time. No database or
+  environment changes are required.
+
 ## [2.5.6] — 2026-08-07
 
 Social platforms for one post now begin concurrently, so an Instagram
