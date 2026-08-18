@@ -2,6 +2,25 @@
 
 All notable changes to the Digital Home Backend Starter.
 
+## [2.5.9] — 2026-08-18
+
+Social scheduling and Facebook analytics hardening:
+
+- Retrying a failed or partially published post preserves its original
+  `scheduled_at` calendar slot. Previously the retry time replaced the
+  intended publish time, making 11:00 posts appear to move to early morning.
+- Facebook Reel snapshots no longer request the retired
+  `post_impressions_unique` metric. Plays, social actions, likes, and comments
+  are fetched independently, so one unavailable Meta metric cannot discard an
+  otherwise valid snapshot. Facebook Reel reach remains zero because Graph
+  API v23 does not expose a compatible replacement.
+- The native Cloudflare social cron now logs a compact result summary. An
+  explicit `SOCIAL_SCHEDULER_MODE` (`native` or `external`) supports safe
+  cutovers for customized deployments without ever running two schedulers.
+- Added focused retry and Meta regression tests under `npm run test:social`.
+
+No database migration is required.
+
 ## [2.5.8] — 2026-08-18
 
 Cosmetic cleanup: removed the leftover v0.1 and v0.2 labels from the
