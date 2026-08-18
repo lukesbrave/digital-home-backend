@@ -49,8 +49,9 @@ command flips a role, so promote/demote is one line.
 - **Metrics** — every tick appends fresh snapshots (`social_metrics`) for
   targets published in the last 30 days whose numbers are older than 6 h.
   The Performance tab rolls them up; history is kept for trend charts later.
-  Facebook carousel metrics read post insights (impressions/reach) rather
-  than video insights.
+  Facebook carousels read post reactions, comments, shares, and clicks;
+  Facebook Reels read plays, social actions, likes, and comments through
+  independent requests so a retired Meta metric cannot erase the snapshot.
 - **CLI / Claude** — `scripts/social-post.mjs` runs the whole calendar over
   the HMAC machine API (master key from `.env.local`):
   `accounts` · `list` · `create --caption … --media a.jpg b.jpg --when …` ·
@@ -77,7 +78,11 @@ project if you haven't already.
 
 Nothing to add: the Cloudflare cron in `wrangler.jsonc` runs the social tick
 alongside the CRM tick once this worker is deployed (needs the
-`API_SECRET_KEY` secret).
+`API_SECRET_KEY` secret). `SOCIAL_SCHEDULER_MODE` defaults to `native`.
+Customized deployments that still have an external/GitHub social schedule
+can temporarily set it to `external`, remove the recurring external trigger,
+then switch it to `native` and redeploy. Invalid values fail closed and log an
+error rather than risking two authoritative schedulers.
 
 ### 3. Connect accounts (`/social/accounts`)
 
@@ -144,6 +149,10 @@ platforms. One image = a single photo post; 2–10 = a true Instagram carousel
 
 - Insights lag publishing (IG often 404s insights for the first hour) — the
   metrics pass skips quietly and catches up on a later tick.
+- Meta Graph API v23 retired Facebook Reel `post_impressions_unique`, so Reel
+  reach is stored as 0 rather than being guessed from plays. The remaining
+  Reel metrics are isolated from one another and continue recording if an
+  optional metric becomes unavailable.
 - "Publish now" runs the engine inline with a short Instagram transcode wait,
   so it usually returns fully published.
 - Deleting a post removes its storage object; already-published videos stay
