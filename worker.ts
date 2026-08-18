@@ -24,10 +24,10 @@
 // `wrangler types` writes `typeof import("./worker")` into cloudflare-env.d.ts,
 // so this file is pulled back in as a transitive dependency. Wrangler bundles
 // the real module at deploy time.
-// @ts-ignore -- generated at build time
+// @ts-expect-error -- generated at build time
 import openNextHandler from "./.open-next/worker.js";
 
-// @ts-ignore -- generated at build time
+// @ts-expect-error -- generated at build time
 export { DOQueueHandler, DOShardedTagCache, BucketCachePurge } from "./.open-next/worker.js";
 
 const TICK_PATH = "/api/crm/tick";
@@ -104,16 +104,43 @@ async function runSocialTick(env: CloudflareEnv, ctx: ExecutionContext): Promise
     const response = await callSigned(env, ctx, SOCIAL_TICK_PATH, {});
     if (!response.ok) {
       console.error(`social tick cron: ${response.status} ${(await response.text()).slice(0, 300)}`);
+      return;
     }
+    const result = (await response.json()) as {
+      postsDue?: number;
+      targetsPublished?: number;
+      targetsProcessing?: number;
+      targetsFailed?: number;
+      metricsRefreshed?: number;
+      errors?: string[];
+    };
+    console.log(
+      `social tick cron: due=${result.postsDue || 0} published=${result.targetsPublished || 0} ` +
+        `processing=${result.targetsProcessing || 0} failed=${result.targetsFailed || 0} ` +
+        `metrics=${result.metricsRefreshed || 0}` +
+        (result.errors?.length ? ` errors=[${result.errors.join(" | ")}]` : "")
+    );
   } catch (e) {
     console.error(`social tick cron: ${e instanceof Error ? e.message : String(e)}`);
   }
+}
+
+function socialSchedulerMode(env: CloudflareEnv): "native" | "external" | "invalid" {
+  const configured = (env as unknown as Record<string, string>).SOCIAL_SCHEDULER_MODE;
+  if (!configured || configured === "native") return "native";
+  if (configured === "external") return "external";
+  return "invalid";
 }
 
 export default {
   fetch: openNextHandler.fetch,
   async scheduled(_controller: ScheduledController, env: CloudflareEnv, ctx: ExecutionContext) {
     ctx.waitUntil(runTick(env, ctx));
-    ctx.waitUntil(runSocialTick(env, ctx));
+    const mode = socialSchedulerMode(env);
+    if (mode === "native") {
+      ctx.waitUntil(runSocialTick(env, ctx));
+    } else if (mode === "invalid") {
+      console.error("social tick cron: invalid SOCIAL_SCHEDULER_MODE; expected native or external");
+    }
   },
 } satisfies ExportedHandler<CloudflareEnv>;

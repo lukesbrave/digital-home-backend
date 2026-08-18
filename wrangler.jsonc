@@ -55,6 +55,7 @@
     "NEXT_PUBLIC_SUPABASE_ANON_KEY": "your-anon-key",
     "DIGITAL_HOME_URL": "https://yourdomain.com",
     "NEXT_PUBLIC_DIGITAL_HOME_URL": "https://yourdomain.com",
+    "SOCIAL_SCHEDULER_MODE": "native",
     "R2_PUBLIC_BASE": "https://media.yourdomain.com"
   }
 }
