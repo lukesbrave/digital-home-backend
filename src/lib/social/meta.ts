@@ -507,28 +507,94 @@ export async function fbFetchPostMetrics(
 }
 
 export async function fbFetchMetrics(videoId: string, pageToken: string): Promise<MetricSnapshot> {
-  // Reels expose plays via video_insights; likes/comments ride the object itself.
-  const data = await graph<{
-    video_insights?: { data?: Array<{ name: string; values?: Array<{ value?: number }> }> };
+  // Reels expose plays and social actions through video_insights, while
+  // likes/comments ride the video object. Keep those requests independent:
+  // Meta retires individual insight names without preserving compatibility,
+  // and one invalid name makes an otherwise valid combined request fail.
+  type VideoInsight = { name: string; values?: Array<{ value?: unknown }> };
+  type VideoInsightResponse = { video_insights?: { data?: VideoInsight[] } };
+  type EngagementResponse = {
     likes?: { summary?: { total_count?: number } };
     comments?: { summary?: { total_count?: number } };
-  }>(`/${videoId}`, {
-    token: pageToken,
-    params: {
-      fields:
-        "video_insights.metric(blue_reels_play_count,post_impressions_unique,post_video_social_actions){name,values},likes.summary(true).limit(0),comments.summary(true).limit(0)",
-    },
-  });
-  const insights = data.video_insights?.data || [];
-  const get = (name: string) => insights.find((m) => m.name === name)?.values?.[0]?.value ?? 0;
+  };
+
+  async function attempt<T>(request: Promise<T>): Promise<{ data: T | null; error: string | null }> {
+    try {
+      return { data: await request, error: null };
+    } catch (error) {
+      return { data: null, error: error instanceof Error ? error.message : String(error) };
+    }
+  }
+
+  const [playsResult, actionsResult, engagementResult] = await Promise.all([
+    attempt(
+      graph<VideoInsightResponse>(`/${videoId}`, {
+        token: pageToken,
+        params: { fields: "video_insights.metric(blue_reels_play_count){name,values}" },
+      })
+    ),
+    attempt(
+      graph<VideoInsightResponse>(`/${videoId}`, {
+        token: pageToken,
+        params: { fields: "video_insights.metric(post_video_social_actions){name,values}" },
+      })
+    ),
+    attempt(
+      graph<EngagementResponse>(`/${videoId}`, {
+        token: pageToken,
+        params: { fields: "likes.summary(true).limit(0),comments.summary(true).limit(0)" },
+      })
+    ),
+  ]);
+
+  if (!playsResult.data && !actionsResult.data && !engagementResult.data) {
+    throw new Error(
+      `Facebook Reel metrics unavailable: ${[
+        playsResult.error,
+        actionsResult.error,
+        engagementResult.error,
+      ]
+        .filter(Boolean)
+        .join(" | ")}`
+    );
+  }
+
+  const insights = [
+    ...(playsResult.data?.video_insights?.data || []),
+    ...(actionsResult.data?.video_insights?.data || []),
+  ];
+  const value = (name: string) => insights.find((metric) => metric.name === name)?.values?.[0]?.value;
+  const plays = Number(value("blue_reels_play_count")) || 0;
+  const socialActions = value("post_video_social_actions");
+  const shares =
+    socialActions && typeof socialActions === "object"
+      ? Number(
+          (socialActions as Record<string, unknown>).share ??
+            (socialActions as Record<string, unknown>).shares ??
+            0
+        ) || 0
+      : 0;
+
   return {
-    views: get("blue_reels_play_count"),
-    likes: data.likes?.summary?.total_count ?? 0,
-    comments: data.comments?.summary?.total_count ?? 0,
-    shares: 0,
+    views: plays,
+    likes: engagementResult.data?.likes?.summary?.total_count ?? 0,
+    comments: engagementResult.data?.comments?.summary?.total_count ?? 0,
+    shares,
     saves: 0,
-    reach: get("post_impressions_unique"),
-    raw: { insights, likes: data.likes?.summary, comments: data.comments?.summary },
+    // Meta retired post_impressions_unique from Graph v23. Do not substitute
+    // plays for reach: they describe different things.
+    reach: 0,
+    raw: {
+      insights,
+      likes: engagementResult.data?.likes?.summary,
+      comments: engagementResult.data?.comments?.summary,
+      errors: {
+        plays: playsResult.error,
+        social_actions: actionsResult.error,
+        engagement: engagementResult.error,
+      },
+      reach_unavailable: true,
+    },
   };
 }
 
