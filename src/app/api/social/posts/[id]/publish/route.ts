@@ -7,6 +7,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { authenticateSessionOrApiKey, unauthorizedResponse } from "@/lib/api/auth";
 import { createAdminClient } from "@/lib/supabase/server";
 import { runSocialTick } from "@/lib/social/publisher";
+import { scheduledAtForImmediateAttempt } from "@/lib/social/retry";
 
 export const maxDuration = 300;
 
@@ -51,7 +52,11 @@ export async function POST(request: NextRequest, context: RouteContext) {
     .eq("status", "failed");
   await supabase
     .from("social_posts")
-    .update({ status: "scheduled", scheduled_at: new Date().toISOString(), error: null })
+    .update({
+      status: "scheduled",
+      scheduled_at: scheduledAtForImmediateAttempt(post, new Date().toISOString()),
+      error: null,
+    })
     .eq("id", id);
 
   const summary = await runSocialTick(supabase, { postId: id });
