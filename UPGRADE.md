@@ -18,8 +18,8 @@ customizations are intentional: **merge, don't overwrite.** When a file
 conflicts, prefer their copy design-wise and add the new capability into it.
 
 ### Step 0 — Determine current version
-- If a `VERSION` file exists, read it. If it says `2.5.10` or higher, stop —
-  already up to date. If it says anything from `2.5.0` through `2.5.9`,
+- If a `VERSION` file exists, read it. If it says `2.5.11` or higher, stop —
+  already up to date. If it says anything from `2.5.0` through `2.5.10`,
   apply ONLY the "Patch upgrades" section at the bottom of this guide.
 - No `VERSION` file = v1.x (content pipeline era). Apply the full v2.5.0
   upgrade below.
@@ -29,15 +29,15 @@ conflicts, prefer their copy design-wise and add the new capability into it.
 ### Step 1 — Preflight
 1. `git status` — if there are uncommitted changes, commit or stash them
    first so the upgrade is revertible.
-2. Create a branch: `git checkout -b upgrade/v2.5.10`.
+2. Create a branch: `git checkout -b upgrade/v2.5.11`.
 3. Add the starter as a remote if missing:
    `git remote add starter https://github.com/lukesbrave/digital-home-backend.git`
    then `git fetch starter --tags`.
 
 ### Step 2 — Bring in the latest version
-1. Diff `git diff HEAD..v2.5.10 --stat` to see scope.
+1. Diff `git diff HEAD..v2.5.11 --stat` to see scope.
 2. New files (the vast majority) can be checked out directly:
-   `git checkout v2.5.10 -- <path>` for: `src/lib/crm/`, `src/lib/social/`,
+   `git checkout v2.5.11 -- <path>` for: `src/lib/crm/`, `src/lib/social/`,
    `src/app/api/crm/`, `src/app/api/social/`, `src/app/api/settings/`,
    `src/app/api/webhooks/`, `src/app/crm/`, `src/app/social/`,
    `src/components/crm/`, `worker.ts`, `scripts/deploy.sh`,
@@ -85,7 +85,7 @@ conflicts, prefer their copy design-wise and add the new capability into it.
    activity entry and an opportunity in the first stage.
 4. Draft a 2-step test workflow, enroll yourself, run "Run engine now" —
    the send appears as `simulated` in the sent-email viewer.
-5. Commit, merge the branch, deploy. Done — `VERSION` should read `2.5.10`
+5. Commit, merge the branch, deploy. Done — `VERSION` should read `2.5.11`
    (it comes along with the checkout).
 
 ### If something breaks
@@ -95,6 +95,16 @@ branch until merged). The migration is additive and safe to leave applied.
 ## Patch upgrades (you're already on 2.5.x)
 
 Fetch the starter remote first: `git fetch starter --tags`.
+
+**From 2.5.10 → 2.5.11** — the funnel dashboard learns to show more
+than one funnel (selector appears once a second funnel sends events):
+
+    git checkout v2.5.11 -- src/lib/crm/funnel.ts "src/app/api/crm/funnel/route.ts" "src/app/crm/funnel/page.tsx" VERSION CHANGELOG.md
+
+No database or environment changes are required.
+
+**From 2.5.9 → 2.5.11** — apply the 2.5.10 patch below, then the
+2.5.10 → 2.5.11 patch above.
 
 **From 2.5.9 → 2.5.10** — let funnels capture leads with the funnel
 secret alone:

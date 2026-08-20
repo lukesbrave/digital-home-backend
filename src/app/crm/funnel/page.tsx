@@ -3,8 +3,11 @@
 import { useCallback, useEffect, useState } from 'react';
 import { api, EmptyState, Loading, PageHeader, useToast } from '@/components/crm/kit';
 
+type FunnelSummary = { funnel: string; sessions: number; domain: string | null };
+
 type FunnelStats = {
   funnel: string;
+  funnels: FunnelSummary[];
   window_days: number;
   totals: { starts: number; opt_ins: number; optin_rate: number; cta_clicks: number; cta_rate: number };
   steps: { index: number; screen_id: string | null; sessions: number; pct_of_start: number; dropped: number; drop_pct: number }[];
@@ -49,6 +52,7 @@ const WINDOWS = [
 
 export default function FunnelAnalytics() {
   const [days, setDays] = useState(30);
+  const [funnel, setFunnel] = useState('');
   const [data, setData] = useState<FunnelStats | null>(null);
   const [loading, setLoading] = useState(true);
   const { show, node: toastNode } = useToast();
@@ -56,13 +60,14 @@ export default function FunnelAnalytics() {
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      setData(await api<FunnelStats>(`/api/crm/funnel?days=${days}`));
+      const fq = funnel ? `&funnel=${encodeURIComponent(funnel)}` : '';
+      setData(await api<FunnelStats>(`/api/crm/funnel?days=${days}${fq}`));
     } catch (e) {
       show(e instanceof Error ? e.message : 'Failed to load', 'err');
     } finally {
       setLoading(false);
     }
-  }, [days, show]);
+  }, [days, funnel, show]);
 
   useEffect(() => {
     load();
@@ -74,7 +79,22 @@ export default function FunnelAnalytics() {
     <div className="flex flex-col h-full">
       {toastNode}
       <PageHeader title="Funnel">
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-3 flex-wrap justify-end">
+          {(data?.funnels?.length ?? 0) > 1 && (
+            <select
+              value={funnel || data?.funnel || ''}
+              onChange={(e) => setFunnel(e.target.value)}
+              className="px-3 py-1.5 text-xs rounded-lg border border-minimal-border bg-minimal-row text-zinc-300 focus:outline-none focus:border-zinc-500"
+              aria-label="Funnel"
+            >
+              {data?.funnels?.map((f) => (
+                <option key={f.funnel} value={f.funnel}>
+                  {f.funnel} · {f.sessions}
+                </option>
+              ))}
+            </select>
+          )}
+          <div className="flex items-center gap-1">
           {WINDOWS.map((w) => (
             <button
               key={w.days}
@@ -88,6 +108,7 @@ export default function FunnelAnalytics() {
               {w.label}
             </button>
           ))}
+          </div>
         </div>
       </PageHeader>
 
@@ -97,6 +118,10 @@ export default function FunnelAnalytics() {
         <div className="flex-1 overflow-y-auto px-12 pb-12">
           <p className="text-xs text-minimal-muted mb-6">
             {data.funnel}
+            {(() => {
+              const domain = data.funnels?.find((f) => f.funnel === data.funnel)?.domain;
+              return domain ? ` · ${domain}` : '';
+            })()}
             {data.truncated ? ' · window truncated at 50k events' : ''}
           </p>
 

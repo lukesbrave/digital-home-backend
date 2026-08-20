@@ -2,6 +2,19 @@
 
 All notable changes to the Digital Home Backend Starter.
 
+## [2.5.11] — 2026-08-20
+
+Multi-funnel dashboard:
+
+- The funnel dashboard now handles more than one funnel. Every funnel
+  registers itself the moment its first event arrives (the slug the funnel
+  template sends with each event is the registration; nothing to configure),
+  and a funnel selector appears in the dashboard header once a second
+  funnel exists. The default view is the busiest funnel in the window.
+- The stats API (`/api/crm/funnel`) returns the distinct funnels seen in
+  the window with session counts, and each funnel's domain is derived from
+  its own event URLs. No database changes.
+
 ## [2.5.10] — 2026-08-20
 
 Funnel capture with a single secret:

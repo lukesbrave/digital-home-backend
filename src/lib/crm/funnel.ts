@@ -213,3 +213,51 @@ export async function getFunnelStats(
     truncated,
   };
 }
+export interface FunnelSummary {
+  funnel: string;
+  sessions: number;
+  /** Host of the funnel's most recent event URL, for display. */
+  domain: string | null;
+}
+
+/**
+ * Distinct funnels seen in the window, busiest first. A funnel registers
+ * itself by sending events — the slug in the stream IS the registration;
+ * there is no funnel table to maintain. Scans newest-first so the first
+ * page_url met per slug is also its current domain.
+ */
+export async function listFunnels(supabase: AdminClient, days = 30): Promise<FunnelSummary[]> {
+  const since = days > 0 ? new Date(Date.now() - days * 86_400_000).toISOString() : null;
+  const map = new Map<string, { sessions: Set<string>; domain: string | null }>();
+  for (let page = 0; page < MAX_PAGES; page++) {
+    let query = supabase
+      .from("funnel_events")
+      .select("funnel, session_id, page_url")
+      .order("created_at", { ascending: false })
+      .range(page * PAGE_SIZE, (page + 1) * PAGE_SIZE - 1);
+    if (since) query = query.gte("created_at", since);
+    const { data, error } = await query;
+    if (error) throw new Error(error.message);
+    const rows = (data ?? []) as { funnel: string | null; session_id: string; page_url: string | null }[];
+    for (const r of rows) {
+      const slug = r.funnel || "unknown";
+      let entry = map.get(slug);
+      if (!entry) {
+        entry = { sessions: new Set(), domain: null };
+        map.set(slug, entry);
+      }
+      entry.sessions.add(r.session_id);
+      if (!entry.domain && r.page_url) {
+        try {
+          entry.domain = new URL(r.page_url).host;
+        } catch {
+          // Malformed page_url: leave the domain unknown.
+        }
+      }
+    }
+    if (!data || data.length < PAGE_SIZE) break;
+  }
+  return Array.from(map.entries())
+    .map(([funnel, e]) => ({ funnel, sessions: e.sessions.size, domain: e.domain }))
+    .sort((a, b) => b.sessions - a.sessions);
+}
