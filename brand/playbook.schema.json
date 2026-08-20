@@ -1,0 +1,648 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "BrandPlaybook",
+  "description": "Contract for brand/playbook.json, the brand research playbook rendered at /brand. Produced by your brand research process; sections map to the structured sections of the brand page.",
+  "type": "object",
+  "required": [
+    "meta",
+    "audienceResearch"
+  ],
+  "properties": {
+    "meta": {
+      "type": "object",
+      "required": [
+        "client",
+        "generatedAt",
+        "version",
+        "selectedAudience"
+      ],
+      "properties": {
+        "client": {
+          "type": "string"
+        },
+        "generatedAt": {
+          "type": "string",
+          "description": "ISO 8601"
+        },
+        "version": {
+          "type": "string",
+          "const": "2.0-agent"
+        },
+        "selectedAudience": {
+          "type": "object",
+          "required": [
+            "title",
+            "description"
+          ],
+          "properties": {
+            "title": {
+              "type": "string"
+            },
+            "description": {
+              "type": "string"
+            }
+          }
+        },
+        "sources": {
+          "type": "object",
+          "properties": {
+            "brief": {
+              "type": "string",
+              "description": "Path or message ref of the client brief"
+            },
+            "transcripts": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "focusGroupInsights": {
+      "type": "object",
+      "description": "Present only when transcripts were provided (stage 0).",
+      "required": [
+        "directQuotes",
+        "painPoints",
+        "desireStatements",
+        "vocabularyPatterns",
+        "urgencyIndicators"
+      ],
+      "properties": {
+        "directQuotes": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "quote",
+              "context",
+              "emotion"
+            ],
+            "properties": {
+              "quote": {
+                "type": "string"
+              },
+              "context": {
+                "type": "string"
+              },
+              "emotion": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "painPoints": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "pain",
+              "frequency",
+              "exactPhrases"
+            ],
+            "properties": {
+              "pain": {
+                "type": "string"
+              },
+              "frequency": {
+                "enum": [
+                  "mentioned_once",
+                  "recurring",
+                  "dominant_theme"
+                ]
+              },
+              "exactPhrases": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "desireStatements": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "vocabularyPatterns": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "urgencyIndicators": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "audienceResearch": {
+      "type": "object",
+      "required": [
+        "audienceState",
+        "urgencyGateway",
+        "painPoints",
+        "languageMap",
+        "congregationPoints",
+        "marketingRecommendation",
+        "competitiveLandscape"
+      ],
+      "properties": {
+        "audienceState": {
+          "type": "object",
+          "required": [
+            "currentState",
+            "desiredState"
+          ],
+          "properties": {
+            "currentState": {
+              "type": "string"
+            },
+            "desiredState": {
+              "type": "string"
+            }
+          }
+        },
+        "urgencyGateway": {
+          "type": "object",
+          "required": [
+            "problem",
+            "whyUrgent",
+            "failedSolutions",
+            "aspirinSolution"
+          ],
+          "properties": {
+            "problem": {
+              "type": "string"
+            },
+            "whyUrgent": {
+              "type": "string"
+            },
+            "failedSolutions": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "aspirinSolution": {
+              "type": "string"
+            }
+          }
+        },
+        "painPoints": {
+          "type": "array",
+          "minItems": 5,
+          "maxItems": 8,
+          "items": {
+            "type": "object",
+            "required": [
+              "pain",
+              "severity",
+              "emotionalContext",
+              "realQuotes"
+            ],
+            "properties": {
+              "pain": {
+                "type": "string"
+              },
+              "severity": {
+                "enum": [
+                  "critical",
+                  "moderate",
+                  "low"
+                ]
+              },
+              "emotionalContext": {
+                "type": "string"
+              },
+              "realQuotes": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "text",
+                    "source"
+                  ],
+                  "properties": {
+                    "text": {
+                      "type": "string"
+                    },
+                    "source": {
+                      "type": "string",
+                      "description": "Platform/community, or the literal string \"synthesized\""
+                    },
+                    "url": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "languageMap": {
+          "type": "object",
+          "required": [
+            "painPhrases",
+            "desirePhrases",
+            "searchPhrases",
+            "emotionalTriggers"
+          ],
+          "properties": {
+            "painPhrases": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "desirePhrases": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "searchPhrases": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": [
+                  "phrase",
+                  "estimatedDemand"
+                ],
+                "properties": {
+                  "phrase": {
+                    "type": "string"
+                  },
+                  "estimatedDemand": {
+                    "enum": [
+                      "high",
+                      "medium",
+                      "low",
+                      "unknown"
+                    ]
+                  },
+                  "context": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "emotionalTriggers": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "congregationPoints": {
+          "type": "object",
+          "required": [
+            "tier1_mainstream",
+            "tier2_niche",
+            "tier3_micro"
+          ],
+          "properties": {
+            "tier1_mainstream": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": [
+                  "name",
+                  "platform",
+                  "relevance"
+                ],
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "platform": {
+                    "type": "string"
+                  },
+                  "size": {
+                    "type": "string"
+                  },
+                  "relevance": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "tier2_niche": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": [
+                  "name",
+                  "platform",
+                  "relevance",
+                  "exampleTopics"
+                ],
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "platform": {
+                    "type": "string"
+                  },
+                  "size": {
+                    "type": "string"
+                  },
+                  "relevance": {
+                    "type": "string"
+                  },
+                  "exampleTopics": {
+                    "type": "array",
+                    "minItems": 1,
+                    "maxItems": 2,
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            },
+            "tier3_micro": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": [
+                  "name",
+                  "platform",
+                  "relevance"
+                ],
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "platform": {
+                    "type": "string"
+                  },
+                  "relevance": {
+                    "type": "string"
+                  },
+                  "howToAccess": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "marketingRecommendation": {
+          "type": "object",
+          "required": [
+            "primaryPlatform",
+            "secondaryPlatforms",
+            "contentStrategyTips",
+            "quickWin"
+          ],
+          "properties": {
+            "primaryPlatform": {
+              "$ref": "#/$defs/platformRecommendation"
+            },
+            "secondaryPlatforms": {
+              "type": "array",
+              "maxItems": 2,
+              "items": {
+                "$ref": "#/$defs/platformRecommendation"
+              }
+            },
+            "contentStrategyTips": {
+              "type": "array",
+              "minItems": 3,
+              "maxItems": 5,
+              "items": {
+                "type": "string"
+              }
+            },
+            "quickWin": {
+              "type": "string"
+            }
+          }
+        },
+        "competitiveLandscape": {
+          "type": "object",
+          "required": [
+            "existingSolutions",
+            "marketGaps",
+            "positioningOpportunities"
+          ],
+          "properties": {
+            "existingSolutions": {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 6,
+              "items": {
+                "type": "object",
+                "required": [
+                  "name",
+                  "positioning",
+                  "complaints",
+                  "strengths",
+                  "weaknesses"
+                ],
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "url": {
+                    "type": "string"
+                  },
+                  "positioning": {
+                    "type": "string"
+                  },
+                  "pricing": {
+                    "type": "string"
+                  },
+                  "complaints": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "required": [
+                        "quote"
+                      ],
+                      "properties": {
+                        "quote": {
+                          "type": "string"
+                        },
+                        "source": {
+                          "type": "string"
+                        },
+                        "url": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  },
+                  "strengths": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "weaknesses": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            },
+            "marketGaps": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "positioningOpportunities": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "offerCore": {
+      "type": "object",
+      "required": [
+        "offerStatement",
+        "theOfferGivesYou",
+        "youCanUseItTo",
+        "hiddenBenefits",
+        "programNameOptions"
+      ],
+      "properties": {
+        "offerStatement": {
+          "type": "object",
+          "required": [
+            "finalStatement",
+            "emotionalCore",
+            "universalMotivatorsUsed",
+            "templateUsed"
+          ],
+          "properties": {
+            "finalStatement": {
+              "type": "string"
+            },
+            "emotionalCore": {
+              "type": "string"
+            },
+            "universalMotivatorsUsed": {
+              "type": "array",
+              "minItems": 2,
+              "maxItems": 3,
+              "items": {
+                "enum": [
+                  "wealth",
+                  "looks",
+                  "health",
+                  "popularity",
+                  "security",
+                  "inner_peace",
+                  "free_time",
+                  "fun"
+                ]
+              }
+            },
+            "templateUsed": {
+              "enum": [
+                "superlative_mechanism",
+                "transformation",
+                "problem_solution",
+                "identity",
+                "contrast",
+                "result"
+              ]
+            }
+          }
+        },
+        "theOfferGivesYou": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 5,
+          "items": {
+            "type": "string"
+          }
+        },
+        "youCanUseItTo": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 5,
+          "items": {
+            "type": "string"
+          }
+        },
+        "hiddenBenefits": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 3,
+          "items": {
+            "type": "string"
+          }
+        },
+        "programNameOptions": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 3,
+          "items": {
+            "type": "object",
+            "required": [
+              "name",
+              "uniqueMechanism",
+              "rationale"
+            ],
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "uniqueMechanism": {
+                "type": "string"
+              },
+              "rationale": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "platformRecommendation": {
+      "type": "object",
+      "required": [
+        "platform",
+        "reasoning",
+        "contentFormats",
+        "postingCadence"
+      ],
+      "properties": {
+        "platform": {
+          "type": "string"
+        },
+        "reasoning": {
+          "type": "string"
+        },
+        "contentFormats": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "postingCadence": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

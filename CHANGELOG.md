@@ -2,6 +2,22 @@
 
 All notable changes to the Digital Home Backend Starter.
 
+## [2.6.0] — 2026-08-21
+
+The brand playbook page:
+
+- New `/brand` page ("Brand" in the sidebar) renders your brand research
+  playbook as a readable, sectioned document: audience, transformation,
+  urgency gateway, pain points, language map, where they gather, marketing
+  recommendation, competitive landscape, the offer, standing copy rules,
+  proof asset, and known gaps.
+- The playbook lives at `brand/playbook.json` and ships with example data
+  for a fictional business; replace it with your own research export. Its
+  shape is documented in `brand/playbook.schema.json` (sections 1-9).
+  Sections 10-12 are narrative constants at the top of
+  `src/app/brand/page.tsx` — edit them by hand.
+- No database changes.
+
 ## [2.5.11] — 2026-08-20
 
 Multi-funnel dashboard:

@@ -1,0 +1,202 @@
+{
+  "meta": {
+    "client": "Ridgeline Physio (example)",
+    "generatedAt": "2026-08-21T00:00:00.000Z",
+    "version": "2.0-agent",
+    "selectedAudience": {
+      "title": "Active adults with recurring knee pain",
+      "description": "Placeholder audience for the example playbook. Runners, hikers, and weekend athletes in their 30s to 50s whose knee pain keeps returning, who want to stay active without surgery, and who have already tried resting it away. Replace this whole file with the playbook your brand research produces."
+    },
+    "sources": {
+      "brief": "example-brief.md",
+      "transcripts": []
+    }
+  },
+  "audienceResearch": {
+    "audienceState": {
+      "currentState": "Training around a knee that flares up every few weeks, googling symptoms at night, and quietly skipping the activities they love because they no longer trust the joint.",
+      "desiredState": "Back to running, hiking, and playing without thinking about the knee at all, with a simple routine they trust to keep it that way."
+    },
+    "urgencyGateway": {
+      "problem": "Every flare-up costs them two to three weeks of the season, and each one takes a little longer to settle than the last.",
+      "whyUrgent": "The pattern is getting worse, the next event they care about is on the calendar, and everything they have tried so far only manages the symptom.",
+      "failedSolutions": [
+        "Resting until it stops hurting, then re-injuring it the first week back",
+        "Generic stretching videos that never address their specific movement pattern",
+        "A knee brace that helps on the day but changes nothing underneath"
+      ],
+      "aspirinSolution": "A guided six-week rebuild programme that finds the movement fault behind the flare-ups and fixes it with three short sessions a week."
+    },
+    "painPoints": [
+      {
+        "pain": "Nobody has told them why the pain keeps coming back",
+        "severity": "critical",
+        "emotionalContext": "They have seen two professionals, done the exercises, and still do not have an explanation they believe. The uncertainty is worse than the pain.",
+        "realQuotes": [
+          {
+            "text": "Example quote. Replace with a real one from your research, word for word.",
+            "source": "Community forum (example)",
+            "url": "https://example.com/thread/1"
+          }
+        ]
+      },
+      {
+        "pain": "Losing the identity that comes with being active",
+        "severity": "moderate",
+        "emotionalContext": "Saying no to the weekend trail run means watching a part of themselves fade. They minimise it out loud and worry about it privately.",
+        "realQuotes": [
+          {
+            "text": "Second example quote. Every quote in a real playbook is verbatim from a real source.",
+            "source": "Product review (example)",
+            "url": "https://example.com/review/2"
+          }
+        ]
+      }
+    ],
+    "languageMap": {
+      "painPhrases": [
+        "my knee just gives out",
+        "I can't trust it anymore",
+        "it's fine until it isn't"
+      ],
+      "desirePhrases": [
+        "run without thinking about it",
+        "get back to my old self",
+        "fix the cause, not the symptom"
+      ],
+      "searchPhrases": [
+        {
+          "phrase": "knee pain comes back after rest",
+          "estimatedDemand": "high",
+          "context": "Searched after the second or third flare-up, when resting has visibly failed."
+        },
+        {
+          "phrase": "strengthen knees without surgery",
+          "estimatedDemand": "medium",
+          "context": "Searched by people who have been told surgery is the eventual path and want an alternative."
+        }
+      ],
+      "emotionalTriggers": [
+        "Fear of the next flare-up taking the season",
+        "Relief at finally hearing a mechanism that makes sense",
+        "Pride in rebuilding rather than avoiding"
+      ]
+    },
+    "congregationPoints": {
+      "tier1_mainstream": [
+        {
+          "name": "r/runninginjuries (example)",
+          "platform": "Reddit",
+          "size": "150k members",
+          "relevance": "Where the audience describes flare-ups in their own words, usually the same week they happen."
+        }
+      ],
+      "tier2_niche": [
+        {
+          "name": "Trail running club Facebook groups (example)",
+          "platform": "Facebook",
+          "size": "2k-20k per group",
+          "relevance": "High-trust spaces where recommendations for practitioners actually convert.",
+          "exampleTopics": [
+            "taping vs strengthening debates",
+            "post-race recovery threads"
+          ]
+        }
+      ],
+      "tier3_micro": [
+        {
+          "name": "Local parkrun communities (example)",
+          "platform": "In person / WhatsApp",
+          "relevance": "Small, loyal, and full of exactly this injury profile.",
+          "howToAccess": "Sponsor the finish-line banner and run the free knee-screen stand."
+        }
+      ]
+    },
+    "marketingRecommendation": {
+      "primaryPlatform": {
+        "platform": "Instagram",
+        "reasoning": "Placeholder reasoning. The real playbook explains why this platform matches where the audience already spends attention.",
+        "contentFormats": [
+          "30-second movement-fault breakdowns",
+          "Before/after rebuild stories",
+          "Myth-vs-mechanism carousels"
+        ],
+        "postingCadence": "3 posts per week"
+      },
+      "secondaryPlatforms": [
+        {
+          "platform": "YouTube",
+          "reasoning": "Long-form rebuild walkthroughs rank for the audience's search phrases.",
+          "contentFormats": ["10-minute programme explainers"],
+          "postingCadence": "1 video per fortnight"
+        }
+      ],
+      "contentStrategyTips": [
+        "Name the mechanism behind the pain before naming the offer",
+        "Use the audience's own phrases from the language map, not clinical terms",
+        "Every claim carries a real example or none at all"
+      ],
+      "quickWin": "Publish one post answering the exact search phrase 'knee pain comes back after rest' in plain language."
+    },
+    "competitiveLandscape": {
+      "existingSolutions": [
+        {
+          "name": "Generic Rehab App (example)",
+          "url": "https://example.com",
+          "positioning": "One-size-fits-all exercise plans by body part.",
+          "pricing": "$15/month",
+          "complaints": [
+            {
+              "quote": "Example complaint quote. Real playbooks quote real users verbatim.",
+              "source": "App store review (example)",
+              "url": "https://example.com/reviews"
+            }
+          ],
+          "strengths": ["Cheap", "Available instantly"],
+          "weaknesses": ["No assessment of the individual movement fault", "No human accountability"]
+        }
+      ],
+      "marketGaps": [
+        "Nobody explains the mechanism in plain language before selling the fix",
+        "No offer bridges the gap between generic apps and $150 one-to-one sessions"
+      ],
+      "positioningOpportunities": [
+        "Own the 'find the fault first' assessment as the front door",
+        "Publish the rebuild programme structure openly and sell the guidance"
+      ]
+    }
+  },
+  "offerCore": {
+    "offerStatement": {
+      "finalStatement": "Rebuild the knee that keeps letting you down in six weeks, without surgery and without giving up your season.",
+      "emotionalCore": "Trust your body again",
+      "universalMotivatorsUsed": ["health", "freedom", "pride"],
+      "templateUsed": "outcome-without-cost"
+    },
+    "theOfferGivesYou": [
+      "A movement assessment that names the fault behind the flare-ups",
+      "A six-week rebuild programme with three short sessions a week",
+      "A weekly check-in that adjusts the plan to how the knee responds"
+    ],
+    "youCanUseItTo": [
+      "Get back to running without watching the ground",
+      "Start the season you had written off",
+      "Stop paying for sessions that only treat the symptom"
+    ],
+    "hiddenBenefits": [
+      "Placeholder strategy note. The real playbook records the benefits the audience feels but never says out loud."
+    ],
+    "programNameOptions": [
+      {
+        "name": "The Kneehab Rebuild (example)",
+        "uniqueMechanism": "fault-first assessment",
+        "rationale": "Placeholder rationale. The chosen name leads the page hero; replace it with your own."
+      },
+      {
+        "name": "Six-Week Knee Reset (example)",
+        "uniqueMechanism": "progressive load rebuild",
+        "rationale": "A plainer alternative for audiences that distrust clever names."
+      }
+    ]
+  }
+}
