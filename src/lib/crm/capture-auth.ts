@@ -20,6 +20,12 @@ export async function authenticateCapture(
     if (settings.capture_key && captureKey === settings.capture_key) {
       return { ok: true, via: "capture-key" };
     }
+    // Funnel workers (digital-home-funnel-starter) hold one secret and
+    // send it to both the ingest and capture doors; accept the funnel
+    // secret here so members configure a single value.
+    if (settings.funnel_secret && captureKey === settings.funnel_secret) {
+      return { ok: true, via: "funnel-secret" };
+    }
     return { ok: false, via: "capture-key" };
   }
   const auth = await authenticateSessionOrApiKey(request);

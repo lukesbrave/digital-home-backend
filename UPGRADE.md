@@ -18,8 +18,8 @@ customizations are intentional: **merge, don't overwrite.** When a file
 conflicts, prefer their copy design-wise and add the new capability into it.
 
 ### Step 0 — Determine current version
-- If a `VERSION` file exists, read it. If it says `2.5.9` or higher, stop —
-  already up to date. If it says anything from `2.5.0` through `2.5.8`,
+- If a `VERSION` file exists, read it. If it says `2.5.10` or higher, stop —
+  already up to date. If it says anything from `2.5.0` through `2.5.9`,
   apply ONLY the "Patch upgrades" section at the bottom of this guide.
 - No `VERSION` file = v1.x (content pipeline era). Apply the full v2.5.0
   upgrade below.
@@ -29,15 +29,15 @@ conflicts, prefer their copy design-wise and add the new capability into it.
 ### Step 1 — Preflight
 1. `git status` — if there are uncommitted changes, commit or stash them
    first so the upgrade is revertible.
-2. Create a branch: `git checkout -b upgrade/v2.5.9`.
+2. Create a branch: `git checkout -b upgrade/v2.5.10`.
 3. Add the starter as a remote if missing:
    `git remote add starter https://github.com/lukesbrave/digital-home-backend.git`
    then `git fetch starter --tags`.
 
 ### Step 2 — Bring in the latest version
-1. Diff `git diff HEAD..v2.5.9 --stat` to see scope.
+1. Diff `git diff HEAD..v2.5.10 --stat` to see scope.
 2. New files (the vast majority) can be checked out directly:
-   `git checkout v2.5.9 -- <path>` for: `src/lib/crm/`, `src/lib/social/`,
+   `git checkout v2.5.10 -- <path>` for: `src/lib/crm/`, `src/lib/social/`,
    `src/app/api/crm/`, `src/app/api/social/`, `src/app/api/settings/`,
    `src/app/api/webhooks/`, `src/app/crm/`, `src/app/social/`,
    `src/components/crm/`, `worker.ts`, `scripts/deploy.sh`,
@@ -85,7 +85,7 @@ conflicts, prefer their copy design-wise and add the new capability into it.
    activity entry and an opportunity in the first stage.
 4. Draft a 2-step test workflow, enroll yourself, run "Run engine now" —
    the send appears as `simulated` in the sent-email viewer.
-5. Commit, merge the branch, deploy. Done — `VERSION` should read `2.5.9`
+5. Commit, merge the branch, deploy. Done — `VERSION` should read `2.5.10`
    (it comes along with the checkout).
 
 ### If something breaks
@@ -96,8 +96,19 @@ branch until merged). The migration is additive and safe to leave applied.
 
 Fetch the starter remote first: `git fetch starter --tags`.
 
-**From 2.5.8 → 2.5.9** — preserve calendar intent on retries, isolate
-Facebook Reel metrics, and make the scheduler source explicit:
+**From 2.5.9 → 2.5.10** — let funnels capture leads with the funnel
+secret alone:
+
+    git checkout v2.5.10 -- src/lib/crm/capture-auth.ts VERSION CHANGELOG.md
+
+The lead capture endpoint now also accepts the `crm_funnel_secret` value
+in its `x-capture-key` header, so a funnel configured with one secret can
+post leads without a separate `crm_capture_key`. No database or
+environment changes are required.
+
+**From 2.5.8 → 2.5.10** — preserve calendar intent on retries, isolate
+Facebook Reel metrics, and make the scheduler source explicit; afterwards
+apply the 2.5.9 → 2.5.10 patch above:
 
     git checkout v2.5.9 -- "src/app/api/social/posts/[id]/publish/route.ts" "src/lib/social/retry.ts" "src/lib/social/retry.test.ts" "src/lib/social/meta.ts" "src/lib/social/meta.test.ts" SOCIAL.md VERSION CHANGELOG.md
 
@@ -115,15 +126,15 @@ deployments already use the native Cloudflare cron and should remain in
 tick, deploy once with `external`, remove that GitHub schedule, then change to
 `native` and redeploy. No database changes are required.
 
-**From 2.5.7 → 2.5.9** — remove the legacy version labels, then apply the
-2.5.8 → 2.5.9 patch above:
+**From 2.5.7 → 2.5.10** — remove the legacy version labels, then apply the
+2.5.8 → 2.5.10 steps above:
 
     git checkout v2.5.8 -- "src/app/content/[slug]/page.tsx" "src/app/content/page.tsx" "src/app/login/page.tsx" "src/components/sidebar.tsx" VERSION CHANGELOG.md
 
 No database or environment changes are required.
 
-**From 2.5.6 → 2.5.9** — take the 2.5.7 lead views, calendar sync, and
-build fix, the 2.5.8 files below, then apply the 2.5.8 → 2.5.9 patch above:
+**From 2.5.6 → 2.5.10** — take the 2.5.7 lead views, calendar sync, and
+build fix, the 2.5.8 files below, then apply the 2.5.8 → 2.5.10 steps above:
 
     git checkout v2.5.7 -- "src/app/api/content-calendar/[id]/route.ts" "src/app/api/crm/leads/route.ts" "src/app/crm/leads/page.tsx" worker.ts VERSION CHANGELOG.md
     git checkout v2.5.8 -- "src/app/content/[slug]/page.tsx" "src/app/content/page.tsx" "src/app/login/page.tsx" "src/components/sidebar.tsx" VERSION CHANGELOG.md
@@ -131,7 +142,7 @@ build fix, the 2.5.8 files below, then apply the 2.5.8 → 2.5.9 patch above:
 No database or environment changes are required.
 
 **From 2.5.5 or lower** — follow your chain below to reach 2.5.6, then
-apply the 2.5.7, 2.5.8, and 2.5.9 steps above.
+apply the 2.5.7, 2.5.8, 2.5.9, and 2.5.10 steps above.
 
 **From 2.5.5 → 2.5.6** — take the concurrent publishing engine directly:
 

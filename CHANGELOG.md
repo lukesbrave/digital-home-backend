@@ -2,6 +2,17 @@
 
 All notable changes to the Digital Home Backend Starter.
 
+## [2.5.10] — 2026-08-20
+
+Funnel capture with a single secret:
+
+- The lead capture endpoint (`/api/crm/capture`) now also accepts the
+  `crm_funnel_secret` value in its `x-capture-key` header. Funnels built
+  from `digital-home-funnel-starter` send one secret to both the analytics
+  ingest and lead capture doors; previously leads only landed when the
+  separate `crm_capture_key` setting held the same value. One secret now
+  works out of the box. No database changes.
+
 ## [2.5.9] — 2026-08-18
 
 Social scheduling and Facebook analytics hardening:
