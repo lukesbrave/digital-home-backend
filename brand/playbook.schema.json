@@ -615,6 +615,73 @@
           }
         }
       }
+    },
+    "narrative": {
+      "type": "object",
+      "description": "Sections 10-12 of the rendered playbook. Optional: any part you omit simply does not render. Kept with the playbook so each one is self-contained.",
+      "properties": {
+        "standingCopyRules": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "title",
+              "body"
+            ],
+            "properties": {
+              "title": {
+                "type": "string"
+              },
+              "body": {
+                "type": "string"
+              }
+            }
+          },
+          "description": "The rules that govern every ad, page and post from here."
+        },
+        "proofAsset": {
+          "type": "object",
+          "required": [
+            "body"
+          ],
+          "properties": {
+            "body": {
+              "type": "string",
+              "description": "The strongest verifiable evidence behind the offer. Real or absent, never invented."
+            },
+            "caution": {
+              "type": "string",
+              "description": "What to re-check before quoting any figure publicly."
+            }
+          }
+        },
+        "knownGaps": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "title",
+              "body"
+            ],
+            "properties": {
+              "title": {
+                "type": "string"
+              },
+              "body": {
+                "type": "string"
+              }
+            }
+          },
+          "description": "What the research could not cover, so silence is never mistaken for evidence."
+        },
+        "neverSay": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Words and phrases this brand does not use."
+        }
+      }
     }
   },
   "$defs": {

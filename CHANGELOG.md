@@ -6,18 +6,22 @@ All notable changes to the Digital Home Backend Starter.
 
 The brand playbook page:
 
-- New `/brand` page ("Brand" in the sidebar) renders your brand research
-  playbook as a readable, sectioned document: audience, transformation,
-  urgency gateway, pain points, language map, where they gather, marketing
-  recommendation, competitive landscape, the offer, standing copy rules,
-  proof asset, and known gaps.
-- The playbook lives at `brand/playbook.json` and ships with example data
-  for a fictional business; replace it with your own research export. Its
-  shape is documented in `brand/playbook.schema.json` (sections 1-9).
-  Sections 10-12 are narrative constants at the top of
-  `src/app/brand/page.tsx` — edit them by hand.
-- The sidebar wordmark now reads "Digital Home" instead of carrying the
-  BraveBrand product name into member installations.
+- New `/brand` page ("Brand" in the sidebar) is your playbook shelf: one
+  card per brand research playbook you have run, newest first, with the
+  current one marked. Click a card to read the whole playbook — audience,
+  transformation, urgency gateway, pain points, language map, where they
+  gather, marketing recommendation, competitive landscape, the offer, plus
+  your standing copy rules, proof asset, and known gaps.
+- **It starts empty.** Your Digital Home ships with no brand research in
+  it. When your brand strategist runs your research, it writes the result
+  to `brand/playbook.json` and the page fills itself in — nothing to wire.
+- Its shape is documented in `brand/playbook.schema.json`. Each playbook
+  carries its own `narrative` block (standing copy rules, proof asset,
+  known gaps, never-say list), so a playbook is self-contained and nothing
+  has to be kept in sync by hand.
+- To keep an old playbook when you run new research, archive it into
+  `brand/playbooks/` — see the instructions in `brand/playbooks/index.ts`.
+- The sidebar wordmark now reads "Digital Home".
 - No database changes.
 
 ## [2.5.11] — 2026-08-20

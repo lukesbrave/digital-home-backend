@@ -100,7 +100,13 @@ Fetch the starter remote first: `git fetch starter --tags`.
 **From 2.5.x → 2.6.0** — add the brand playbook page (do any patch steps
 for your version below first, then this):
 
-    git checkout v2.6.0 -- src/app/brand/page.tsx brand/playbook.json brand/playbook.schema.json VERSION CHANGELOG.md
+    git checkout v2.6.0 -- src/app/brand/ src/components/brand/ brand/playbooks/ brand/playbook.schema.json VERSION CHANGELOG.md
+
+**Do NOT check out `brand/playbook.json`.** If you already have one it
+holds your brand research, and v2.6.0's copy is an empty file that would
+overwrite it. Only take it if the file does not exist in your project:
+
+    test -f brand/playbook.json || git checkout v2.6.0 -- brand/playbook.json
 
 Merge one shared file rather than overwriting customizations:
 
@@ -108,9 +114,10 @@ Merge one shared file rather than overwriting customizations:
    and change the visible wordmark to "Digital Home" from v2.6.0, keeping
    any custom nav entries.
 
-The page ships with example playbook data at `brand/playbook.json`;
-replace it with your own research export (shape documented in
-`brand/playbook.schema.json`). No database or environment changes are
+The page starts empty and fills itself in when your brand strategist runs
+your research and writes `brand/playbook.json` (shape documented in
+`brand/playbook.schema.json`). If you already have research there, it
+appears as soon as you deploy. No database or environment changes are
 required.
 
 **From 2.5.10 → 2.5.11** — the funnel dashboard learns to show more
