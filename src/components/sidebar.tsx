@@ -165,11 +165,11 @@ export function Sidebar() {
     >
       {/* Wordmark + collapse toggle */}
       <div className={`flex items-center px-3 mb-6 ${collapsed ? 'flex-col gap-3' : 'justify-between'}`}>
-        <Link href="/content" className="flex items-center gap-2.5 px-1.5" title="Brave — Digital Home">
+        <Link href="/content" className="flex items-center gap-2.5 px-1.5" title="Digital Home">
           <span className="w-6 h-6 rounded-md bg-white text-black text-[11px] font-bold flex items-center justify-center shrink-0">
             B
           </span>
-          {!collapsed && <span className="text-[14px] font-semibold text-white">Brave</span>}
+          {!collapsed && <span className="text-[14px] font-semibold text-white">Digital Home</span>}
         </Link>
         <button
           onClick={toggleCollapsed}

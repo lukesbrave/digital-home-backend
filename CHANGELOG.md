@@ -16,6 +16,8 @@ The brand playbook page:
   shape is documented in `brand/playbook.schema.json` (sections 1-9).
   Sections 10-12 are narrative constants at the top of
   `src/app/brand/page.tsx` — edit them by hand.
+- The sidebar wordmark now reads "Digital Home" instead of carrying the
+  BraveBrand product name into member installations.
 - No database changes.
 
 ## [2.5.11] — 2026-08-20

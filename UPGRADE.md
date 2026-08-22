@@ -105,7 +105,8 @@ for your version below first, then this):
 Merge one shared file rather than overwriting customizations:
 
 1. `src/components/sidebar.tsx` — add the "Brand" nav item (href `/brand`)
-   from v2.6.0, keeping any custom nav entries.
+   and change the visible wordmark to "Digital Home" from v2.6.0, keeping
+   any custom nav entries.
 
 The page ships with example playbook data at `brand/playbook.json`;
 replace it with your own research export (shape documented in
