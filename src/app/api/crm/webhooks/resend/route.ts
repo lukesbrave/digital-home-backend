@@ -1,11 +1,16 @@
 /**
- * POST /api/crm/webhooks/resend — Resend delivery events (svix-signed).
+ * POST /api/crm/webhooks/resend — Resend events (svix-signed).
  * Configure in Resend: Webhooks → add endpoint → this URL, then
  * `wrangler secret put RESEND_WEBHOOK_SECRET` with the whsec_ value.
  *
- * Maps delivered/opened/clicked/bounced/complained onto email_sends +
- * email_events, and flips lead email_status on bounces/complaints so
- * the suppression check stops future sends automatically.
+ * Outbound: maps delivered/opened/clicked/bounced/complained onto
+ * email_sends + email_events, and flips lead email_status on bounces/
+ * complaints so the suppression check stops future sends automatically.
+ *
+ * Inbound (email.received): a reply to the sending subdomain (Resend
+ * inbound needs an MX record on the SENDING subdomain only — never the
+ * root domain) is matched to the lead by sender address and logged on
+ * their timeline as an email_received activity with the message text.
  */
 import { NextRequest, NextResponse } from "next/server";
 import { createHmac, timingSafeEqual } from "crypto";
@@ -54,11 +59,25 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
   }
 
-  let event: { type?: string; data?: { email_id?: string; click?: { link?: string } } };
+  let event: {
+    type?: string;
+    data?: {
+      email_id?: string;
+      click?: { link?: string };
+      from?: string | { email?: string; name?: string };
+      subject?: string;
+      text?: string;
+      html?: string;
+    };
+  };
   try {
     event = JSON.parse(payload);
   } catch {
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
+  }
+
+  if (event.type === "email.received") {
+    return handleInbound(event.data || {});
   }
 
   const mapped = EVENT_MAP[event.type || ""];
@@ -119,4 +138,60 @@ export async function POST(request: NextRequest) {
   }
 
   return NextResponse.json({ ok: true });
+}
+
+/**
+ * A reply landed on the sending subdomain. Match it to a lead by sender
+ * address and put the message on their timeline. Unmatched senders are
+ * acknowledged (200) so Resend doesn't retry — we only track known leads.
+ */
+async function handleInbound(data: {
+  email_id?: string;
+  from?: string | { email?: string; name?: string };
+  subject?: string;
+  text?: string;
+  html?: string;
+}) {
+  const rawFrom = typeof data.from === "string" ? data.from : data.from?.email || "";
+  const fromEmail = (rawFrom.match(/<([^>]+)>/)?.[1] || rawFrom).trim().toLowerCase();
+  if (!fromEmail || !fromEmail.includes("@")) {
+    return NextResponse.json({ ok: true, ignored: true });
+  }
+
+  const supabase = createAdminClient();
+  const { data: lead } = await supabase
+    .from("leads")
+    .select("id, status")
+    .eq("email", fromEmail)
+    .maybeSingle();
+  if (!lead) return NextResponse.json({ ok: true, unmatched_inbound: true });
+
+  const subject = (data.subject || "(no subject)").slice(0, 300);
+  // Plain text preferred; fall back to crudely stripped HTML. Capped so a
+  // giant reply chain can't bloat the activity row.
+  const text = (
+    data.text ||
+    (data.html || "")
+      .replace(/<style[\s\S]*?<\/style>/gi, "")
+      .replace(/<[^>]+>/g, " ")
+      .replace(/\s+/g, " ")
+  )
+    .trim()
+    .slice(0, 20_000);
+
+  await logActivity(supabase, {
+    lead_id: lead.id,
+    activity_type: "email_received",
+    title: `Reply received: ${subject}`,
+    body: text || null,
+    data: { from: fromEmail, subject, resend_email_id: data.email_id || null },
+    actor: "lead",
+  });
+
+  // A reply is the strongest engagement signal a new lead can give.
+  if (lead.status === "new") {
+    await supabase.from("leads").update({ status: "engaged" }).eq("id", lead.id);
+  }
+
+  return NextResponse.json({ ok: true, inbound: true });
 }

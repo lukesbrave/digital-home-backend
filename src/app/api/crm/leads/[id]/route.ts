@@ -21,7 +21,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   if (!lead) return NextResponse.json({ error: "Lead not found" }, { status: 404 });
 
-  const [activities, enrollments, opportunities, tasks, sends, appointments] = await Promise.all([
+  const [activities, enrollments, opportunities, tasks, sends, appointments, visitors] = await Promise.all([
     supabase
       .from("lead_activities")
       .select("*")
@@ -46,7 +46,52 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       .order("created_at", { ascending: false })
       .limit(25),
     supabase.from("appointments").select("*").eq("lead_id", id).order("starts_at", { ascending: false }),
+    supabase
+      .from("visitors")
+      .select(
+        "anonymous_id, first_source, first_medium, first_campaign, first_referrer_domain, is_ai_traffic, ai_referrer_source, latest_source, latest_medium, latest_campaign, visit_count, first_seen_at, last_seen_at, pages_viewed, device_type, browser, country, city"
+      )
+      .eq("lead_id", id)
+      .order("last_seen_at", { ascending: false })
+      .limit(5),
   ]);
+
+  // Where the lead entered a funnel: first event of their session carries the
+  // landing URL (UTMs included — funnel_events.page_url keeps the query string)
+  // and referrer. Fail-soft: attribution is context, never worth a 500.
+  const custom = (lead.custom && typeof lead.custom === "object" ? lead.custom : {}) as Record<string, unknown>;
+  const sessionId = typeof custom.funnel_session_id === "string" ? custom.funnel_session_id : null;
+  let funnelFirstTouch: Record<string, unknown> | null = null;
+  if (sessionId) {
+    const { data: ft, error: ftErr } = await supabase
+      .from("funnel_events")
+      .select("funnel, page_url, referrer, created_at")
+      .eq("session_id", sessionId)
+      .order("created_at", { ascending: true })
+      .limit(1);
+    if (ftErr) console.warn("lead detail: funnel first-touch lookup failed", ftErr.message);
+    const first = ft?.[0];
+    if (first) {
+      let utm: Record<string, string> = {};
+      try {
+        const sp = new URL(first.page_url || "", "https://x.invalid").searchParams;
+        utm = Object.fromEntries(
+          ["utm_source", "utm_medium", "utm_campaign", "utm_content"]
+            .map((k) => [k.slice(4), sp.get(k) || ""])
+            .filter(([, v]) => v)
+        );
+      } catch {
+        // unparseable page_url — keep the raw fields
+      }
+      funnelFirstTouch = {
+        funnel: first.funnel,
+        landed_at: first.created_at,
+        page_url: first.page_url,
+        referrer: first.referrer,
+        ...utm,
+      };
+    }
+  }
 
   return NextResponse.json({
     lead,
@@ -56,6 +101,8 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     tasks: tasks.data || [],
     sends: sends.data || [],
     appointments: appointments.data || [],
+    visitors: visitors.data || [],
+    funnel_first_touch: funnelFirstTouch,
   });
 }
 

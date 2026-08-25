@@ -276,6 +276,7 @@ export const ACTIVITY_ICONS: Record<string, string> = {
   created: '●',
   note: '✎',
   email_sent: '✉',
+  email_received: '↩',
   email_opened: '◉',
   email_clicked: '↗',
   email_bounced: '⚠',

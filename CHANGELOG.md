@@ -4,6 +4,22 @@ All notable changes to the Digital Home Backend Starter.
 
 ## [Unreleased]
 
+The lead detail page now tells the lead's whole story: an at-a-glance strip
+(score, source, next appointment, open tasks), an attribution card (capture
+source, funnel first touch with UTMs and referrer, linked website-visitor
+intel), a collected-data card showing every submitted custom key, and a
+day-grouped timeline with filter chips (all/emails/notes/system) where email
+entries open the stored as-sent preview. The unused custom-fields editor is
+gone from the page (definitions stay manageable in Settings; merge tags and
+workflows read `lead.custom` directly). Two new capabilities ride along: a
+one-off email composer (`POST /api/crm/leads/[id]/email`) that sends through
+the normal engine — merge tags, suppression, and safe mode all apply — and
+inbound reply capture: the Resend webhook now handles `email.received`,
+matching a reply to its lead by sender address, logging it on the timeline,
+and promoting a `new` lead to `engaged`. Enabling replies needs only an MX
+record on the SENDING subdomain (never the root domain) plus the inbound
+event ticked on the Resend webhook. No database migration is required.
+
 CRM capture now accepts validated UUID offer references and surfaces
 lead-lookup failures instead of treating them as a missing lead. The paired
 frontend starter now routes public lead capture through this endpoint, strips
