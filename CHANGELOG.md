@@ -2,6 +2,18 @@
 
 All notable changes to the Digital Home Backend Starter.
 
+## [Unreleased]
+
+CRM capture now accepts validated UUID offer references and surfaces
+lead-lookup failures instead of treating them as a missing lead. The paired
+frontend starter now routes public lead capture through this endpoint, strips
+privileged workflow/provider fields, links the anonymous visitor through
+`visitors.lead_id`, provides fail-closed handling for payment/entitlement
+events, and preserves contact messages in its non-critical fallback. No
+database migration is required; frontend deployments must configure
+`BACKEND_URL` and set `CRM_CAPTURE_KEY` to
+`backend_settings.crm_capture_key`.
+
 ## [2.6.0] — 2026-08-21
 
 The brand playbook page:

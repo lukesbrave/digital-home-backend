@@ -6,8 +6,9 @@
  * logs activities, and fires workflow triggers.
  *
  * Auth: x-capture-key header (crm_capture_key setting) or standard API auth.
- * Body: { email, name?, first_name?, last_name?, phone?, company?, source?,
- *         page?, form?, message?, tags?: string[], custom?: {}, workflow_id? }
+ * Body: { email, name?, first_name?, last_name?, phone?, company?,
+ *         source?, page?, form?, message?, tags?: string[],
+ *         interested_offers?: string[], custom?: {}, workflow_id? }
  */
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/server";
@@ -62,8 +63,14 @@ export async function POST(request: NextRequest) {
       capture_page: (body.page as string | undefined) || (body.capture_page as string | undefined),
       form: body.form as string | undefined,
       message: body.message as string | undefined,
-      tags: Array.isArray(body.tags) ? (body.tags as string[]) : [],
-      custom: body.custom && typeof body.custom === "object" ? (body.custom as Record<string, unknown>) : {},
+      tags: Array.isArray(body.tags) ? body.tags.filter((tag): tag is string => typeof tag === "string") : [],
+      interested_offers: Array.isArray(body.interested_offers)
+        ? body.interested_offers.filter((offer): offer is string => typeof offer === "string")
+        : [],
+      custom:
+        body.custom && typeof body.custom === "object" && !Array.isArray(body.custom)
+          ? (body.custom as Record<string, unknown>)
+          : {},
     };
 
     const { lead, created } = await upsertLead(supabase, input, { actor: `capture:${auth.via}` });

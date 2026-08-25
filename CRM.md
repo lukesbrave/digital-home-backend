@@ -63,9 +63,29 @@ content API. **Sign the pathname only — never include the query string**
 (`GET /api/crm/leads?q=x` signs `GET:/api/crm/leads:<ts>:`). The capture endpoint alternatively accepts the simpler
 `x-capture-key` header (value = `crm_capture_key` setting) for webhook senders.
 
+### Capture lifecycle and critical events
+
+Application/request tags must be distinct from tags that prove payment or
+activation. A safe generic model is:
+
+- application: `offer-example-applied`, `offer-example-vip-requested`
+- paid: `offer-example-paid`, `offer-example-vip`
+
+Trigger confirmation or fulfillment on the dedicated `-paid` tag, never on a
+generic interest/application tag. `upsertLead()` unions tags and only fires
+`tag_added` for new tags, so replaying the same provider event will not
+re-enroll a non-reenrolling workflow.
+
+Payments, memberships and entitlement webhooks must not use a direct database
+fallback when this endpoint is unavailable or rejects authentication. Return a
+non-2xx response so the provider retries. The frontend starter implements this
+with `captureLeadServerSide(payload, {allowFallback:false})`; see its
+`CRM_CAPTURE.md`. Keep the provider event/session/payment ID and provider time
+in `custom` so a replay produces stable state.
+
 | Endpoint | What it does |
 |---|---|
-| `POST /api/crm/capture` | Universal lead intake: upsert by email, activities, triggers. Body: `{email, name?, phone?, company?, source?, page?, form?, message?, tags?, custom?, workflow_id?}`. Honeypot: include a `website` field to get silently dropped. |
+| `POST /api/crm/capture` | Trusted lead intake: upsert by email, activities, triggers. Body: `{email, name?, phone?, company?, source?, page?, form?, message?, tags?, interested_offers?, custom?, workflow_id?}`. `interested_offers` accepts UUIDs only. Honeypot: include a `website` field to get silently dropped. Public website forms must pass through the frontend `/api/leads` allowlist rather than exposing this trusted payload surface. |
 | `GET/POST /api/crm/leads`, `GET/PATCH/DELETE /api/crm/leads/:id` | CRUD + search (`?q=&status=&tag=&page=`). PATCH diffs fire tag/status triggers. DELETE is the GDPR hard-delete. |
 | `POST /api/crm/leads/:id/notes` · `POST /api/crm/leads/:id/enroll` | Timeline note · enroll into a workflow. |
 | `POST /api/crm/leads/import` | Bulk upsert (≤500 rows/call). `fire_triggers` defaults FALSE so imports don't get welcome emails. |

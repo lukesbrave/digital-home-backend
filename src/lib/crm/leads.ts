@@ -1,4 +1,5 @@
 import { logActivity } from "./activity";
+import { validUuidValues } from "./capture-validation";
 import { fireTrigger } from "./engine";
 import type { AdminClient, Lead } from "./types";
 import type { Json } from "@/types/database";
@@ -15,6 +16,7 @@ export interface LeadInput {
   form?: string | null; // form identifier for form_submitted triggers
   message?: string | null; // free-text message → saved as a note
   tags?: string[];
+  interested_offers?: string[];
   custom?: Record<string, unknown>;
   timezone?: string | null;
 }
@@ -64,16 +66,18 @@ export async function upsertLead(
   }
 
   const cleanTags = (input.tags || []).map((t) => t.trim()).filter(Boolean);
+  const cleanOffers = validUuidValues(input.interested_offers);
 
   // Case-insensitive lookup: the unique constraint on email is effectively
   // case-insensitive, but some older rows carry mixed-case emails — an .eq()
   // miss here would insert a duplicate and hit the constraint instead.
-  const { data: existing } = await supabase
+  const { data: existing, error: lookupError } = await supabase
     .from("leads")
     .select("*")
     .ilike("email", email.replace(/[%_]/g, "\\$&"))
     .limit(1)
     .maybeSingle();
+  if (lookupError) throw new Error(`lead lookup failed: ${lookupError.message}`);
 
   let lead: Lead;
   let created = false;
@@ -81,6 +85,9 @@ export async function upsertLead(
 
   if (existing) {
     const mergedTags = Array.from(new Set([...(existing.tags || []), ...cleanTags]));
+    const mergedOffers = Array.from(
+      new Set([...(existing.interested_offers || []), ...cleanOffers])
+    );
     addedTags = mergedTags.filter((t) => !(existing.tags || []).includes(t));
     const mergedCustom = {
       ...((existing.custom as Record<string, unknown>) || {}),
@@ -96,6 +103,7 @@ export async function upsertLead(
         company: existing.company || input.company?.trim() || null,
         timezone: existing.timezone || input.timezone || null,
         tags: mergedTags,
+        interested_offers: mergedOffers,
         custom: mergedCustom as Json,
         last_activity_at: new Date().toISOString(),
       })
@@ -117,6 +125,7 @@ export async function upsertLead(
         capture_page: input.capture_page || null,
         timezone: input.timezone || null,
         tags: cleanTags,
+        interested_offers: cleanOffers,
         custom: (input.custom || {}) as Json,
       })
       .select("*")
