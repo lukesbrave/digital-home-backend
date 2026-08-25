@@ -9,6 +9,321 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      studio_sources: {
+        Row: {
+          id: string;
+          url: string;
+          platform: "youtube" | "instagram" | "tiktok" | "facebook_ads" | "website" | "article" | "upload";
+          kind: "own" | "competitor" | "inspiration";
+          status: "pending" | "ingesting" | "ready" | "failed";
+          title: string | null;
+          author: string | null;
+          seconds: number | null;
+          published_at: string | null;
+          transcript: string | null;
+          analysis: Json | null;
+          engagement: Json | null;
+          notes: string | null;
+          thumbnail: string | null;
+          mirrored_from: string | null;
+          mirror_key: string | null;
+          added_by: string;
+          added_at: string;
+          refreshed_at: string;
+        };
+        Insert: {
+          id?: string;
+          url: string;
+          platform: string;
+          kind?: string;
+          status?: string;
+          title?: string | null;
+          author?: string | null;
+          seconds?: number | null;
+          published_at?: string | null;
+          transcript?: string | null;
+          analysis?: Json | null;
+          engagement?: Json | null;
+          notes?: string | null;
+          thumbnail?: string | null;
+          mirrored_from?: string | null;
+          mirror_key?: string | null;
+          added_by?: string;
+          refreshed_at?: string;
+        };
+        Update: {
+          url?: string;
+          platform?: string;
+          kind?: string;
+          status?: string;
+          title?: string | null;
+          author?: string | null;
+          seconds?: number | null;
+          published_at?: string | null;
+          transcript?: string | null;
+          analysis?: Json | null;
+          engagement?: Json | null;
+          notes?: string | null;
+          thumbnail?: string | null;
+          refreshed_at?: string;
+        };
+        Relationships: [];
+      };
+      studio_ingest_jobs: {
+        Row: {
+          id: string;
+          source_id: string;
+          status: "queued" | "claimed" | "fetching" | "transcribing" | "analyzing" | "ready" | "failed";
+          stage: string;
+          progress: number;
+          runner_id: string | null;
+          error: string | null;
+          attempts: number;
+          claimed_at: string | null;
+          completed_at: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          source_id: string;
+          status?: string;
+          stage?: string;
+          progress?: number;
+          runner_id?: string | null;
+          error?: string | null;
+          attempts?: number;
+          claimed_at?: string | null;
+          completed_at?: string | null;
+        };
+        Update: {
+          status?: string;
+          stage?: string;
+          progress?: number;
+          runner_id?: string | null;
+          error?: string | null;
+          attempts?: number;
+          claimed_at?: string | null;
+          completed_at?: string | null;
+        };
+        Relationships: [];
+      };
+      studio_boards: {
+        Row: {
+          id: string;
+          name: string;
+          template_key: string | null;
+          viewport: Json | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: { id?: string; name: string; template_key?: string | null; viewport?: Json | null };
+        Update: { name?: string; template_key?: string | null; viewport?: Json | null };
+        Relationships: [];
+      };
+      studio_nodes: {
+        Row: {
+          id: string;
+          board_id: string;
+          kind: "source" | "desk" | "note" | "sop" | "group" | "output" | "creative";
+          parent_id: string | null;
+          position: Json;
+          data: Json;
+          source_id: string | null;
+          desk_id: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          board_id: string;
+          kind: string;
+          parent_id?: string | null;
+          position?: Json;
+          data?: Json;
+          source_id?: string | null;
+          desk_id?: string | null;
+        };
+        Update: {
+          kind?: string;
+          parent_id?: string | null;
+          position?: Json;
+          data?: Json;
+          source_id?: string | null;
+          desk_id?: string | null;
+        };
+        Relationships: [];
+      };
+      studio_edges: {
+        Row: { id: string; board_id: string; from_node: string; to_node: string; created_at: string };
+        Insert: { id?: string; board_id: string; from_node: string; to_node: string };
+        Update: { from_node?: string; to_node?: string };
+        Relationships: [];
+      };
+      studio_gen_jobs: {
+        Row: {
+          id: string;
+          board_id: string;
+          desk_node_id: string | null;
+          prompt: string;
+          model: string;
+          asset_type: string;
+          image_size: Json;
+          reference_urls: Json;
+          count: number;
+          status: "queued" | "claimed" | "generating" | "ready" | "failed";
+          stage: string;
+          results: Json | null;
+          error: string | null;
+          runner_id: string | null;
+          claimed_at: string | null;
+          completed_at: string | null;
+          dismissed: boolean;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          board_id: string;
+          desk_node_id?: string | null;
+          prompt: string;
+          model?: string;
+          asset_type?: string;
+          image_size?: Json;
+          reference_urls?: Json;
+          count?: number;
+          status?: string;
+          stage?: string;
+        };
+        Update: {
+          status?: string;
+          stage?: string;
+          asset_type?: string;
+          image_size?: Json;
+          results?: Json | null;
+          error?: string | null;
+          runner_id?: string | null;
+          claimed_at?: string | null;
+          completed_at?: string | null;
+          dismissed?: boolean;
+        };
+        Relationships: [];
+      };
+      studio_desks: {
+        Row: {
+          id: string;
+          name: string;
+          persona: "none" | "content-manager" | "beacon";
+          sop: string | null;
+          model: string;
+          max_context_tokens: number;
+          settings: Json;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          name: string;
+          persona?: string;
+          sop?: string | null;
+          model?: string;
+          max_context_tokens?: number;
+          settings?: Json;
+        };
+        Update: {
+          name?: string;
+          persona?: string;
+          sop?: string | null;
+          model?: string;
+          max_context_tokens?: number;
+          settings?: Json;
+        };
+        Relationships: [];
+      };
+      studio_desk_messages: {
+        Row: {
+          id: string;
+          desk_id: string;
+          role: "user" | "assistant";
+          content: string;
+          meta: Json | null;
+          created_at: string;
+        };
+        Insert: { id?: string; desk_id: string; role: string; content: string; meta?: Json | null; created_at?: string };
+        Update: { content?: string; meta?: Json | null };
+        Relationships: [];
+      };
+      voice_profiles: {
+        Row: { id: string; version: number; profile: Json; source_count: number; generated_at: string };
+        Insert: { id?: string; version: number; profile: Json; source_count?: number };
+        Update: { profile?: Json; source_count?: number };
+        Relationships: [];
+      };
+      upgrade_codes: {
+        Row: {
+          id: string;
+          code: string;
+          member_email: string | null;
+          product: string;
+          status: "active" | "revoked";
+          created_at: string;
+          last_used_at: string | null;
+          use_count: number;
+        };
+        Insert: {
+          id?: string;
+          code: string;
+          member_email?: string | null;
+          product?: string;
+          status?: string;
+        };
+        Update: {
+          member_email?: string | null;
+          status?: string;
+          last_used_at?: string | null;
+          use_count?: number;
+        };
+        Relationships: [];
+      };
+      video_transcripts: {
+        Row: {
+          video_id: string;
+          title: string | null;
+          published_at: string | null;
+          seconds: number | null;
+          source: "manual" | "asr" | "timedtext";
+          language: string | null;
+          transcript: string;
+          word_count: number;
+          fetched_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          video_id: string;
+          title?: string | null;
+          published_at?: string | null;
+          seconds?: number | null;
+          source: "manual" | "asr" | "timedtext";
+          language?: string | null;
+          transcript: string;
+          word_count?: number;
+          fetched_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          video_id?: string;
+          title?: string | null;
+          published_at?: string | null;
+          seconds?: number | null;
+          source?: "manual" | "asr" | "timedtext";
+          language?: string | null;
+          transcript?: string;
+          word_count?: number;
+          fetched_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
       visitors: {
         Row: {
           id: string;
@@ -179,6 +494,143 @@ export type Database = {
           updated_at?: string;
         };
         Relationships: [];
+      };
+      carousel_jobs: {
+        Row: {
+          id: string;
+          requested_by: string;
+          request: string | null;
+          source_article_id: string | null;
+          source_title: string | null;
+          source_slug: string | null;
+          status: "queued" | "running" | "writing" | "rendering" | "uploading" | "ready" | "revision_queued" | "revising" | "approved" | "rejected" | "failed";
+          stage: string;
+          progress: number;
+          revision: number;
+          executor: "factory" | "employee";
+          result: Json | null;
+          run_dir: string | null;
+          post_id: string | null;
+          action_id: string | null;
+          error: string | null;
+          claimed_at: string | null;
+          completed_at: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          requested_by?: string;
+          request?: string | null;
+          source_article_id?: string | null;
+          source_title?: string | null;
+          source_slug?: string | null;
+          status?: "queued" | "running" | "writing" | "rendering" | "uploading" | "ready" | "revision_queued" | "revising" | "approved" | "rejected" | "failed";
+          stage?: string;
+          progress?: number;
+          revision?: number;
+          executor?: "factory" | "employee";
+          result?: Json | null;
+          run_dir?: string | null;
+          post_id?: string | null;
+          action_id?: string | null;
+          error?: string | null;
+          claimed_at?: string | null;
+          completed_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          requested_by?: string;
+          request?: string | null;
+          source_article_id?: string | null;
+          source_title?: string | null;
+          source_slug?: string | null;
+          status?: "queued" | "running" | "writing" | "rendering" | "uploading" | "ready" | "revision_queued" | "revising" | "approved" | "rejected" | "failed";
+          stage?: string;
+          progress?: number;
+          revision?: number;
+          executor?: "factory" | "employee";
+          result?: Json | null;
+          run_dir?: string | null;
+          post_id?: string | null;
+          action_id?: string | null;
+          error?: string | null;
+          claimed_at?: string | null;
+          completed_at?: string | null;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      carousel_revisions: {
+        Row: {
+          id: string;
+          carousel_job_id: string;
+          revision_number: number;
+          requested_by: string;
+          feedback: string;
+          slide_numbers: number[];
+          status: "queued" | "claimed" | "revising" | "rendering" | "uploading" | "ready" | "failed" | "cancelled";
+          stage: string;
+          progress: number;
+          base_run_dir: string;
+          post_id: string | null;
+          action_id: string | null;
+          proposed_slot: string | null;
+          error: string | null;
+          claimed_at: string | null;
+          completed_at: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          carousel_job_id: string;
+          revision_number: number;
+          requested_by?: string;
+          feedback: string;
+          slide_numbers?: number[];
+          status?: "queued" | "claimed" | "revising" | "rendering" | "uploading" | "ready" | "failed" | "cancelled";
+          stage?: string;
+          progress?: number;
+          base_run_dir: string;
+          post_id?: string | null;
+          action_id?: string | null;
+          proposed_slot?: string | null;
+          error?: string | null;
+          claimed_at?: string | null;
+          completed_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          carousel_job_id?: string;
+          revision_number?: number;
+          requested_by?: string;
+          feedback?: string;
+          slide_numbers?: number[];
+          status?: "queued" | "claimed" | "revising" | "rendering" | "uploading" | "ready" | "failed" | "cancelled";
+          stage?: string;
+          progress?: number;
+          base_run_dir?: string;
+          post_id?: string | null;
+          action_id?: string | null;
+          proposed_slot?: string | null;
+          error?: string | null;
+          claimed_at?: string | null;
+          completed_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "carousel_revisions_carousel_job_id_fkey";
+            columns: ["carousel_job_id"];
+            isOneToOne: false;
+            referencedRelation: "carousel_jobs";
+            referencedColumns: ["id"];
+          },
+        ];
       };
       seo_meta: {
         Row: {
@@ -975,6 +1427,156 @@ export type Database = {
           duration_ms?: number | null;
           tokens_used?: number | null;
           created_at?: string;
+        };
+        Relationships: [];
+      };
+      agent_runs: {
+        Row: {
+          id: string;
+          trigger: "chat" | "tick" | "hermes";
+          status: "running" | "completed" | "failed";
+          summary: string | null;
+          report_md: string | null;
+          tool_calls: Json;
+          tokens_used: number | null;
+          error: string | null;
+          created_at: string;
+          completed_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          trigger?: "chat" | "tick" | "hermes";
+          status?: "running" | "completed" | "failed";
+          summary?: string | null;
+          report_md?: string | null;
+          tool_calls?: Json;
+          tokens_used?: number | null;
+          error?: string | null;
+          created_at?: string;
+          completed_at?: string | null;
+        };
+        Update: {
+          id?: string;
+          trigger?: "chat" | "tick" | "hermes";
+          status?: "running" | "completed" | "failed";
+          summary?: string | null;
+          report_md?: string | null;
+          tool_calls?: Json;
+          tokens_used?: number | null;
+          error?: string | null;
+          created_at?: string;
+          completed_at?: string | null;
+        };
+        Relationships: [];
+      };
+      agent_threads: {
+        Row: {
+          id: string;
+          user_id: string;
+          title: string;
+          archived_at: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          title?: string;
+          archived_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          title?: string;
+          archived_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      agent_messages: {
+        Row: {
+          id: string;
+          thread_id: string;
+          role: "user" | "assistant";
+          content: string;
+          run_id: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          thread_id: string;
+          role: "user" | "assistant";
+          content: string;
+          run_id?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          thread_id?: string;
+          role?: "user" | "assistant";
+          content?: string;
+          run_id?: string | null;
+          created_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "agent_messages_thread_id_fkey";
+            columns: ["thread_id"];
+            isOneToOne: false;
+            referencedRelation: "agent_threads";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "agent_messages_run_id_fkey";
+            columns: ["run_id"];
+            isOneToOne: false;
+            referencedRelation: "agent_runs";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      agent_actions: {
+        Row: {
+          id: string;
+          run_id: string | null;
+          type: "email" | "publish" | "workflow" | "other";
+          title: string;
+          summary: string | null;
+          payload: Json;
+          status: "proposed" | "approved" | "rejected" | "executed" | "failed";
+          result: Json | null;
+          created_at: string;
+          decided_at: string | null;
+          executed_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          run_id?: string | null;
+          type: "email" | "publish" | "workflow" | "other";
+          title: string;
+          summary?: string | null;
+          payload?: Json;
+          status?: "proposed" | "approved" | "rejected" | "executed" | "failed";
+          result?: Json | null;
+          created_at?: string;
+          decided_at?: string | null;
+          executed_at?: string | null;
+        };
+        Update: {
+          id?: string;
+          run_id?: string | null;
+          type?: "email" | "publish" | "workflow" | "other";
+          title?: string;
+          summary?: string | null;
+          payload?: Json;
+          status?: "proposed" | "approved" | "rejected" | "executed" | "failed";
+          result?: Json | null;
+          created_at?: string;
+          decided_at?: string | null;
+          executed_at?: string | null;
         };
         Relationships: [];
       };
