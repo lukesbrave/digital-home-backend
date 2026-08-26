@@ -7,11 +7,9 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { PlaybookView } from '@/components/brand/playbook-view';
-import { PLAYBOOKS, getPlaybook } from '../../../../brand/playbooks';
+import { getBrandPlaybook } from '@/lib/brand/playbook-store';
 
-export function generateStaticParams() {
-  return PLAYBOOKS.map(({ slug }) => ({ slug }));
-}
+export const dynamic = 'force-dynamic';
 
 function fmtDate(iso: string): string {
   return new Date(iso).toLocaleDateString('en-AU', { year: 'numeric', month: 'long', day: 'numeric' });
@@ -19,7 +17,7 @@ function fmtDate(iso: string): string {
 
 export default async function BrandPlaybookPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const playbook = getPlaybook(slug);
+  const playbook = await getBrandPlaybook(slug);
   if (!playbook) notFound();
 
   return (

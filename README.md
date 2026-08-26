@@ -134,10 +134,29 @@ The `CLAUDE.md` file is the complete technical reference — architecture, modul
 ### Fresh-Start Validation
 Once both repos are deployed, verify the setup in this order:
 - Log into the Backend dashboard successfully
+- Run `node scripts/publish-brand-playbook.mjs check --base https://backend.yourdomain.com` and confirm the scoped Brand publisher reports `ready: true`
 - Open `/api/test-frontend` and confirm it returns `status: 200`
 - Run the Frontend repo's `weekly-trends.yml` workflow and confirm new `content_calendar` rows appear
 - Approve one topic, then run `daily-publish.yml`
 - Confirm the article shows up in the Frontend blog as a draft or published post, depending on your publish mode
+
+### Publish a Brand Playbook
+
+The Brand shelf is live-backed. After a strategist has written and approved
+`brand/playbook.json`, publish it without rebuilding or redeploying the app:
+
+```bash
+node scripts/publish-brand-playbook.mjs publish \
+  --file brand/playbook.json \
+  --base https://backend.yourdomain.com \
+  --actor tumi
+```
+
+The command signs the request with `API_SECRET_KEY` from the ignored
+`.env.local`, then reads the live shelf back and verifies the playbook
+metadata. Replacing a playbook automatically archives the previous edition;
+re-publishing the same file is safe and makes no duplicate. The readable
+result is at `/brand/current`.
 
 ## Community
 

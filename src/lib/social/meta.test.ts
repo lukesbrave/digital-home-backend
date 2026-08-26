@@ -1,6 +1,5 @@
 import assert from "node:assert/strict";
 import test, { type TestContext } from "node:test";
-// @ts-expect-error Node's strip-types runner requires the explicit .ts extension.
 import { fbFetchMetrics } from "./meta.ts";
 
 type FetchHandler = (fields: string) => Response;

@@ -5,7 +5,8 @@
   "type": "object",
   "required": [
     "meta",
-    "audienceResearch"
+    "audienceResearch",
+    "offerCore"
   ],
   "properties": {
     "meta": {

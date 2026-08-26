@@ -2,9 +2,9 @@
  * The playbook shelf.
  *
  * Your Digital Home ships with no brand research — this shelf is empty
- * until your brand strategist runs it. When it does, it writes your
- * research to `brand/playbook.json` and that path becomes the current
- * playbook and the first entry here. Nothing to wire by hand.
+ * until your brand strategist runs it. `brand/playbook.json` is the portable
+ * source copy. The live shelf is backed by `backend_settings`, so an approved
+ * playbook can appear immediately without a full Digital Home deployment.
  *
  * `brand/playbook.json` is a contract: your employees read it by name, so
  * it stays at that path and never moves into this folder.
@@ -116,12 +116,27 @@ export type PlaybookEntry = { slug: string; playbook: Playbook };
  * `brand/playbook.json` is an empty object until the strategist fills it,
  * so the shelf only lists it once it holds real research.
  */
-function isPlaybook(value: unknown): value is Playbook {
+export function isPlaybook(value: unknown): value is Playbook {
+  const playbook = value as Playbook;
   return (
     !!value &&
     typeof value === 'object' &&
-    !!(value as Playbook).meta?.client &&
-    !!(value as Playbook).audienceResearch
+    typeof playbook.meta?.client === 'string' &&
+    typeof playbook.meta?.generatedAt === 'string' &&
+    typeof playbook.meta?.selectedAudience?.title === 'string' &&
+    typeof playbook.meta?.selectedAudience?.description === 'string' &&
+    typeof playbook.audienceResearch?.audienceState?.currentState === 'string' &&
+    typeof playbook.audienceResearch?.audienceState?.desiredState === 'string' &&
+    Array.isArray(playbook.audienceResearch?.painPoints) &&
+    Array.isArray(playbook.audienceResearch?.languageMap?.painPhrases) &&
+    Array.isArray(playbook.audienceResearch?.congregationPoints?.tier1_mainstream) &&
+    Array.isArray(playbook.audienceResearch?.marketingRecommendation?.contentStrategyTips) &&
+    Array.isArray(playbook.audienceResearch?.competitiveLandscape?.existingSolutions) &&
+    typeof playbook.offerCore?.offerStatement?.finalStatement === 'string' &&
+    Array.isArray(playbook.offerCore?.theOfferGivesYou) &&
+    Array.isArray(playbook.offerCore?.youCanUseItTo) &&
+    Array.isArray(playbook.offerCore?.hiddenBenefits) &&
+    Array.isArray(playbook.offerCore?.programNameOptions)
   );
 }
 

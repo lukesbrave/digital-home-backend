@@ -3,13 +3,16 @@
  * Add playbooks in brand/playbooks/index.ts.
  */
 import Link from 'next/link';
-import { PLAYBOOKS } from '../../../brand/playbooks';
+import { loadBrandPlaybooks } from '@/lib/brand/playbook-store';
+
+export const dynamic = 'force-dynamic';
 
 function fmtDate(iso: string): string {
   return new Date(iso).toLocaleDateString('en-AU', { year: 'numeric', month: 'long', day: 'numeric' });
 }
 
-export default function BrandIndexPage() {
+export default async function BrandIndexPage() {
+  const playbooks = await loadBrandPlaybooks();
   return (
     <div className="flex-1 overflow-y-auto">
       <header className="px-12 pt-10 pb-6 flex items-center">
@@ -22,12 +25,12 @@ export default function BrandIndexPage() {
       </header>
 
       <div className="px-12 pb-12 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 max-w-6xl">
-        {PLAYBOOKS.length === 0 && (
+        {playbooks.length === 0 && (
           <div className="text-sm text-minimal-muted border border-dashed border-minimal-border rounded-lg p-8 text-center col-span-full">
             No playbooks yet. Ask your brand strategist to run your research.
           </div>
         )}
-        {PLAYBOOKS.map(({ slug, playbook }, i) => {
+        {playbooks.map(({ slug, playbook }, i) => {
           const angle = playbook.offerCore?.programNameOptions?.[0];
           return (
           <Link

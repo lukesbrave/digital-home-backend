@@ -14,6 +14,7 @@
     "test:crm": "node --experimental-strip-types --test src/lib/crm/*.test.ts",
     "test:social": "node --experimental-strip-types --test src/lib/social/*.test.ts",
     "test:social-upload": "node --experimental-strip-types --test src/lib/social/youtube.test.ts",
+    "test:brand": "node --experimental-strip-types --test src/lib/brand/*.test.ts",
     "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
     "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
     "upload": "opennextjs-cloudflare build && opennextjs-cloudflare upload",

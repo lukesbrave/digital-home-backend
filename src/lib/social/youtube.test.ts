@@ -1,6 +1,5 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-// @ts-expect-error Node's strip-types runner requires the explicit .ts extension.
 import { YT_UPLOAD_CHUNK_SIZE, ytResumeVideoUpload, ytStartVideoUpload, type YouTubeUploadRef } from "./youtube.ts";
 
 test("starts a resumable session without reading video bytes", async (t) => {

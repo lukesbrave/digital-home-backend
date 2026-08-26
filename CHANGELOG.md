@@ -4,6 +4,15 @@ All notable changes to the Digital Home Backend Starter.
 
 ## [Unreleased]
 
+The Brand shelf is now live-publishable without a full Digital Home deploy.
+An approved playbook can be sent through the signed, authenticated
+`/api/brand/playbooks` endpoint with `scripts/publish-brand-playbook.mjs`;
+`/brand` reads the current and archived editions from `backend_settings` and
+falls back to the bundled `brand/playbook.json` on older installations or a
+temporary database failure. Replacing a playbook archives the previous one,
+and publishing the same edition twice is idempotent. No migration or new
+secret is required.
+
 The CRM home becomes the **Command Centre** — the page that answers "what's
 the state of my business?" in five seconds. One status sentence, the business
 drawn as a flowing Leads → Nurture → Pipeline → Revenue strip (animated

@@ -95,6 +95,17 @@ Optional non-secret runtime vars:
 | `API_REQUEST_SIGNATURE_TTL_SECONDS` | Optional max age for signed machine requests. Default is `300`. |
 | `OPENAI_IMAGE_MODEL` | Optional hero-image model override. Defaults to `gpt-image-1`. |
 
+Keep the same `API_SECRET_KEY` in the project's ignored `.env.local` so
+approved agent-owned updates can use the signed, scoped publishers. After
+deployment, verify the Brand door before research begins:
+
+```bash
+node scripts/publish-brand-playbook.mjs check --base https://backend.yourdomain.com
+```
+
+This check does not publish a playbook. It only proves authentication and the
+live Brand shelf are ready.
+
 ## Step 5: Create the `images` Storage Bucket
 
 The article writer uploads hero images into a Supabase Storage bucket named `images`.
