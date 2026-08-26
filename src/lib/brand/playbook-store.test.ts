@@ -1,8 +1,11 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import {
+  BRAND_PROJECTION_KEYS,
+  comparePlaybookProjection,
   mergePlaybookRows,
   planPlaybookPublish,
+  projectPlaybookToBrandContext,
   validatePlaybook,
   type StoredPlaybookEnvelope,
 } from "./playbook-contract.ts";
@@ -101,4 +104,40 @@ test("re-publishing identical research is idempotent", () => {
   assert.equal(plan.changed, false);
   assert.equal(plan.current, existing);
   assert.equal(plan.archive, undefined);
+});
+
+test("Playbook projection is deterministic, complete, and owns only namespaced rows", () => {
+  const playbook = fixture("Projection");
+  playbook.narrative = {
+    standingCopyRules: [{ title: "Plain", body: "Use short direct sentences." }],
+    proofAsset: { body: "Verified client result", caution: "Re-check before quoting." },
+    knownGaps: [],
+    neverSay: ["revolutionary"],
+  };
+  const first = projectPlaybookToBrandContext(playbook);
+  assert.deepEqual(first, projectPlaybookToBrandContext(playbook));
+  assert.deepEqual(first.map((row) => row.key), BRAND_PROJECTION_KEYS);
+  assert.equal(first.length, 7);
+  assert(first.every((row) => row.content.trim().length > 0));
+  assert(first.some((row) => row.content.includes("Verified client result")));
+  assert(first.some((row) => row.content.includes("revolutionary")));
+  assert(!BRAND_PROJECTION_KEYS.includes("links" as never));
+  assert(!BRAND_PROJECTION_KEYS.includes("author" as never));
+  assert(!BRAND_PROJECTION_KEYS.includes("image_style" as never));
+});
+
+test("projection comparison detects missing and stale rows and accepts an idempotent repair", () => {
+  const playbook = fixture("Repair");
+  const expected = projectPlaybookToBrandContext(playbook);
+  const missing = comparePlaybookProjection(playbook, expected.slice(1));
+  assert.equal(missing.ready, false);
+  assert.deepEqual(missing.missing, [expected[0].key]);
+  const staleRows = expected.map((row, index) => index === 1 ? { ...row, content: `${row.content}\nstale` } : row);
+  const stale = comparePlaybookProjection(playbook, staleRows);
+  assert.equal(stale.ready, false);
+  assert.deepEqual(stale.stale, [expected[1].key]);
+  const repaired = comparePlaybookProjection(playbook, expected);
+  assert.equal(repaired.ready, true);
+  assert.deepEqual(repaired.missing, []);
+  assert.deepEqual(repaired.stale, []);
 });

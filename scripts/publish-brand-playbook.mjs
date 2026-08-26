@@ -54,17 +54,19 @@ async function api(method, path, body) {
 
 if (command === "check") {
   const result = await api("GET", "/api/brand/playbooks");
-  console.log(JSON.stringify({ ready: result.ready === true, base, current: result.current?.playbook?.meta || null }, null, 2));
+  console.log(JSON.stringify({ ready: result.ready === true, base, current: result.current?.playbook?.meta || null, projection: result.projection || null, operational: result.operational || null }, null, 2));
   process.exit(result.ready === true ? 0 : 1);
 }
 
-if (command !== "publish") {
-  console.error("Usage: node scripts/publish-brand-playbook.mjs check|publish [--file brand/playbook.json] [--base https://backend.example.com] [--actor tumi]");
+if (command !== "publish" && command !== "sync") {
+  console.error("Usage: node scripts/publish-brand-playbook.mjs check|publish|sync [--file brand/playbook.json] [--base https://backend.example.com] [--actor tumi]");
   process.exit(1);
 }
 
+const before = command === "sync" ? await api("GET", "/api/brand/playbooks") : null;
 const file = resolve(projectRoot, option("file") || "brand/playbook.json");
-const playbook = JSON.parse(readFileSync(file, "utf8"));
+const playbook = command === "sync" ? before?.current?.playbook : JSON.parse(readFileSync(file, "utf8"));
+if (!playbook) throw new Error("No current live Brand Playbook exists to synchronize.");
 const actor = option("actor") || "tumi";
 const published = await api("POST", "/api/brand/playbooks", { playbook, actor });
 const verified = await api("GET", "/api/brand/playbooks");
@@ -73,10 +75,15 @@ const actual = verified.current?.playbook?.meta || {};
 if (actual.client !== expected.client || actual.generatedAt !== expected.generatedAt || actual.version !== expected.version) {
   throw new Error("Publish returned success, but the live Brand shelf did not match the source playbook metadata.");
 }
+if (published.projection?.ready !== true || verified.projection?.ready !== true || published.projection?.fingerprint !== verified.projection?.fingerprint) {
+  throw new Error("Brand shelf is live, but its downstream brand_context projection did not verify.");
+}
 
 console.log(JSON.stringify({
   success: true,
+  command,
   changed: published.changed,
+  projection: published.projection,
   client: actual.client,
   generatedAt: actual.generatedAt,
   archivedSlug: published.archivedSlug,

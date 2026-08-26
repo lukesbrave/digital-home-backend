@@ -16,6 +16,7 @@ import { createAdminClient } from "@/lib/supabase/server";
 import Anthropic from "@anthropic-ai/sdk";
 import OpenAI from "openai";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
+import { BRAND_PROJECTION_KEYS } from "@/lib/brand/playbook-contract";
 
 
 const FRONTEND_URL =
@@ -45,6 +46,7 @@ function frontendFetch(path: string, init?: RequestInit): Promise<Response> {
 interface BrandContext {
   fullContext: string;
   ctaLinks: string;
+  activeOffers: string;
   authorName: string;
   imageStyle: string;
 }
@@ -59,6 +61,16 @@ async function loadBrandContext(): Promise<BrandContext> {
 
   const rows = dbContext || [];
 
+  const missingCore = BRAND_PROJECTION_KEYS.filter(
+    (key) => !rows.some((row) => row.key === key && row.content?.trim())
+  );
+  if (missingCore.length > 0) {
+    throw new Error(
+      `Brand context is not ready for article writing. Missing Playbook projection rows: ${missingCore.join(", ")}. ` +
+        "Run the scoped Brand Playbook publisher sync before writing."
+    );
+  }
+
   const fullContext = rows
     .map((row) => `# ${row.category}/${row.key}\n\n${row.content}`)
     .join("\n\n---\n\n");
@@ -66,6 +78,21 @@ async function loadBrandContext(): Promise<BrandContext> {
   // Extract CTA links from brand context (category: "cta", key: "links")
   const ctaRow = rows.find((r) => r.category === "cta" && r.key === "links");
   const ctaLinks = ctaRow?.content || "";
+
+  const { data: offers, error: offersError } = await supabase
+    .from("offers")
+    .select("name, tagline, description, price_display, cta_text, cta_url, who_its_for")
+    .eq("status", "active")
+    .order("position_in_ladder", { ascending: true, nullsFirst: false });
+  if (offersError) throw new Error(`Operational offer readiness check failed: ${offersError.message}`);
+  const activeOffers = (offers || []).map((offer) => [
+    `- ${offer.name}`,
+    offer.who_its_for ? `For: ${offer.who_its_for}` : null,
+    offer.tagline || offer.description || null,
+    offer.price_display ? `Approved price display: ${offer.price_display}` : null,
+    offer.cta_text ? `CTA label: ${offer.cta_text}` : null,
+    offer.cta_url ? `CTA URL: ${offer.cta_url}` : null,
+  ].filter(Boolean).join("\n  ")).join("\n");
 
   // Extract author name from brand context (category: "identity", key: "author")
   const authorRow = rows.find((r) => r.category === "identity" && r.key === "author");
@@ -75,7 +102,7 @@ async function loadBrandContext(): Promise<BrandContext> {
   const imageRow = rows.find((r) => r.category === "content" && r.key === "image_style");
   const imageStyle = imageRow?.content?.trim() || "";
 
-  return { fullContext, ctaLinks, authorName, imageStyle };
+  return { fullContext, ctaLinks, activeOffers, authorName, imageStyle };
 }
 
 // ─── Fetch existing articles for internal linking ────────────────────────────
@@ -390,7 +417,9 @@ export async function POST(request: NextRequest) {
     // Build CTA instruction from brand context
     const ctaInstruction = brand.ctaLinks
       ? `- The CTA section MUST include one of the links below (choose the most relevant for the article topic). Use ONLY these exact links — do not modify the URLs or create new ones:\n${brand.ctaLinks}`
-      : "- End with a CTA section that ties to the brand's offers. Match the article topic to the most relevant offer from the brand context.";
+      : brand.activeOffers
+        ? `- Match the CTA to one active operational offer below. Use only its recorded name, price, status and URL; omit any field that is absent and never infer it:\n${brand.activeOffers}`
+        : "- No active operational offer or configured CTA link exists. End with a non-transactional, no-link next step grounded in the approved offer core. Do not invent a price, URL, checkout destination, testimonial, active status, or availability claim. This draft requires CTA readiness review before publication.";
 
     // 5. Call Claude to write the article
     const anthropic = new Anthropic();

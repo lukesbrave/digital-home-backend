@@ -103,8 +103,24 @@ deployment, verify the Brand door before research begins:
 node scripts/publish-brand-playbook.mjs check --base https://backend.yourdomain.com
 ```
 
-This check does not publish a playbook. It only proves authentication and the
-live Brand shelf are ready.
+This check does not publish a playbook. It proves authentication, the live
+Brand shelf, the downstream Playbook projection state, and operational
+offer/CTA readiness. Missing operational CTA data is reported separately from
+core brand readiness.
+
+Publishing an approved Playbook writes both the readable shelf and its
+deterministic `brand_context` projection. For an existing Home that already
+has a live Playbook but predates that projection, use the safe idempotent
+backfill:
+
+```bash
+node scripts/publish-brand-playbook.mjs sync --base https://backend.yourdomain.com --actor tumi
+```
+
+`sync` reads the current Playbook through the signed route and repairs only
+the publisher-owned `playbook_*` context rows. It does not archive an identical
+edition or overwrite `cta/links`, `identity/author`, `content/image_style`, or
+other independently configured rows.
 
 ## Step 5: Create the `images` Storage Bucket
 
@@ -116,9 +132,15 @@ The article writer uploads hero images into a Supabase Storage bucket named `ima
 
 If you skip this, the writer still works, but image upload will fail gracefully and articles will publish without hero images.
 
-## Step 6: Seed Brand Context
+## Step 6: Seed Operational Brand Context
 
-After deploying, log into the backend and call the authenticated setup endpoint from that session, or insert the rows directly in Supabase:
+The Playbook publisher owns durable audience, positioning, voice, rules,
+never-say, proof, and offer-core rows. Use the setup endpoint only for
+independent operational rows such as CTA destinations, author identity, and
+image style. Never invent a price, checkout URL, testimonial, or active offer
+to make this step look complete.
+
+After deploying, log into the backend and call the authenticated setup endpoint from that session, or insert those approved operational rows directly in Supabase:
 
 `POST https://your-backend-url/api/setup`
 

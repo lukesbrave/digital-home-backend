@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { authenticateSessionOrApiKey, unauthorizedResponse } from "@/lib/api/auth";
 import {
   assertBrandPublisherReady,
+  getBrandOperationalReadiness,
+  inspectBrandProjection,
   loadBrandPlaybooks,
   publishBrandPlaybook,
   validatePlaybook,
@@ -21,9 +23,16 @@ export async function GET(request: NextRequest) {
   try {
     await assertBrandPublisherReady();
     const playbooks = await loadBrandPlaybooks();
+    const current = playbooks[0] || null;
+    const [projection, operational] = await Promise.all([
+      current ? inspectBrandProjection(current.playbook) : Promise.resolve({ ready: false, fingerprint: "", rows: 0, missing: [], stale: [] }),
+      getBrandOperationalReadiness(),
+    ]);
     return NextResponse.json({
       ready: true,
-      current: playbooks[0] || null,
+      current,
+      projection,
+      operational,
       playbooks: playbooks.map(({ slug, playbook }) => ({ slug, meta: playbook.meta })),
     });
   } catch (error) {
@@ -61,6 +70,7 @@ export async function POST(request: NextRequest) {
       changed: result.changed,
       archivedSlug: result.archivedSlug || null,
       current: result.current as StoredPlaybookEnvelope,
+      projection: result.projection,
       brandPath: "/brand/current",
     });
   } catch (error) {

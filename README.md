@@ -153,10 +153,22 @@ node scripts/publish-brand-playbook.mjs publish \
 ```
 
 The command signs the request with `API_SECRET_KEY` from the ignored
-`.env.local`, then reads the live shelf back and verifies the playbook
-metadata. Replacing a playbook automatically archives the previous edition;
-re-publishing the same file is safe and makes no duplicate. The readable
-result is at `/brand/current`.
+`.env.local`, then reads the live route back and verifies both the shelf
+metadata and its deterministic downstream `brand_context` projection.
+Replacing a playbook automatically archives the previous edition;
+re-publishing the same file is safe, makes no duplicate, and repairs a missing
+or stale projection. The readable result is at `/brand/current`.
+
+For an existing Home whose live shelf predates the projection, run:
+
+```bash
+node scripts/publish-brand-playbook.mjs sync \
+  --base https://backend.yourdomain.com \
+  --actor tumi
+```
+
+This sync leaves independent CTA links, author identity, image style, offers,
+and all other human-configured operational context untouched.
 
 ## Community
 

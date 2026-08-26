@@ -4,6 +4,26 @@ All notable changes to the Digital Home Backend Starter.
 
 ## [Unreleased]
 
+## [2.7.2] — 2026-08-26
+
+Brand publication now powers downstream AI as one verified operation:
+
+- Every successful Playbook publish also upserts a deterministic, machine-ready
+  seven-row projection into `brand_context` for audience, positioning, voice,
+  standing rules, never-say language, proof, and offer core.
+- Re-publishing the same Playbook repairs missing or stale projection rows
+  without duplicating the visible shelf edition. Independent operational rows
+  such as CTA links, author identity, and image style are never overwritten.
+- `publish-brand-playbook.mjs sync` safely backfills an existing live Playbook,
+  and both `publish` and `sync` read the route back to verify the shelf metadata,
+  projection fingerprint, and readiness.
+- The article writer refuses to generate generic copy when core Playbook context
+  is incomplete. Active offers and CTA links are checked separately; absent
+  operational data never causes an invented price, destination, testimonial,
+  status, or availability claim.
+
+No migration or new secret is required.
+
 The Brand shelf is now live-publishable without a full Digital Home deploy.
 An approved playbook can be sent through the signed, authenticated
 `/api/brand/playbooks` endpoint with `scripts/publish-brand-playbook.mjs`;
