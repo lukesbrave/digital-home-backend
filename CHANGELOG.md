@@ -4,6 +4,28 @@ All notable changes to the Digital Home Backend Starter.
 
 ## [Unreleased]
 
+The CRM home becomes the **Command Centre** — the page that answers "what's
+the state of my business?" in five seconds. One status sentence, the business
+drawn as a flowing Leads → Nurture → Pipeline → Revenue strip (animated
+connectors, each stage clickable through to its working screen), a "Waiting
+on you" panel of open tasks, upcoming appointments, and a live activity feed
+refreshing every 20 seconds. The sidebar leads with Command and its working
+screens; logging in lands there.
+
+Revenue now reaches the ledger: a payment webhook capturing
+`custom.booking_amount_cents` (e.g. Stripe event bookings on the frontend)
+automatically records a WON opportunity at the booking amount — idempotent
+per Stripe session, test-mode ignored. A one-time
+`scripts/backfill-event-bookings.mjs` records historical bookings that
+landed on leads before this shipped. The landing stage is configurable via
+the `crm_won_stage_name` setting (defaults to the pipeline's last stage).
+
+Pipeline value becomes a forecast: open deals with no value contribute their
+stage's estimate from the `crm_stage_estimates` setting
+(`{ "default_cents": 1400, "stages": { "Nurturing": 14700 } }`); the Command
+Centre shows estimated totals with a `~` marker so forecast is never mistaken
+for booked money. No database migration is required.
+
 The lead detail page now tells the lead's whole story: an at-a-glance strip
 (score, source, next appointment, open tasks), an attribution card (capture
 source, funnel first touch with UTMs and referrer, linked website-visitor

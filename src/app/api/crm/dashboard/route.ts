@@ -46,7 +46,7 @@ export async function GET(request: NextRequest) {
       .limit(25),
     supabase
       .from("opportunities")
-      .select("value_cents", { count: "exact" })
+      .select("value_cents, stage_id", { count: "exact" })
       .eq("status", "open"),
     supabase
       .from("opportunities")
@@ -56,6 +56,27 @@ export async function GET(request: NextRequest) {
   ]);
 
   const pipelineValueCents = (openOpps.data || []).reduce((sum, o) => sum + (o.value_cents || 0), 0);
+
+  // Pipeline forecast: open deals with no value contribute their stage's
+  // estimate from backend_settings `crm_stage_estimates` —
+  // { default_cents, stages: { "Stage name": cents } } — so an auto-filed
+  // pipeline reads as a forecast instead of a misleading $0.
+  let pipelineEstimateCents = pipelineValueCents;
+  const { data: estCfg } = await supabase
+    .from("backend_settings")
+    .select("value")
+    .eq("key", "crm_stage_estimates")
+    .maybeSingle();
+  const estConf = (estCfg?.value ?? {}) as { default_cents?: number; stages?: Record<string, number> };
+  if (estConf.default_cents || estConf.stages) {
+    const { data: stageRows } = await supabase.from("pipeline_stages").select("id, name");
+    const stageNameById = new Map((stageRows ?? []).map((s) => [s.id, s.name]));
+    for (const o of openOpps.data || []) {
+      if (o.value_cents) continue;
+      const stageName = stageNameById.get(o.stage_id) ?? "";
+      pipelineEstimateCents += estConf.stages?.[stageName] ?? estConf.default_cents ?? 0;
+    }
+  }
 
   const monthStart = new Date();
   monthStart.setUTCDate(1);
@@ -76,6 +97,7 @@ export async function GET(request: NextRequest) {
       open_tasks: openTasks.count || 0,
       open_opportunities: openOpps.count || 0,
       pipeline_value_cents: pipelineValueCents,
+      pipeline_estimate_cents: pipelineEstimateCents,
       won_total_cents: wonTotalCents,
       won_this_month_cents: wonMonthCents,
       won_deals: (wonOpps.data || []).length,

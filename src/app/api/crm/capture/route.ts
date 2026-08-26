@@ -15,6 +15,7 @@ import { createAdminClient } from "@/lib/supabase/server";
 import { authenticateCapture } from "@/lib/crm/capture-auth";
 import { isValidEmail, upsertLead } from "@/lib/crm/leads";
 import { enrollLead, ensureLeadOpportunity } from "@/lib/crm/engine";
+import { winEventBookingDeal } from "@/lib/crm/event-bookings";
 
 const CORS_HEADERS = {
   "Access-Control-Allow-Origin": "*",
@@ -74,6 +75,17 @@ export async function POST(request: NextRequest) {
     };
 
     const { lead, created } = await upsertLead(supabase, input, { actor: `capture:${auth.via}` });
+
+    // Paid event bookings (a payment webhook capturing booking_amount_cents)
+    // become won deals at the booking amount — revenue reaches the ledger
+    // instead of sitting invisibly on the lead.
+    if (Number(input.custom?.booking_amount_cents ?? 0) > 0) {
+      try {
+        await winEventBookingDeal(supabase, lead, input.custom);
+      } catch (e) {
+        console.error("capture: winEventBookingDeal failed", e);
+      }
+    }
 
     // Auto-file into the sales pipeline: a fresh inbound lead opens a deal in
     // "New". Idempotent and forward-only. If upsertLead already enrolled them

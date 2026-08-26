@@ -25,7 +25,7 @@ const NAV_ITEMS = [
   },
   {
     href: '/crm',
-    label: 'CRM',
+    label: 'Command',
     icon: (
       <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 shrink-0" viewBox="0 0 256 256" fill="currentColor">
         <path d="M224,200h-8V40a8,8,0,0,0-8-8H152a8,8,0,0,0-8,8V80H96a8,8,0,0,0-8,8v40H48a8,8,0,0,0-8,8v64H24a8,8,0,0,0,0,16H224a8,8,0,0,0,0-16ZM160,48h40V200H160ZM104,96h40V200H104ZM56,144H88v56H56Z" />
@@ -86,6 +86,26 @@ const NAV_ITEMS = [
       </svg>
     ),
   },
+];
+
+// Command leads: the top-down room comes first, its working screens under it,
+// then the production surfaces. Setup stays last.
+const NAV_ORDER = [
+  '/crm',
+  '/crm/leads',
+  '/crm/pipeline',
+  '/crm/funnel',
+  '/crm/workflows',
+  '/content',
+  '/social',
+  '/brand',
+  '/crm/settings',
+];
+const ORDERED_NAV = [
+  ...NAV_ORDER.map((h) => NAV_ITEMS.find((i) => i.href === h)).filter(
+    (i): i is (typeof NAV_ITEMS)[number] => !!i
+  ),
+  ...NAV_ITEMS.filter((i) => !NAV_ORDER.includes(i.href)),
 ];
 
 function ThemeToggle({ collapsed }: { collapsed: boolean }) {
@@ -190,7 +210,7 @@ export function Sidebar() {
 
       {/* Nav */}
       <nav className="flex flex-col gap-1 px-3 flex-1">
-        {(role === 'social' ? NAV_ITEMS.filter((i) => i.href === '/social') : NAV_ITEMS).map((item) => {
+        {(role === 'social' ? NAV_ITEMS.filter((i) => i.href === '/social') : ORDERED_NAV).map((item) => {
           const isActive =
             item.href === '/crm'
               ? pathname === '/crm'
