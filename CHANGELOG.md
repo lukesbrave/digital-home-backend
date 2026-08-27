@@ -4,6 +4,20 @@ All notable changes to the Digital Home Backend Starter.
 
 ## [Unreleased]
 
+## [2.7.3] — 2026-08-27
+
+The article workspace now says what each surface actually contains:
+
+- The sidebar calls the workspace **Articles** while preserving the existing
+  `/content` route and article lifecycle.
+- Its secondary navigation is **Pipeline | Published**. Published requests
+  only published rows from the existing status-filtered articles endpoint;
+  drafts and archived articles remain in their Pipeline columns.
+- Fresh published cards reserve space for the **New** badge, so the badge no
+  longer overlaps long titles.
+
+No migration, route change, or new secret is required.
+
 ## [2.7.2] — 2026-08-26
 
 Brand publication now powers downstream AI as one verified operation:

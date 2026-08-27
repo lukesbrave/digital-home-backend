@@ -138,7 +138,7 @@ export default function ContentPipelinePage() {
       {/* Header */}
       <header className="h-20 px-12 flex items-center justify-between shrink-0">
         <h1 className="text-lg font-semibold text-white">
-          {view === 'board' ? 'Pipeline' : 'Articles'}
+          {view === 'board' ? 'Pipeline' : 'Published'}
         </h1>
         <div className="flex items-center gap-6">
           <button
@@ -155,7 +155,7 @@ export default function ContentPipelinePage() {
               view === 'list' ? 'text-white' : 'text-minimal-muted hover:text-white'
             }`}
           >
-            Articles
+            Published
           </button>
         </div>
       </header>
@@ -199,7 +199,7 @@ export default function ContentPipelinePage() {
 
       {/* Footer */}
       <footer className="h-16 px-12 flex items-center justify-end text-xs text-minimal-muted shrink-0">
-        <span>Digital Home / {view === 'board' ? 'Pipeline' : 'Articles'}</span>
+        <span>Digital Home / {view === 'board' ? 'Pipeline' : 'Published'}</span>
       </footer>
 
       {/* Autonomous Mode Confirmation Modal */}
@@ -603,12 +603,12 @@ function DraggableCard({
       {/* Title — clickable link to editor if article exists */}
       {entry.content_objects?.slug ? (
         <Link href={`/content/${entry.content_objects.slug}`} className="block">
-          <p className="text-[14px] leading-relaxed mb-3 font-light hover:text-white transition-colors underline-offset-4 hover:underline">
+          <p className={`text-[14px] leading-relaxed mb-3 font-light hover:text-white transition-colors underline-offset-4 hover:underline ${isNew ? 'pr-14' : ''}`}>
             {entry.title}
           </p>
         </Link>
       ) : (
-        <p className="text-[14px] leading-relaxed mb-3 font-light">
+        <p className={`text-[14px] leading-relaxed mb-3 font-light ${isNew ? 'pr-14' : ''}`}>
           {entry.title}
         </p>
       )}
@@ -727,7 +727,7 @@ function ListView() {
 
   const fetchArticles = useCallback(async () => {
     setLoading(true);
-    const res = await fetch('/api/articles');
+    const res = await fetch('/api/articles?status=published');
     const data = await res.json();
     setArticles(data.articles || []);
     setLoading(false);
@@ -745,9 +745,9 @@ function ListView() {
         {articles.length === 0 ? (
           <div className="text-center py-24">
             <div className="text-2xl mb-4 opacity-10">◇</div>
-            <p className="text-minimal-muted text-sm mb-2">No articles yet.</p>
+            <p className="text-minimal-muted text-sm mb-2">No published articles yet.</p>
             <p className="text-minimal-muted/60 text-xs">
-              Articles appear once the content agent writes them.
+              Articles appear here after they are published.
             </p>
           </div>
         ) : (
