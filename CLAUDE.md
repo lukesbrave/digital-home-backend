@@ -1,3 +1,5 @@
+@AGENTS.md
+
 # Digital Home Backend
 
 ## First Time Setup

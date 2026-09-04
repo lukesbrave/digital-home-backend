@@ -4,6 +4,20 @@ All notable changes to the Digital Home Backend Starter.
 
 ## [Unreleased]
 
+## [2.7.4] — 2026-09-04
+
+Agents now keep their worktrees inside the repo:
+
+- New `AGENTS.md` carries the worktree convention: create at `.worktrees/<task>`,
+  reuse when continuing recent work, remove the worktree and delete the branch
+  in the same turn once merged, and skip `npm install` unless the task builds
+  or tests.
+- `CLAUDE.md` now begins with `@AGENTS.md`, so Claude Code and Buzz agents read
+  one set of agent rules.
+- `.worktrees/` is gitignored.
+
+No migration, route change, or new secret is required.
+
 ## [2.7.3] — 2026-08-27
 
 The article workspace now says what each surface actually contains:
