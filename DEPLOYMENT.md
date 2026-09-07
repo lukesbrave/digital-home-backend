@@ -10,7 +10,7 @@ This project uses **@opennextjs/cloudflare** (OpenNext) to run Next.js on Cloudf
 
 ## Prerequisites
 
-- Node.js 18+
+- Node.js 22+
 - A Cloudflare account
 - A Supabase project with the required tables
 - GitHub repository with the code pushed
@@ -27,6 +27,10 @@ Run the Frontend migrations first, then run this repo's migration in the Supabas
 
 ## Step 2: Create Admin User
 
+This email and password are your login to the private Digital Home dashboard,
+where you manage content, leads and your business. Supabase handles that login;
+it is separate from your Supabase account or database password. Keep the password
+in your own password manager. An agent can promote your email/UUID without it.
 There is no public signup. Create your admin user manually:
 
 1. Go to Supabase Dashboard
@@ -39,11 +43,13 @@ There is no public signup. Create your admin user manually:
 1. Configure `wrangler.jsonc` locally with your non-secret runtime vars
    - replace the starter Worker name
    - replace `WORKER_SELF_REFERENCE.service` so it matches that Worker name
-   - replace the R2 cache bucket name with your own unique bucket
-2. Build locally:
-   - **Build command:** `npm run build`
-3. Deploy with the package script:
-   - **Deploy command:** `npm run deploy`
+   - follow the optional social choice in `SOCIAL.md`; a fresh opt-out needs no R2 bucket
+   - set `FRONTEND_WORKER` to the actual frontend Worker. If it does not exist
+     yet, omit that binding for the first deploy, then add it once the frontend
+     has deployed. Preserve the self-reference binding.
+2. Build and deploy once: `npm run deploy`.
+3. If an unchanged build already passed with `npm run build`, deploy that output
+   with `npx opennextjs-cloudflare deploy` instead of building it a second time.
 4. Set the required Worker secrets with `wrangler secret put`
 
 ## Step 4: Environment Variables

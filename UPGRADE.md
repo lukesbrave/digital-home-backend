@@ -17,9 +17,25 @@ You are upgrading a member's Digital Home backend — a customized fork of
 customizations are intentional: **merge, don't overwrite.** When a file
 conflicts, prefer their copy design-wise and add the new capability into it.
 
+### Latest release: 2.8.0 — optional social calendar
+
+For a 2.7.4 Home, merge these additions on an upgrade branch: `src/lib/social/feature.ts`,
+`src/lib/social/feature.test.ts`, `src/app/social/layout.tsx`, the social API guard
+in `src/middleware.ts` and `worker.ts`, and the optional bindings in
+`cloudflare-env.d.ts`. Preserve custom auth, layouts and scheduled jobs.
+Read the new `SOCIAL.md` activation/disable instructions. **Do not replace a
+member's wrangler.jsonc with the starter:** that would change their identity,
+URLs and social choice. Leave the new flag absent or set it to `"true"` for an
+existing enabled calendar, preserving R2 and queued posts. Only set it to
+`"false"` if the member chooses to disable it. No migration or new secret.
+Run social/CRM/brand tests, lint and build; deploy only with member authorisation,
+then verify the chosen calendar state and CRM. Update VERSION to 2.8.0 after
+applying the release. Earlier versions follow their existing patches first,
+then apply this 2.7.4 → 2.8.0 step last.
+
 ### Step 0 — Determine current version
-- If a `VERSION` file exists, read it. If it says `2.7.4`, stop — already up
-  to date. If it says anything from `2.5.0` through `2.7.3`, apply ONLY the
+- If a `VERSION` file exists, read it. If it says `2.8.0`, stop — already up
+  to date. If it says anything from `2.5.0` through `2.7.4`, apply ONLY the
   "Patch upgrades" section at the bottom of this guide.
 - No `VERSION` file = v1.x (content pipeline era). Apply the full v2.5.0
   upgrade below.
@@ -29,13 +45,13 @@ conflicts, prefer their copy design-wise and add the new capability into it.
 ### Step 1 — Preflight
 1. `git status` — if there are uncommitted changes, commit or stash them
    first so the upgrade is revertible.
-2. Create a branch: `git checkout -b upgrade/v2.7.4`.
+2. Create a branch: `git checkout -b upgrade/v2.8.0`.
 3. Add the starter as a remote if missing:
    `git remote add starter https://github.com/lukesbrave/digital-home-backend.git`
    then `git fetch starter --tags`.
 
 ### Step 2 — Bring in the latest version
-1. Diff `git diff HEAD..v2.7.4 --stat` to see scope.
+1. Diff `git diff HEAD..v2.8.0 --stat` to see scope.
 2. New files (the vast majority) can be checked out directly:
    `git checkout v2.6.0 -- <path>` for: `src/lib/crm/`, `src/lib/social/`,
    `src/app/brand/`, `brand/`,

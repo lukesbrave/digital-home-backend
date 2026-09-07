@@ -4,6 +4,17 @@ All notable changes to the Digital Home Backend Starter.
 
 ## [Unreleased]
 
+## [2.8.0] — 2026-09-07
+
+- Optional social calendar: new Homes start off without requiring R2. The shell
+  explains activation; social APIs and cron are disabled while CRM/articles work.
+- Existing installations without the new flag retain their enabled behavior.
+- Setup guidance explains the dashboard login and expected R2 activation, avoids
+  compiling twice, and separates core handover from later brand/content work.
+
+No database migration or new secret. Preserve existing settings when upgrading;
+see UPGRADE.md before applying the new starter configuration.
+
 ## [2.7.4] — 2026-09-04
 
 Agents now keep their worktrees inside the repo:

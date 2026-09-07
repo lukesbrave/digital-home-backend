@@ -20,6 +20,39 @@ A social media manager gets a real account boundary: create their login with
 every non-social API route rejects social-role sessions). Re-running the same
 command flips a role, so promote/demote is one line.
 
+## Optional social calendar
+
+New installations leave `SOCIAL_PUBLISHING_ENABLED` set to `"false"` and
+`r2_buckets` empty. The Social entry remains visible with an inactive calendar
+message. Social API requests return `403 SOCIAL_PUBLISHING_DISABLED` and the
+Worker skips social cron work. Articles, CRM and their cron continue normally.
+This switch preserves existing social data; it does not delete accounts or posts.
+Omitting the variable preserves the enabled behavior of older installations.
+A configured value other than `true` disables it. This is separate from send-safe
+mode and `SOCIAL_SCHEDULER_MODE`, which still apply when social is enabled.
+
+### Activate later
+
+1. Confirm the member wants their social calendar activated. Explain that its
+   storage enables media publishing once their social accounts are connected.
+2. In [Cloudflare R2](https://dash.cloudflare.com/?to=/:account/r2/overview), the
+   member completes R2 subscription checkout if required. R2 includes free
+   monthly usage; usage above the allowance is billable. See
+   [Cloudflare's setup guidance](https://developers.cloudflare.com/r2/get-started/).
+3. Create the member's bucket and configure public media access as described
+   below. Add `{"binding":"SOCIAL_MEDIA","bucket_name":"<their-bucket>"}` to
+   `r2_buckets`, and set `R2_PUBLIC_BASE` to its verified public media URL.
+4. Before re-enabling an existing calendar, review queued posts with the member;
+   enabling resumes eligible scheduled publishing. Keep the feature off until
+   they approve that behavior. Set `SOCIAL_PUBLISHING_ENABLED` to `"true"` and
+   redeploy. Verify the calendar and a bounded upload test. Connect accounts
+   through the existing consent flow; do not publish a public test automatically.
+
+To disable, set the flag to `"false"` and redeploy. Requests already executing
+may finish; disabling is not a recall mechanism. Preserve the bucket, bindings,
+credentials and data for an existing installation unless their removal is
+separately requested. For a fresh opt-out no bucket or binding is needed.
+
 ## How it works
 
 - **Storage** — media lives in the **`social-media` Cloudflare R2 bucket**

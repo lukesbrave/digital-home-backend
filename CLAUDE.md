@@ -2,6 +2,18 @@
 
 # Digital Home Backend
 
+## Simon / BraveBrand guided setup
+
+When running `mission-build-home`, follow that mission for the member journey and
+completion; use this repository for technical commands and configuration. Simon
+handles both repositories in the existing DM. No new chat or Buzz Project is required.
+Deploy and verify the working foundation with the business facts already supplied.
+The deeper content corpus, Brand Playbook, articles and design are later, optional
+work with Simon or the specialist agents. Their absence does not make a verified
+core build incomplete. Do not start that work automatically or hold the handover
+until it is done. Congratulate the member, deliver both live links and explain the
+next choices after the login and lead loop are verified and shared context is saved.
+
 ## First Time Setup
 
 If you just cloned this repo, follow these steps in order. You need both this repo (Backend) and the [Digital Home Frontend](https://github.com/lukesbrave/digital-home-frontend) repo. **Set up the Frontend first** — it has the shared website migrations.
@@ -46,13 +58,13 @@ Fill in:
 - `OPENAI_API_KEY` — from [platform.openai.com](https://platform.openai.com) (for OpenAI image-model hero images, optional)
 - `OPENAI_IMAGE_MODEL` — optional; defaults to `gpt-image-1`
 
-### Step 3: Seed Your Brand Context
+### Step 3: Seed Your Brand Context (when beginning content work)
 Your brand context is what makes the AI write in your voice. First, fill in your content corpus files (see the Frontend's `content-corpus-examples/` for the format). Then seed them into Supabase either:
 
 - via the Supabase dashboard / SQL editor, or
 - via the authenticated `/api/setup` route after logging into the Backend
 
-> **⚠️ This is the most important step.** The content corpus is what separates AI that writes like you from AI that writes generic slop. A properly built corpus includes: voice guide, tone examples, content hooks, core positioning, offer architecture, competitive landscape, SEO keyword clusters, and case studies/testimonials. If you haven't completed your content corpus in the Frontend setup, do that first. If you want help building that part properly, the deeper brand intake and strategy workflow is available in the [BraveBrand community](https://www.skool.com/bravebrand).
+> Your content corpus gives article writing your business context. For a Simon-guided foundation build, complete this when the member chooses the later brand/content stage, not as a deployment prerequisite. A properly built corpus includes: voice guide, tone examples, content hooks, core positioning, offer architecture, competitive landscape, SEO keyword clusters, and case studies/testimonials. Before generating brand-specific articles, develop the relevant context with the member. If you want help building that part properly, the deeper brand intake and strategy workflow is available in the [BraveBrand community](https://www.skool.com/bravebrand).
 
 You also need two special entries in the `brand_context` table:
 

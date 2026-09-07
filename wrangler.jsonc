@@ -34,16 +34,8 @@
   "images": {
     "binding": "IMAGES"
   },
-  // Social media files (videos + carousel slides). Make the bucket public by
-  // attaching a custom domain (e.g. media.yourdomain.com) and set
-  // R2_PUBLIC_BASE below to match — Meta ingests by pulling that URL, and R2
-  // egress is free.
-  "r2_buckets": [
-    {
-      "binding": "SOCIAL_MEDIA",
-      "bucket_name": "social-media"
-    }
-  ],
+  // Social publishing is optional. See SOCIAL.md before adding SOCIAL_MEDIA.
+  "r2_buckets": [],
   "observability": {
     "enabled": true
   },
@@ -55,6 +47,7 @@
     "NEXT_PUBLIC_SUPABASE_ANON_KEY": "your-anon-key",
     "DIGITAL_HOME_URL": "https://yourdomain.com",
     "NEXT_PUBLIC_DIGITAL_HOME_URL": "https://yourdomain.com",
+    "SOCIAL_PUBLISHING_ENABLED": "false",
     "SOCIAL_SCHEDULER_MODE": "native",
     "R2_PUBLIC_BASE": "https://media.yourdomain.com"
   }

@@ -10,10 +10,13 @@
 
 import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
+import { socialPublishingEnabled, socialUnavailable } from './lib/social/feature';
 
 export async function middleware(request: NextRequest) {
   // Allow login page and static assets
   const { pathname } = request.nextUrl;
+  const unavailable = socialUnavailable(pathname, socialPublishingEnabled(process.env.SOCIAL_PUBLISHING_ENABLED));
+  if (unavailable) return unavailable;
   if (pathname === '/login' || pathname.startsWith('/_next') || pathname.startsWith('/favicon') || pathname.startsWith('/api')) {
     return NextResponse.next();
   }

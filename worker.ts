@@ -30,6 +30,8 @@ import openNextHandler from "./.open-next/worker.js";
 // @ts-expect-error -- generated at build time
 export { DOQueueHandler, DOShardedTagCache, BucketCachePurge } from "./.open-next/worker.js";
 
+import { socialPublishingEnabled, socialUnavailable } from "./src/lib/social/feature";
+
 const TICK_PATH = "/api/crm/tick";
 const SOCIAL_TICK_PATH = "/api/social/tick";
 
@@ -133,9 +135,13 @@ function socialSchedulerMode(env: CloudflareEnv): "native" | "external" | "inval
 }
 
 export default {
-  fetch: openNextHandler.fetch,
+  fetch(request, env, ctx) {
+    const unavailable = socialUnavailable(new URL(request.url).pathname, socialPublishingEnabled(env.SOCIAL_PUBLISHING_ENABLED));
+    return unavailable || openNextHandler.fetch(request, env, ctx);
+  },
   async scheduled(_controller: ScheduledController, env: CloudflareEnv, ctx: ExecutionContext) {
     ctx.waitUntil(runTick(env, ctx));
+    if (!socialPublishingEnabled(env.SOCIAL_PUBLISHING_ENABLED)) return;
     const mode = socialSchedulerMode(env);
     if (mode === "native") {
       ctx.waitUntil(runSocialTick(env, ctx));
