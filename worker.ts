@@ -32,6 +32,8 @@ export { DOQueueHandler, DOShardedTagCache, BucketCachePurge } from "./.open-nex
 
 import { socialPublishingEnabled, socialUnavailable } from "./src/lib/social/feature";
 
+import { servePublicMedia } from "./src/lib/media/public-media";
+
 const TICK_PATH = "/api/crm/tick";
 const SOCIAL_TICK_PATH = "/api/social/tick";
 
@@ -135,7 +137,21 @@ function socialSchedulerMode(env: CloudflareEnv): "native" | "external" | "inval
 }
 
 export default {
-  fetch(request, env, ctx) {
+  async fetch(request, env, ctx) {
+    if (new URL(request.url).pathname.startsWith("/media/")) {
+      const cacheUrl = new URL(request.url);
+      cacheUrl.search = "";
+      const cacheKey = new Request(cacheUrl, { method: "GET" });
+      if (request.method === "GET" && !request.headers.has("If-None-Match")) {
+        const cached = await caches.default.match(cacheKey);
+        if (cached) return cached;
+      }
+      const media = await servePublicMedia(request, env);
+      if (media) {
+        if (request.method === "GET" && media.status === 200) ctx.waitUntil(caches.default.put(cacheKey, media.clone()));
+        return media;
+      }
+    }
     const unavailable = socialUnavailable(new URL(request.url).pathname, socialPublishingEnabled(env.SOCIAL_PUBLISHING_ENABLED));
     return unavailable || openNextHandler.fetch(request, env, ctx);
   },

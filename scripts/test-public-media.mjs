@@ -1,0 +1,62 @@
+import assert from 'node:assert/strict';
+import { build } from 'esbuild';
+import { Miniflare } from 'miniflare';
+import sharp from 'sharp';
+import { mkdtemp, rm, readFile, writeFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { pathToFileURL } from 'node:url';
+import { createHash } from 'node:crypto';
+const temp = await mkdtemp(join(tmpdir(), 'r2-media-test-'));
+let mf;
+try {
+  const out = join(temp, 'worker.mjs');
+  await build({ entryPoints: ['scripts/fixtures/media-worker.ts'], outfile: out, bundle: true, format: 'esm', platform: 'browser', logLevel: 'silent' });
+  mf = new Miniflare({ modules: true, modulesRoot: temp, scriptPath: out, compatibilityDate: '2026-05-01',
+    r2Buckets: ['PUBLIC_MEDIA'], images: { binding: 'IMAGES' }, bindings: { TEST_TOKEN: 'sandbox-only' } });
+  const imageArg = process.argv.indexOf('--image');
+  const input = imageArg >= 0 ? await readFile(process.argv[imageArg+1]) : await sharp({ create: { width: 2400, height: 1600, channels: 3, background: '#184d61' } }).png().toBuffer();
+  const originalMeta = await sharp(input).metadata();
+  const denied = await mf.dispatchFetch('http://localhost/upload', { method: 'POST', body: input });
+  assert.equal(denied.status, 401);
+  const response = await mf.dispatchFetch('http://localhost/upload', { method: 'POST', body: input, headers: { Authorization: 'Bearer sandbox-only' } });
+  const saved = await response.json();
+  assert.equal(response.status, 200, JSON.stringify(saved));
+  assert(saved.url.startsWith('http://localhost/media/public/website/'));
+  assert(saved.bytes > 0 && saved.bytes <= 500 * 1024);
+  const fetched = await mf.dispatchFetch(saved.url);
+  const bytes = Buffer.from(await fetched.arrayBuffer());
+  const meta = await sharp(bytes).metadata();
+  assert.equal(meta.format, 'webp'); assert(meta.width <= 1536 && meta.height <= 1536); assert(Math.abs(meta.width/meta.height-originalMeta.width/originalMeta.height)<0.003, 'Keep original aspect ratio');
+  const outputArg = process.argv.indexOf('--output');
+  if (outputArg >= 0) await writeFile(process.argv[outputArg+1], bytes);
+  assert.equal(bytes.length, saved.bytes);
+  assert.equal(createHash('sha256').update(bytes).digest('hex'), saved.sha256);
+  assert.match(fetched.headers.get('cache-control'), /immutable/);
+  assert.equal(fetched.headers.get('access-control-allow-origin'), '*');
+  const head = await mf.dispatchFetch(saved.url, { method: 'HEAD' });
+  assert.equal(head.status, 200); assert.equal((await head.arrayBuffer()).byteLength, 0);
+  const conditional = await mf.dispatchFetch(saved.url, { headers: { 'If-None-Match': fetched.headers.get('etag') } });
+  assert.equal(conditional.status, 304);
+  assert.equal((await mf.dispatchFetch(saved.url, { method: 'DELETE' })).status, 405);
+  assert.equal((await mf.dispatchFetch('http://localhost/media/private/invoice.pdf')).status, 404);
+  assert.equal((await mf.dispatchFetch('http://localhost/media/public/website/missing-'+'0'.repeat(32)+'.webp')).status, 404);
+  const bucket = await mf.getR2Bucket('PUBLIC_MEDIA');
+  assert.equal((await bucket.list()).objects.length, 1);
+  // Deterministic content-addressed uploads do not accumulate duplicate files.
+  await mf.dispatchFetch('http://localhost/upload', { method: 'POST', body: input, headers: { Authorization: 'Bearer sandbox-only' } });
+  assert.equal((await bucket.list()).objects.length, 1);
+  const bad = await mf.dispatchFetch('http://localhost/upload', { method: 'POST', body: 'not an image', headers: { Authorization: 'Bearer sandbox-only' } });
+  assert.equal(bad.status, 422);
+  await build({ entryPoints: ['src/lib/media/public-media.ts'], outfile: join(temp,'core.mjs'), bundle: true, platform: 'node', format: 'esm', logLevel: 'silent' });
+  const core = await import(pathToFileURL(join(temp,'core.mjs')));
+  await assert.rejects(core.savePublicImage({}, input.buffer, 'test', 'https://backend.test'), /storage/);
+  let encodes = 0;
+  const oversized = { async info() {return {width:2400,height:1600};}, input() { return { transform() { return this; }, async output() { encodes++; return { response() { return new Response(new Uint8Array(600*1024)); } }; } }; } };
+  await assert.rejects(core.optimiseImage(input, oversized), /500 KB/);
+  assert.equal(encodes, 3);
+  assert.throws(()=>core.mediaBase({PUBLIC_MEDIA_BASE:'https://test.r2.dev'},'https://backend.test'));
+  assert.throws(()=>core.mediaBase({PUBLIC_MEDIA_BASE:'https://project.supabase.co/storage'},'https://backend.test'));
+  console.log(JSON.stringify({pass:true, runtime:'local workerd / Miniflare R2 and Images', input_bytes:input.length,
+    output_bytes:bytes.length, dimensions:[meta.width,meta.height], checks:['authorisation','resize','WebP decode','size ceiling','R2 readback','public GET','HEAD','ETag','immutable caching','private path refusal','idempotent upload','invalid image refusal','missing storage refusal','bounded encoding failure']},null,2));
+} finally { if (mf) await mf.dispose(); await rm(temp, {recursive:true,force:true}); }

@@ -23,7 +23,7 @@ command flips a role, so promote/demote is one line.
 ## Optional social calendar
 
 New installations leave `SOCIAL_PUBLISHING_ENABLED` set to `"false"` and
-`r2_buckets` empty. The Social entry remains visible with an inactive calendar
+`PUBLIC_MEDIA` configured per `MEDIA.md`. The Social entry remains visible with an inactive calendar
 message. Social API requests return `403 SOCIAL_PUBLISHING_DISABLED` and the
 Worker skips social cron work. Articles, CRM and their cron continue normally.
 This switch preserves existing social data; it does not delete accounts or posts.
@@ -51,7 +51,7 @@ mode and `SOCIAL_SCHEDULER_MODE`, which still apply when social is enabled.
 To disable, set the flag to `"false"` and redeploy. Requests already executing
 may finish; disabling is not a recall mechanism. Preserve the bucket, bindings,
 credentials and data for an existing installation unless their removal is
-separately requested. For a fresh opt-out no bucket or binding is needed.
+separately requested. For a fresh social opt-out no SOCIAL_MEDIA binding is needed; PUBLIC_MEDIA remains required.
 
 ## How it works
 

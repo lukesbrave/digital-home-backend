@@ -1,3 +1,4 @@
+import { verifyPublicationImage } from "@/lib/media/publication";
 /**
  * GET /api/articles/[slug] — Fetch a single article
  * PATCH /api/articles/[slug] — Update an article
@@ -44,6 +45,21 @@ export async function PATCH(
 
   // Separate SEO fields from content fields
   const { seo, ...contentFields } = body;
+
+  if (contentFields.status === "published") {
+    const { data: current } = await supabase.from("content_objects").select("featured_image_url, seo_meta_id").eq("slug", slug).single();
+    if (!current) return NextResponse.json({ error: "Article not found" }, { status: 404 });
+    try {
+      await verifyPublicationImage(supabase, contentFields.featured_image_url !== undefined ? contentFields.featured_image_url : current.featured_image_url, request.nextUrl.origin);
+      const { data: currentSeo } = current.seo_meta_id
+        ? await supabase.from("seo_meta").select("og_image_url").eq("id", current.seo_meta_id).single()
+        : { data: null };
+      const og = seo?.og_image_url !== undefined ? seo.og_image_url : currentSeo?.og_image_url;
+      if (og) await verifyPublicationImage(supabase, og, request.nextUrl.origin);
+    } catch (error) {
+      return NextResponse.json({ error: error instanceof Error ? error.message : "Image validation failed" }, { status: 409 });
+    }
+  }
 
   // If publishing, set published_at
   if (contentFields.status === "published" && !contentFields.published_at) {

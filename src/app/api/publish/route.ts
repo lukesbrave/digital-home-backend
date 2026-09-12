@@ -1,3 +1,4 @@
+import { verifyPublicationImage } from "@/lib/media/publication";
 /**
  * POST /api/publish — Publish a draft article
  *
@@ -48,6 +49,20 @@ export async function POST(request: NextRequest) {
       { error: "No article written for this entry yet. The article must be drafted before publishing." },
       { status: 400 }
     );
+  }
+
+  const { data: draft, error: draftError } = await supabase.from("content_objects")
+    .select("featured_image_url, seo_meta_id").eq("id", calendarEntry.content_object_id).single();
+  if (draftError || !draft) return NextResponse.json({ error: "Linked article not found" }, { status: 404 });
+  try {
+    await verifyPublicationImage(supabase, draft.featured_image_url, request.nextUrl.origin);
+    if (draft.seo_meta_id) {
+      const { data: seo, error: seoError } = await supabase.from("seo_meta").select("og_image_url").eq("id", draft.seo_meta_id).single();
+      if (seoError) throw new Error("Could not verify the social-preview image");
+      if (seo?.og_image_url) await verifyPublicationImage(supabase, seo.og_image_url, request.nextUrl.origin);
+    }
+  } catch (error) {
+    return NextResponse.json({ error: error instanceof Error ? error.message : "Image validation failed" }, { status: 409 });
   }
 
   // 2. Update the content object to published

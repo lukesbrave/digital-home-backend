@@ -19,11 +19,18 @@ try {
       ` }));
     } }], logLevel: "silent" });
   const worker = (await import(pathToFileURL(out).href)).default;
+  globalThis.caches = { default: { async match() { return undefined; }, async put() {} } };
   for (const flag of ["false", "true", undefined]) {
-    const env = { SOCIAL_PUBLISHING_ENABLED: flag, API_SECRET_KEY: "local-test-key", calls: [] };
+    const env = { SOCIAL_PUBLISHING_ENABLED: flag, API_SECRET_KEY: "local-test-key", calls: [],
+      PUBLIC_MEDIA: { async get() { return { size: 12, httpEtag: '"test"', body: new Response('RIFF....WEBP').body }; } } };
     const pending = []; const ctx = { waitUntil(p) { pending.push(p); } };
     const response = await worker.fetch(new Request("https://local.test/api/social/posts/post-1/publish", {method:"POST"}), env, ctx);
     assert.equal(response.status, flag === "false" ? 403 : 200);
+    const media = await worker.fetch(new Request("https://local.test/media/public/website/test-" + "a".repeat(32) + ".webp"), env, ctx);
+    assert.equal(media.status, 200, "Public images remain available with social off");
+    assert.equal(media.headers.get("content-type"), "image/webp");
+    const privateFile = await worker.fetch(new Request("https://local.test/media/private/invoice.pdf"), env, ctx);
+    assert.equal(privateFile.status, 404, "Public gateway must not expose private objects");
     env.calls.length = 0;
     await worker.scheduled({}, env, ctx); await Promise.all(pending);
     assert(env.calls.includes("/api/crm/tick"), "CRM must keep running");
@@ -45,5 +52,5 @@ try {
   assert(!disabled.includes("ACTIVE_CALENDAR"));
   process.env.SOCIAL_PUBLISHING_ENABLED = "true";
   assert(page.render().includes("ACTIVE_CALENDAR"));
-  console.log("PASS: Worker blocks social when off; CRM cron continues; legacy social enabled; inactive layout hides active children");
+  console.log("PASS: Worker blocks social when off; CRM cron continues; legacy social enabled; inactive layout hides active children; public R2 images work with social off; private paths denied");
 } finally { rmSync(tmp, {recursive:true,force:true}); }

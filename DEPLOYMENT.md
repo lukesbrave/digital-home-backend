@@ -43,7 +43,8 @@ There is no public signup. Create your admin user manually:
 1. Configure `wrangler.jsonc` locally with your non-secret runtime vars
    - replace the starter Worker name
    - replace `WORKER_SELF_REFERENCE.service` so it matches that Worker name
-   - follow the optional social choice in `SOCIAL.md`; a fresh opt-out needs no R2 bucket
+   - configure required `PUBLIC_MEDIA` per `MEDIA.md`; social opt-out omits only
+     the separate `SOCIAL_MEDIA` binding, never public image storage
    - set `FRONTEND_WORKER` to the actual frontend Worker. If it does not exist
      yet, omit that binding for the first deploy, then add it once the frontend
      has deployed. Preserve the self-reference binding.
@@ -128,15 +129,12 @@ the publisher-owned `playbook_*` context rows. It does not archive an identical
 edition or overwrite `cta/links`, `identity/author`, `content/image_style`, or
 other independently configured rows.
 
-## Step 5: Create the `images` Storage Bucket
+## Step 5: Connect required R2 public media
 
-The article writer uploads hero images into a Supabase Storage bucket named `images`.
-
-1. Go to **Supabase > Storage**
-2. Create a bucket named `images`
-3. Make it **public** if you want article hero images to load directly on the public site
-
-If you skip this, the writer still works, but image upload will fail gracefully and articles will publish without hero images.
+Follow `MEDIA.md` to provision and verify `PUBLIC_MEDIA` plus image optimisation.
+This is required even when social publishing is off. Do not create a public
+Supabase `images` bucket for new article heroes. Keep existing buckets and
+references intact until their separately reviewed migration is verified.
 
 ## Step 6: Seed Operational Brand Context
 

@@ -98,12 +98,11 @@ Using a separate chat for each repo helps Claude stay in the correct project con
    npm run dev
    ```
 
-7. **Create the `images` storage bucket (optional, but recommended)**
-   The article writer uploads hero images to a Supabase Storage bucket named `images`.
-   - In Supabase, go to **Storage**
-   - Create a new bucket named `images`
-   - Mark it **public** if you want published hero images to load directly on the site
-   If you skip this, article writing still works, but hero image generation will quietly fall back to no image.
+7. **Connect required R2 public media**
+   Follow [MEDIA.md](MEDIA.md): create the member's public image bucket, configure
+   `PUBLIC_MEDIA` and `IMAGES`, and verify optimisation/upload/public delivery.
+   This is required with social scheduling off too. No custom domain is needed.
+   New images are not uploaded to Supabase. Existing images require a reviewed migration.
 
 8. **Deploy to Cloudflare**
    ```bash

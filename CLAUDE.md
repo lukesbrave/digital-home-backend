@@ -99,15 +99,12 @@ npm run dev
 ```
 Open `http://localhost:3001` and log in with the admin user you created in Supabase.
 
-### Step 5: Create the `images` Storage Bucket
-The article writer uploads hero images to a Supabase Storage bucket named `images`.
-
-In Supabase:
-1. Go to **Storage**
-2. Create a bucket named `images`
-3. Make it **public** if you want article hero images to load directly on the Frontend
-
-If you skip this step, article writing still works, but image uploads will fail gracefully and articles will publish without a hero image.
+### Step 5: Required R2 public media
+Follow `MEDIA.md` to provision and verify the public image pipeline independently
+of social scheduling. Use the existing backend media gateway until a custom
+domain is connected. Do not create a new public Supabase image bucket or silently
+publish an image-enabled article without its hero. Existing storage stays intact
+until a separately reviewed migration is verified.
 
 ### Step 6: Deploy to Cloudflare
 

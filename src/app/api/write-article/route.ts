@@ -15,6 +15,8 @@ import { authenticateSessionOrApiKey, unauthorizedResponse } from "@/lib/api/aut
 import { createAdminClient } from "@/lib/supabase/server";
 import Anthropic from "@anthropic-ai/sdk";
 import OpenAI from "openai";
+import { mediaBase, mediaBucket, savePublicImage } from "@/lib/media/public-media";
+import { mediaEnvironment } from "@/lib/media/runtime";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { BRAND_PROJECTION_KEYS } from "@/lib/brand/playbook-contract";
 
@@ -49,6 +51,7 @@ interface BrandContext {
   activeOffers: string;
   authorName: string;
   imageStyle: string;
+  imageMode: "automatic" | "text_only";
 }
 
 async function loadBrandContext(): Promise<BrandContext> {
@@ -102,7 +105,10 @@ async function loadBrandContext(): Promise<BrandContext> {
   const imageRow = rows.find((r) => r.category === "content" && r.key === "image_style");
   const imageStyle = imageRow?.content?.trim() || "";
 
-  return { fullContext, ctaLinks, activeOffers, authorName, imageStyle };
+  const imageModeRow = rows.find((r) => r.category === "content" && r.key === "article_image_mode");
+  const imageMode = imageModeRow?.content?.trim();
+  if (imageMode !== "automatic" && imageMode !== "text_only") throw new Error("Article imagery preference is not configured. Simon must record automatic or text_only before writing.");
+  return { fullContext, ctaLinks, activeOffers, authorName, imageStyle, imageMode };
 }
 
 // ─── Fetch existing articles for internal linking ────────────────────────────
@@ -165,9 +171,10 @@ async function generateHeroImage(
   keyword: string,
   slug: string,
   imageStyle?: string,
-  imageConcept?: string
+  imageConcept?: string,
+  backendOrigin?: string
 ): Promise<string | null> {
-  if (!process.env.OPENAI_API_KEY) return null;
+  if (!process.env.OPENAI_API_KEY) throw new Error("Automatic imagery needs the saved OpenAI key.");
 
   try {
     const openai = new OpenAI();
@@ -204,7 +211,7 @@ CRITICAL RULES:
       n: 1,
       size: isDalleModel ? "1792x1024" : "1536x1024",
       quality: isDalleModel ? "hd" : "high",
-      ...(isDalleModel ? { response_format: "url" } : {}),
+      ...(isDalleModel ? { response_format: "url" } : { output_format: "webp", output_compression: 75 }),
     } as Parameters<typeof openai.images.generate>[0]);
 
     const imageResponse = response as unknown as {
@@ -216,35 +223,15 @@ CRITICAL RULES:
       imageBuffer = base64ToArrayBuffer(generated.b64_json);
     } else if (generated?.url) {
       const imageRes = await fetch(generated.url);
-      if (!imageRes.ok) return null;
+      if (!imageRes.ok) throw new Error("Image provider download failed");
       imageBuffer = await imageRes.arrayBuffer();
     }
-    if (!imageBuffer) return null;
+    if (!imageBuffer) throw new Error("Image provider returned no image");
 
-    const supabase = createAdminClient();
-    const fileName = `blog/${slug}-hero.png`;
-
-    const { error: uploadError } = await supabase.storage
-      .from("images")
-      .upload(fileName, imageBuffer, {
-        contentType: "image/png",
-        upsert: true,
-      });
-
-    if (uploadError) {
-      console.error("Image upload failed:", uploadError.message);
-      return null;
-    }
-
-    // Get the public URL
-    const { data: publicUrl } = supabase.storage
-      .from("images")
-      .getPublicUrl(fileName);
-
-    return publicUrl.publicUrl;
+    const saved = await savePublicImage(mediaEnvironment(), imageBuffer, slug, backendOrigin!);
+    return saved.url;
   } catch (err) {
-    console.error("Hero image generation failed:", err);
-    return null;
+    throw new Error(`Hero image failed: ${err instanceof Error ? err.message : "provider unavailable"}`);
   }
 }
 
@@ -393,7 +380,7 @@ export async function POST(request: NextRequest) {
       : settingsData?.value === "autonomous"
         ? "autonomous"
         : "safe";
-  const targetStatus = publishMode === "autonomous" ? "published" : "draft";
+  let targetStatus: "published" | "draft" = publishMode === "autonomous" ? "published" : "draft";
 
   // 3. Mark as writing
   await supabase
@@ -407,6 +394,14 @@ export async function POST(request: NextRequest) {
       loadBrandContext(),
       fetchPublishedSlugs(),
     ]);
+
+
+    if (brand.imageMode === "automatic") {
+      mediaBucket(mediaEnvironment());
+      mediaBase(mediaEnvironment(), request.nextUrl.origin);
+      if (!mediaEnvironment().IMAGES) throw new Error("Image optimisation is not configured");
+      if (!process.env.OPENAI_API_KEY) throw new Error("Automatic imagery needs the saved OpenAI key");
+    }
 
     const internalLinks = publishedArticles.length > 0
       ? `\n\nExisting articles for internal linking (use these exact paths — they are the canonical URLs):\n${publishedArticles
@@ -606,14 +601,19 @@ Return a JSON object with EXACTLY these fields:
       );
     }
 
-    // 7. Generate hero image (non-blocking — article still saves if this fails)
-    const heroImageUrl = await generateHeroImage(
-      articleData.title,
-      entry.target_keyword || articleData.semantic_tags?.[0] || "business technology",
-      articleData.slug,
-      brand.imageStyle,
-      articleData.image_concept
-    );
+    // Preserve paid article copy as a draft if image generation/upload fails.
+    let heroImageUrl: string | null = null;
+    let imageError: string | null = null;
+    if (brand.imageMode === "automatic") {
+      try {
+        heroImageUrl = await generateHeroImage(articleData.title,
+          entry.target_keyword || articleData.semantic_tags?.[0] || "business technology",
+          articleData.slug, brand.imageStyle, articleData.image_concept, request.nextUrl.origin);
+      } catch (error) {
+        imageError = error instanceof Error ? error.message : "Article image failed";
+        targetStatus = "draft";
+      }
+    }
 
     // 8. Save via Frontend API
     const publishPayload = {
@@ -740,6 +740,10 @@ Return a JSON object with EXACTLY these fields:
         word_count: articleData.body.split(/\s+/).length,
       },
       mode: publishMode,
+      image_status: imageError ? "failed" : brand.imageMode === "text_only" ? "text_only" : "ready",
+      image_error: imageError,
+      publication_blocked: Boolean(imageError),
+      content_object_id: articleResult?.id,
     });
   } catch (error) {
     // Revert calendar status on any failure

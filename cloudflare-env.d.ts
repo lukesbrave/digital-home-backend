@@ -7,6 +7,8 @@
 // .open-next/worker.js import) into Next's type-check and breaks the build.
 declare namespace Cloudflare {
 	interface Env {
+		PUBLIC_MEDIA?: R2Bucket;
+		PUBLIC_MEDIA_BASE?: string;
 		SOCIAL_MEDIA?: R2Bucket;
 		SOCIAL_PUBLISHING_ENABLED?: string;
 		IMAGES: ImagesBinding;

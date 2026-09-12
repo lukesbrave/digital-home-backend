@@ -1,3 +1,4 @@
+import { verifyPublicationImage } from "@/lib/media/publication";
 /**
  * GET  /api/articles — List all articles (content_objects)
  * POST /api/articles — Create an article draft (content_objects row)
@@ -77,6 +78,15 @@ export async function POST(request: NextRequest) {
   }
 
   const supabase = createAdminClient();
+
+  if (body.status === "published") {
+    try {
+      await verifyPublicationImage(supabase, body.featured_image_url, request.nextUrl.origin);
+      if (body.seo?.og_image_url) await verifyPublicationImage(supabase, body.seo.og_image_url, request.nextUrl.origin);
+    } catch (error) {
+      return NextResponse.json({ error: error instanceof Error ? error.message : "Image validation failed" }, { status: 409 });
+    }
+  }
 
   // Optionally create a linked seo_meta row first.
   let seoMetaId: string | undefined = (body.seo_meta_id as string | undefined) ?? undefined;

@@ -34,8 +34,9 @@
   "images": {
     "binding": "IMAGES"
   },
-  // Social publishing is optional. See SOCIAL.md before adding SOCIAL_MEDIA.
-  "r2_buckets": [],
+  // Public marketing media is required, independently of optional social publishing.
+  // Create this member-owned bucket first; see MEDIA.md.
+  "r2_buckets": [{ "binding": "PUBLIC_MEDIA", "bucket_name": "replace-with-your-public-media-bucket" }],
   "observability": {
     "enabled": true
   },
