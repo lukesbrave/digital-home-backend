@@ -1,3 +1,4 @@
+import { MEDIA_PROBE_PNG_BASE64 } from "@/lib/media/probe-image";
 import { NextRequest, NextResponse } from "next/server";
 import { authenticateSessionOrApiKey, unauthorizedResponse } from "@/lib/api/auth";
 import { digest, mediaBase, mediaBucket, savePublicImage } from "@/lib/media/public-media";
@@ -21,8 +22,8 @@ export async function POST(request: NextRequest) {
   if (!auth.authenticated) return unauthorizedResponse(auth.error);
   try {
     const env = mediaEnvironment();
-    // Fixed 1x1 PNG: validates the actual encoder and R2, with no AI generation.
-    const png = Uint8Array.from(atob("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jRZkAAAAASUVORK5CYII="), (c) => c.charCodeAt(0)).buffer;
+    // Fixed 16x16 RGB PNG: validates the actual encoder and R2, with no AI generation.
+    const png = Uint8Array.from(atob(MEDIA_PROBE_PNG_BASE64), (c) => c.charCodeAt(0)).buffer;
     const saved = await savePublicImage(env, png, "setup", request.nextUrl.origin, "probe");
     const object = await mediaBucket(env).get(saved.key);
     if (!object || await digest(await object.arrayBuffer()) !== saved.sha256) throw new Error("R2 readback differs from the uploaded image");
