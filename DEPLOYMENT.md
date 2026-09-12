@@ -1,6 +1,6 @@
 # Deployment Guide
 
-This guide covers deploying the Digital Home Backend Starter to Cloudflare Workers using OpenNext, with a Vercel alternative for simpler setups.
+This guide covers deploying the Digital Home Backend Starter to Cloudflare Workers using OpenNext and the required R2/Images bindings.
 
 ## Important: OpenNext, Not next-on-pages
 
@@ -19,11 +19,9 @@ This project uses **@opennextjs/cloudflare** (OpenNext) to run Next.js on Cloudf
 
 ## Step 1: Supabase Setup
 
-Run the Frontend migrations first, then run this repo's migration in the Supabase SQL Editor:
-
-```sql
--- digital-home-backend-starter/supabase/migrations/001_backend_core.sql
-```
+Apply the frontend starter migrations first, then every migration in this
+repo's `supabase/migrations/`, in order, to the same verified Supabase project.
+Check each result before continuing. The frontend does not need to be deployed yet.
 
 ## Step 2: Create Admin User
 
@@ -36,22 +34,21 @@ There is no public signup. Create your admin user manually:
 1. Go to Supabase Dashboard
 2. Navigate to Authentication > Users > Add User
 3. Enter your email and a strong password
-4. Check **Auto-confirm user**
+4. Check **Auto-confirm user** and create the account.
+5. Verify the intended email/UUID and grant admin access using the supported
+   admin script. Keep the chosen password private. Test sign-in after deployment.
 
-## Step 3: Deploy to Cloudflare
+## Step 3: Activate and configure R2
 
-1. Configure `wrangler.jsonc` locally with your non-secret runtime vars
-   - replace the starter Worker name
-   - replace `WORKER_SELF_REFERENCE.service` so it matches that Worker name
-   - configure required `PUBLIC_MEDIA` per `MEDIA.md`; social opt-out omits only
-     the separate `SOCIAL_MEDIA` binding, never public image storage
-   - set `FRONTEND_WORKER` to the actual frontend Worker. If it does not exist
-     yet, omit that binding for the first deploy, then add it once the frontend
-     has deployed. Preserve the self-reference binding.
-2. Build and deploy once: `npm run deploy`.
-3. If an unchanged build already passed with `npm run build`, deploy that output
-   with `npx opennextjs-cloudflare deploy` instead of building it a second time.
-4. Set the required Worker secrets with `wrangler secret put`
+Keep this at the demo's existing point, after the database and admin-login step:
+
+“One quick thing before the build runs — R2 (Cloudflare's storage for social
+media files and article images) needs to be enabled on your account.”
+
+Guide dash.cloudflare.com → R2 Object Storage → Purchase R2 Plan, then have the
+member confirm completion. The member handles billing consent. If R2 is already
+active, verify and continue. Follow MEDIA.md to provision `PUBLIC_MEDIA` and the
+existing `IMAGES` binding before deploying. This is required with social off too.
 
 ## Step 4: Environment Variables
 
@@ -59,7 +56,7 @@ There are two types of environment variables. Getting this wrong is the most com
 
 ### Public variables (baked into JavaScript at build time)
 
-These go in the Cloudflare dashboard (Settings > Variables & Secrets) AND in `wrangler.jsonc` under `vars`:
+Supply real values in ignored `.env.local` before the local build, or in the CI build environment for Git builds. Also configure `wrangler.jsonc` runtime `vars`. Placeholder values and runtime-only configuration do not produce a working browser login:
 
 | Variable | Description |
 |----------|-------------|
@@ -71,17 +68,12 @@ These are safe to expose — they are restricted by Row Level Security.
 
 ### Server-side secrets (must be set via Wrangler CLI)
 
-These MUST be set using `wrangler secret put` from your terminal. The Cloudflare dashboard UI does NOT work for Workers — only for Pages projects. This is the most common gotcha.
-
-```bash
-echo "your-value" | npx wrangler secret put SUPABASE_SERVICE_ROLE_KEY
-echo "your-value" | npx wrangler secret put SUPABASE_ANON_KEY
-echo "your-value" | npx wrangler secret put SUPABASE_URL
-echo "your-value" | npx wrangler secret put API_SECRET_KEY
-echo "your-value" | npx wrangler secret put ANTHROPIC_API_KEY
-echo "your-value" | npx wrangler secret put OPENAI_API_KEY
-echo "your-value" | npx wrangler secret put DIGITAL_HOME_URL
-```
+Use `wrangler secret put` with protected input to install Worker secrets for
+this workflow. Keep required local copies only in ignored, owner-only files;
+never put actual values in command arguments, logs or committed configuration.
+Runtime public values such as `SUPABASE_URL`, `SUPABASE_ANON_KEY` and
+`DIGITAL_HOME_URL` belong in `wrangler.jsonc` vars. The service-role and shared
+API secrets remain private. Add provider keys only when that feature is chosen.
 
 | Secret | Description |
 |--------|-------------|
@@ -129,14 +121,28 @@ the publisher-owned `playbook_*` context rows. It does not archive an identical
 edition or overwrite `cta/links`, `identity/author`, `content/image_style`, or
 other independently configured rows.
 
-## Step 5: Connect required R2 public media
+## Step 5: Deploy to Cloudflare
 
-Follow `MEDIA.md` to provision and verify `PUBLIC_MEDIA` plus image optimisation.
-This is required even when social publishing is off. Do not create a public
-Supabase `images` bucket for new article heroes. Keep existing buckets and
-references intact until their separately reviewed migration is verified.
+1. Configure `wrangler.jsonc` locally with your non-secret runtime vars
+   - replace the starter Worker name
+   - replace `WORKER_SELF_REFERENCE.service` so it matches that Worker name
+   - configure required `PUBLIC_MEDIA` per `MEDIA.md`; social opt-out omits only
+     the separate `SOCIAL_MEDIA` binding, never public image storage
+   - set `FRONTEND_WORKER` to the actual frontend Worker. If it does not exist
+     yet, omit that binding for the first deploy, then add it once the frontend
+     has deployed. Preserve the self-reference binding.
+2. Build and deploy once: `npm run deploy`.
+3. If an unchanged build already passed with `npm run build`, deploy that output
+   with `npx opennextjs-cloudflare deploy` instead of building it a second time.
+4. Set the required Worker secrets with `wrangler secret put`
 
-## Step 6: Seed Operational Brand Context
+After deployment, pin the verified backend `/media` URL as `PUBLIC_MEDIA_BASE`
+and run `node --env-file=.env.local scripts/check-public-media.mjs --base <backend>`.
+Verify dashboard login, deploy/connect the frontend and prove its lead loop.
+Do not call setup complete if the external media probe fails. Keep existing
+Supabase buckets and references intact until a reviewed migration is verified.
+
+## Later content work: Seed Operational Brand Context
 
 The Playbook publisher owns durable audience, positioning, voice, rules,
 never-say, proof, and offer-core rows. Use the setup endpoint only for
@@ -154,15 +160,11 @@ In Cloudflare > your project > Custom Domains > Add Domain. Point `backend.yourd
 
 ---
 
-## Vercel Alternative
+## Other hosting platforms
 
-If you do not need Cloudflare specifically, Vercel is simpler:
-
-1. Import the repo at [vercel.com](https://vercel.com)
-2. Add environment variables
-3. Deploy
-
-No build configuration is needed. Next.js is made by Vercel, so it works out of the box. The trade-off: Vercel is more expensive at scale and you have less infrastructure control.
+This release's supported deployment uses Cloudflare Workers, R2 and Images.
+Another host requires a separately implemented and verified media adapter;
+importing this starter into another platform is not a complete deployment.
 
 ---
 
@@ -172,7 +174,7 @@ These are hard-won lessons from the initial deployment. Read these before debugg
 
 ### Build command must be `npm run build`
 
-Do **not** use `npx @cloudflare/next-on-pages@1` as the build command. That is the old adapter. Wrangler's deploy step handles the OpenNext conversion automatically after a standard Next.js build.
+Do **not** use `npx @cloudflare/next-on-pages@1` as the build command. That is the old adapter. `npm run build` runs the OpenNext build pipeline. Deploy its unchanged output with `npx opennextjs-cloudflare deploy`; `npm run deploy` performs both steps.
 
 ### Do NOT add edge runtime exports
 

@@ -4,6 +4,25 @@ All notable changes to the Digital Home Backend Starter.
 
 ## [Unreleased]
 
+## [2.9.0] — 2026-09-13
+
+- Required R2 public media for new Digital Homes, independent of optional social
+  scheduling. Supabase continues to hold database records and image URLs.
+- Article and website images are optimised once on upload to WebP, at most
+  1536 pixels on the longest edge and 500 KiB, with cached public delivery.
+- Image failures preserve article copy as a draft and block incomplete
+  publication. Automatic imagery and text-only mode are explicit saved choices.
+- Signed upload and readiness routes verify R2, image optimisation, and external
+  delivery; private storage paths remain inaccessible through the public gateway.
+- Setup follows the demo: database, private dashboard login, R2 activation,
+  backend deployment, frontend and verification. Public build variables are
+  configured before compiling.
+
+Promotes the tested v2.9.0-beta.1 implementation without runtime code changes.
+No new database migration. Existing Homes require a reviewed configuration and
+image cutover; see UPGRADE.md and MEDIA.md. Do not overwrite existing bindings,
+social choices, customisations, or legacy files.
+
 ## [2.8.0] — 2026-09-07
 
 - Optional social calendar: new Homes start off without requiring R2. The shell

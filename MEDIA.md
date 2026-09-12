@@ -65,7 +65,7 @@ image-model call. A missing saved mode is a setup fault, not implied consent.
 
 ## Existing Homes
 
-This candidate does not automatically migrate clients or delete legacy files.
+This release does not automatically migrate clients or delete legacy files.
 Before upgrading: provision/probe R2, record the existing approved image mode,
 inventory article hero, body image, SEO image and site asset references, and
 save a rollback mapping. Upload optimised copies through the supported media

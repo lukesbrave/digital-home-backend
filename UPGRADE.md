@@ -17,7 +17,64 @@ You are upgrading a member's Digital Home backend — a customized fork of
 customizations are intentional: **merge, don't overwrite.** When a file
 conflicts, prefer their copy design-wise and add the new capability into it.
 
-### Latest release: 2.8.0 — optional social calendar
+### Latest release: 2.9.0 — required public image storage
+
+Read VERSION before changing anything. If it is 2.9.0, no code upgrade is
+needed. If it is 2.8.0 or the tested 2.9.0 beta, follow this section and stop;
+do not run the older full-install instructions below. For earlier releases,
+apply the historical steps through 2.8.0 first, then this section.
+
+1. Confirm the member's backend, frontend, Supabase project and Cloudflare
+   account from their existing project context. Preserve uncommitted work and
+   make a backup/upgrade worktree under `.worktrees/` on a `codex/` branch.
+   Keep custom code, identity, domains, secrets, brand data and social choices.
+2. Fetch the starter release tag `v2.9.0`. Review the release diff against
+   `v2.8.0`, then merge the media modules and routes, article writing and
+   publication guards, `worker.ts`, middleware, media check scripts and binding
+   types into the member's code. Do not replace their project with the starter.
+   The beta has the same runtime implementation; its remaining changes are docs
+   and release metadata. No new database migration is needed for this release.
+3. Follow MEDIA.md for a reviewed cutover. Activate R2 at the existing setup
+   step if needed, provision a member-owned public bucket, and add `PUBLIC_MEDIA`
+   and `IMAGES` while retaining all existing bindings. Do not remove
+   `SOCIAL_MEDIA` or change `SOCIAL_PUBLISHING_ENABLED`. Save/verify the member's
+   article image mode; an absent mode is not consent to automatic generation.
+4. Inventory existing hero, body, SEO and site image references, record their
+   previous URLs for rollback, and keep the original objects. The new backend
+   blocks newly publishing automatic-image drafts whose heroes still use the
+   legacy path. Do not cut over an active publishing workflow without reviewing
+   those drafts and the separately deployed frontend's publishing routes.
+   A code update alone does not migrate images or update the frontend.
+5. Before production cutover, run the media/route regression scripts and build
+   with the real public build variables. Verify a scoped test deployment's
+   signed media probe and external image retrieval. Under the member's rollout
+   approval, deploy, verify again and migrate approved references only after
+   checking each new URL. Check login, one existing article/social preview,
+   lead capture and the preserved social state. Set VERSION to 2.9.0 when the
+   upgrade and required configuration are complete.
+
+Useful checks from the backend folder:
+
+```bash
+node scripts/test-public-media.mjs
+node scripts/test-article-media.mjs
+node scripts/test-media-probe.mjs
+node scripts/test-social-feature.mjs
+npx tsc --noEmit
+npm run build
+node --env-file=.env.local scripts/check-public-media.mjs --base https://YOUR_BACKEND
+```
+
+If a cutover check fails, retain the draft and original objects, restore the
+previous deployment/configuration and restore only URLs changed in this cutover
+from the saved mapping. Never delete legacy storage as part of an upgrade.
+
+## Historical upgrades through 2.8.0
+
+The following instructions apply only to older Homes. Once they reach 2.8.0,
+return to the 2.9.0 section above.
+
+### Previous release: 2.8.0 — optional social calendar
 
 For a 2.7.4 Home, merge these additions on an upgrade branch: `src/lib/social/feature.ts`,
 `src/lib/social/feature.test.ts`, `src/app/social/layout.tsx`, the social API guard
@@ -34,8 +91,8 @@ applying the release. Earlier versions follow their existing patches first,
 then apply this 2.7.4 → 2.8.0 step last.
 
 ### Step 0 — Determine current version
-- If a `VERSION` file exists, read it. If it says `2.8.0`, stop — already up
-  to date. If it says anything from `2.5.0` through `2.7.4`, apply ONLY the
+- If a `VERSION` file exists, read it. If it says `2.8.0`, return to the 2.9.0
+  section above. If it says anything from `2.5.0` through `2.7.4`, apply ONLY the
   "Patch upgrades" section at the bottom of this guide.
 - No `VERSION` file = v1.x (content pipeline era). Apply the full v2.5.0
   upgrade below.
