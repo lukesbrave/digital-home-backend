@@ -9,7 +9,7 @@ const projectRoot = join(dirname(fileURLToPath(import.meta.url)), "..");
 const envPath = join(projectRoot, ".env.local");
 const env = {};
 if (existsSync(envPath)) {
-  for (const line of readFileSync(envPath, "utf8").split("\n")) {
+  for (const line of readFileSync(envPath, "utf8").split(/\r?\n/)) {
     const match = line.match(/^([A-Z][A-Z0-9_]*)=(.*)$/);
     if (match) env[match[1]] = match[2].trim().replace(/^['"]|['"]$/g, "");
   }
