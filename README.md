@@ -123,7 +123,7 @@ Using a separate chat for each repo helps Claude stay in the correct project con
 ### Security Model
 - Public visitors should only see published content and active offers from the shared database.
 - Backend admin APIs are session-protected.
-- Machine-triggered routes (`/api/write-article`, `/api/write-now`, `/api/trend-scan`) accept either a valid admin session or a signed machine request using `x-api-key`, `x-timestamp`, and `x-signature`.
+- Machine-triggered routes (`/api/write-article`, `/api/write-now`, `/api/trend-scan`, `/api/seo/sync-rankings`) accept either a valid admin session or a signed machine request using `x-api-key`, `x-timestamp`, and `x-signature`.
 - The service-role key stays server-side only. Public content access is filtered through server code and protected routes, not exposed directly to the browser.
 - The GitHub Actions workflows live in the Frontend Starter repo and call these Backend API routes directly.
 

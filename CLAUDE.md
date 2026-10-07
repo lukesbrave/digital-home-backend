@@ -282,7 +282,7 @@ If `status` is `401`, the API key doesn't match between Backend and Frontend. Re
 - **Digital Home API** for content writes that need shared-site side effects (e.g., publishing content triggers SEO metadata generation in the Frontend).
 - **Route auth split:**
   - session-only: admin dashboard APIs (`/api/articles`, `/api/content-calendar`, `/api/publish`, `/api/reset-writing`, `/api/settings`, `/api/setup`, `/api/test-frontend`)
-  - session or signed API request: machine-triggered automation routes (`/api/write-article`, `/api/write-now`, `/api/trend-scan`)
+  - session or signed API request: machine-triggered automation routes (`/api/write-article`, `/api/write-now`, `/api/trend-scan`, `/api/seo/sync-rankings`)
 - **Dark theme only.** This is a professional dashboard, not a consumer app.
 - **CRITICAL — Shared database types:** When you modify `src/types/database.ts` or add/change a Supabase migration, you MUST also update the same `src/types/database.ts` file in the Digital Home Frontend Starter repo. These two files must always be identical.
 

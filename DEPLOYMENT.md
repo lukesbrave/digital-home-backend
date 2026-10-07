@@ -158,6 +158,15 @@ After deploying, log into the backend and call the authenticated setup endpoint 
 
 In Cloudflare > your project > Custom Domains > Add Domain. Point `backend.yourdomain.com` to the worker.
 
+## Step 8: SEO Agent (Search Console sync)
+
+Do this now, the same day the real domain goes live — not later. Search
+Console only records data from the day a property is verified, with no
+backfill, so every day live without it is a baseline you can never get
+back. Follow `SEO.md`: a free Google Cloud service account, added as a
+read-only user on the Search Console property, feeds the four empty
+`seo_meta` ranking columns with real numbers on a schedule, unattended.
+
 ---
 
 ## Other hosting platforms
