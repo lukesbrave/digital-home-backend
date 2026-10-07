@@ -4,6 +4,12 @@ All notable changes to the Digital Home Backend Starter.
 
 ## [Unreleased]
 
+- New `/api/seo/sync-rankings` route: a real SEO Agent for the four `seo_meta`
+  performance columns that have sat empty since the schema was written. Pulls
+  clicks, impressions, CTR and position per page from Google Search Console
+  via a service account (no OAuth prompts, no cost), matches pages by
+  `canonical_url`, and logs every run to `agent_logs`. See `SEO.md`.
+
 ## [2.9.0] — 2026-09-13
 
 - Required R2 public media for new Digital Homes, independent of optional social
