@@ -32,6 +32,8 @@ If you haven't already, follow the Frontend CLAUDE.md Steps 1-3 to create your S
 
 Both repos share the same database. The Frontend owns the shared website schema; this repo owns `backend_settings` and `brand_context`.
 
+**Adding your own tables?** Numbers `001`–`899` are reserved for this starter and the Frontend starter — never renumber or reuse one of their migration files, even if you've restructured your fork. Give your own migrations a number `900` or higher (e.g. `900_my_feature.sql`). The upgrade flow in `UPGRADE.md` references specific vendor filenames by number (e.g. `002_crm_core.sql`); reusing a reserved number means a future upgrade can silently apply the wrong file or skip one.
+
 ### Step 2: Set Up Environment Variables
 ```bash
 cp .env.local.example .env.local
