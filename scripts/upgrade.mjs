@@ -110,6 +110,7 @@ function resumeCommand(target) {
   const parts = ['node scripts/upgrade.mjs', `--to v${target}`, `--project-ref ${ctx.ref ?? '<ref>'}`, '--yes'];
   if (typeof args.frontend === 'string') parts.push(`--frontend ${shq(args.frontend)}`);
   if (args['take-untouched'] === true) parts.push('--take-untouched');
+  if (typeof args['starter-url'] === 'string') parts.push(`--starter-url ${shq(args['starter-url'])}`);
   return parts.join(' ');
 }
 
@@ -142,7 +143,7 @@ else console.log(`  Remote starter: ${existing}`);
 if (args['no-fetch'] === true) console.log('  --no-fetch: using the tags already here.');
 else {
   // Fetching only updates tag refs, never the working tree, so a dry run does it too.
-  const from = existing ? 'starter' : url;
+  const from = existing || !dry ? 'starter' : url;
   console.log(`  $ git fetch ${shq(from)} --tags`);
   git(['fetch', from, '--tags']);
 }
@@ -294,7 +295,7 @@ if (newMigrations.length === 0) {
 
 // ── 8. Shared types ──────────────────────────────────────────────────────────
 step('Shared database types');
-const typesNeedWork = [...plan.merge, ...plan.conflict, ...untaken].includes(TYPES);
+const typesNeedWork = [...plan.merge, ...plan.conflict].includes(TYPES) ? 'its merge' : untaken.includes(TYPES) ? 'to be taken' : null;
 if (typeof args.frontend !== 'string') {
   console.log(`  No --frontend given. ${TYPES} must stay byte-identical in the frontend: copy it there once merged.`);
 } else if (!ctx.frontend.path) {
@@ -303,7 +304,7 @@ if (typeof args.frontend !== 'string') {
   const dest = join(ctx.frontend.path, TYPES);
   const source = join(root, TYPES);
   if (typesNeedWork) {
-    console.log(`  ${TYPES} still needs its merge (step 6). After that: cp ${TYPES} ${shq(dest)}`);
+    console.log(`  ${TYPES} still needs ${typesNeedWork} (step 6). After that: cp ${TYPES} ${shq(dest)}`);
   } else if (existsSync(dest) && readFileSync(dest, 'utf8') === readFileSync(source, 'utf8')) {
     console.log(`  ${dest} is already identical.`);
   } else if (dry) {
