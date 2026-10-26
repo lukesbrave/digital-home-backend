@@ -102,7 +102,8 @@ then apply this 2.7.4 → 2.8.0 step last.
 ### Step 1 — Preflight
 1. `git status` — if there are uncommitted changes, commit or stash them
    first so the upgrade is revertible.
-2. Create a branch: `git checkout -b upgrade/v2.8.0`.
+2. Create a branch named for the release you are moving to, for example
+   `git checkout -b upgrade/v2.9.0`.
 3. Add the starter as a remote if missing:
    `git remote add starter https://github.com/lukesbrave/digital-home-backend.git`
    then `git fetch starter --tags`.
@@ -110,7 +111,7 @@ then apply this 2.7.4 → 2.8.0 step last.
 ### Step 2 — Bring in the latest version
 1. Diff `git diff HEAD..v2.8.0 --stat` to see scope.
 2. New files (the vast majority) can be checked out directly:
-   `git checkout v2.6.0 -- <path>` for: `src/lib/crm/`, `src/lib/social/`,
+   `git checkout v2.8.0 -- <path>` for: `src/lib/crm/`, `src/lib/social/`,
    `src/app/brand/`, `brand/`,
    `src/app/api/crm/`, `src/app/api/social/`, `src/app/api/settings/`,
    `src/app/api/webhooks/`, `src/app/crm/`, `src/app/social/`,
@@ -135,7 +136,7 @@ then apply this 2.7.4 → 2.8.0 step last.
 2. Apply `supabase/migrations/002_crm_core.sql` to their Supabase project
    (use `scripts/apply-migration.mjs` or the Supabase SQL editor).
    It is additive — no destructive changes.
-2. **Frontend pairing:** copy `src/types/database.ts` byte-identical into
+3. **Frontend pairing:** copy `src/types/database.ts` byte-identical into
    their frontend project (`digital-home-frontend` fork), commit
    there too. Both repos share one Supabase — types must match.
 
@@ -159,8 +160,9 @@ then apply this 2.7.4 → 2.8.0 step last.
    activity entry and an opportunity in the first stage.
 4. Draft a 2-step test workflow, enroll yourself, run "Run engine now" —
    the send appears as `simulated` in the sent-email viewer.
-5. Commit, merge the branch, deploy. Done — `VERSION` should read `2.7.4`
-   (it comes along with the checkout).
+5. Commit, merge the branch, deploy. `VERSION` should read `2.8.0` (it
+   comes along with the checkout). Then apply the 2.9.0 section at the top
+   of this guide; the upgrade is done when `VERSION` reads `2.9.0`.
 
 ### If something breaks
 Revert is always available: `git checkout main` (the upgrade lives on its
