@@ -3,10 +3,21 @@
  * order, as scripts/apply-migration.mjs: the direct host first (IPv6), then
  * the session poolers (IPv4).
  *
- * Unlike apply-migration.mjs, the server's certificate is verified. Supabase
- * signs database certificates with its own CA: download it from Project
- * Settings → Database → SSL Configuration and point SUPABASE_CA_CERT (or
- * SSL_CERT_FILE, or Node's NODE_EXTRA_CA_CERTS) at the file.
+ * The server's certificate is verified. Supabase signs database
+ * certificates with its own root, which Node does not trust, so a copy ships
+ * in scripts/certs/supabase-root-2021-ca.crt and is trusted alongside Node's
+ * roots. SUPABASE_CA_CERT or SSL_CERT_FILE adds a further CA file (Node's own
+ * NODE_EXTRA_CA_CERTS works too); none of them replaces the bundled one.
+ *
+ * The bundled root (CN "Supabase Root 2021 CA", O Supabase Inc, valid
+ * 2021-04-28 to 2031-04-26) was captured from live TLS handshakes with the
+ * session poolers on 2026-10-26, identical in ap-southeast-1, ap-southeast-2,
+ * ap-northeast-1, us-east-1 and eu-central-1. Its SHA-256 fingerprint is
+ *   80:70:25:AD:50:D4:ED:21:9D:2C:9C:7D:29:9C:00:4F:82:4E:B0:0C:F7:F6:5A:FE:F6:07:D0:7B:72:E6:CA:FA
+ * and scripts/test-upgrade.mjs pins it. To compare it with the certificate
+ * your project offers (Project Settings → Database → SSL Configuration):
+ *   openssl x509 -in prod-ca-2021.crt -noout -sha256 -fingerprint
+ * (-sha256 before -fingerprint). It expires 2031-04-26; replace it before then.
  *
  * Every session waits at most MIGRATION_LOCK_TIMEOUT seconds for a lock
  * (default 5) and MIGRATION_STATEMENT_TIMEOUT seconds per statement
@@ -17,6 +28,7 @@
  */
 import { readFileSync } from 'node:fs';
 import { rootCertificates } from 'node:tls';
+import { fileURLToPath } from 'node:url';
 import { catalogFromRows } from './migrations.mjs';
 
 const POOLER_REGIONS = ['ap-southeast-2', 'ap-southeast-1', 'us-east-1', 'us-west-1', 'eu-central-1'];
@@ -35,10 +47,13 @@ export const TIMEOUTS = {
   statement: seconds('MIGRATION_STATEMENT_TIMEOUT', 60),
 };
 
-function sslOptions() {
-  const caFile = process.env.SUPABASE_CA_CERT || process.env.SSL_CERT_FILE;
-  if (!caFile) return { rejectUnauthorized: true };
-  return { rejectUnauthorized: true, ca: [...rootCertificates, readFileSync(caFile, 'utf8')] };
+export const BUNDLED_CA = fileURLToPath(new URL('../certs/supabase-root-2021-ca.crt', import.meta.url));
+
+/** Node's roots, the bundled Supabase root, and any CA file named in the environment. */
+export function sslOptions(env = process.env) {
+  const ca = [...rootCertificates, readFileSync(BUNDLED_CA, 'utf8')];
+  for (const file of [env.SUPABASE_CA_CERT, env.SSL_CERT_FILE]) if (file) ca.push(readFileSync(file, 'utf8'));
+  return { rejectUnauthorized: true, ca };
 }
 
 /** Connects with verified TLS and the session timeouts, logging each attempt through `log`. */
@@ -80,7 +95,7 @@ export async function connect(ref, password, log = console.log) {
   }
   if (certFailures) {
     throw new Error(
-      'Could not verify the database certificate. Download the CA certificate from Supabase (Project Settings → Database → SSL Configuration) and set SUPABASE_CA_CERT=/path/to/prod-ca-2021.crt.',
+      'Could not verify the database certificate against Node\'s roots and the bundled Supabase root (scripts/certs). If Supabase has changed its CA, download the one in Project Settings → Database → SSL Configuration and set SUPABASE_CA_CERT=/path/to/prod-ca-2021.crt.',
     );
   }
   throw new Error('Could not connect to the database on any host.');

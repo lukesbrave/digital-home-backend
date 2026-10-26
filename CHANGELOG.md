@@ -22,13 +22,14 @@ A Home's schema state is now recorded, and its upgrade is scripted:
   merge by hand, every pending migration recorded as it applies (behind the
   same gate), the shared types and `VERSION`. It stops before deploy and never
   merges or deletes; `--dry-run` writes nothing.
-- The tools verify the database certificate (`SUPABASE_CA_CERT`), take the
-  password from the environment, stdin or a hidden prompt (never the command
-  line), and give each migration a 5 s lock and 60 s statement timeout.
+- The tools verify the database certificate against Node's roots plus
+  Supabase's own root, bundled in `scripts/certs/` (`SUPABASE_CA_CERT` adds
+  another), take the password from the environment, stdin or a hidden prompt
+  (never the command line), and give each migration a 5 s lock and 60 s
+  statement timeout.
 - `scripts/apply-migration.mjs` now uses the same connection and password
   rules: certificate verified, no password in the command, the database ref
-  printed first, and `--project-ref <ref>` refused unless it matches. Homes
-  that used it before need `SUPABASE_CA_CERT` set.
+  printed first, and `--project-ref <ref>` refused unless it matches.
 - `npm run test:upgrade` tests the pure parts, the gates and a full upgrade
   against throwaway git repos and a fake database.
 

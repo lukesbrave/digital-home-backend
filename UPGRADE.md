@@ -25,7 +25,7 @@ older copy):
 git remote add starter https://github.com/lukesbrave/digital-home-backend.git
 git fetch starter --tags
 git checkout -b upgrade/<target tag>
-git checkout <target tag> -- scripts/upgrade.mjs scripts/lib scripts/migrations-status.mjs scripts/migrations-seed.mjs supabase/migrations/003_schema_migrations.sql
+git checkout <target tag> -- scripts/upgrade.mjs scripts/lib scripts/certs scripts/migrations-status.mjs scripts/migrations-seed.mjs supabase/migrations/003_schema_migrations.sql
 git commit -m "Bring in the upgrade tools from <target tag>"
 ```
 
@@ -57,9 +57,11 @@ Skip the `remote add` if `starter` already exists. Then:
 The scripts read `SUPABASE_URL` from the repo's `.env.local` (a worktree uses
 the main checkout's). The database password comes from `SUPABASE_DB_PASSWORD`
 in the environment, from stdin with `--password-stdin`, or from a hidden
-prompt; never type it into the command. Certificates are verified: download
-the CA certificate from Supabase (Project Settings → Database → SSL
-Configuration) and set `SUPABASE_CA_CERT=/path/to/prod-ca-2021.crt`. Each
+prompt; never type it into the command. Certificates are verified against
+Node's roots plus Supabase's own root, which ships in `scripts/certs/` (its
+fingerprint is in `scripts/lib/db.mjs`; compare it with Project Settings →
+Database → SSL Configuration if you want to check). `SUPABASE_CA_CERT` adds
+another CA file if Supabase ever changes its root. Each
 migration waits at most 5 seconds for a lock and 60 seconds per statement
 (`MIGRATION_LOCK_TIMEOUT`, `MIGRATION_STATEMENT_TIMEOUT`); a migration that
 times out is rolled back. The scripts never deploy, merge the branch or delete

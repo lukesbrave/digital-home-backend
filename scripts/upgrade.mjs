@@ -212,7 +212,7 @@ else if (git(['rev-parse', '--verify', '--quiet', `refs/heads/${branch}`], { all
 // ── 5. Tools ─────────────────────────────────────────────────────────────────
 step(`Upgrade tools from ${tgt}`);
 const trees = { HEAD: lsTree('HEAD'), [R.cur]: lsTree(R.cur), [R.tgt]: lsTree(R.tgt) };
-const toolPaths = [...trees[R.tgt].keys()].filter((p) => TOOLS.includes(p) || /^scripts\/lib\/[^/]+\.mjs$/.test(p));
+const toolPaths = [...trees[R.tgt].keys()].filter((p) => TOOLS.includes(p) || /^scripts\/(lib\/[^/]+\.mjs|certs\/[^/]+)$/.test(p));
 const staleTools = toolPaths.filter((p) => trees.HEAD.get(p) !== trees[R.tgt].get(p));
 if (!toolPaths.length) console.log(`  ${tgt} carries no upgrade tools; using these.`);
 else if (!staleTools.length) console.log(`  These tools are ${tgt}'s own copy.`);

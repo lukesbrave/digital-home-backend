@@ -125,6 +125,29 @@ test('KNOWN_MARKERS match a frontend checkout next door, when there is one', (t)
   }
 });
 
+test('the bundled Supabase root is the pinned certificate and is trusted alongside Node\'s roots', async () => {
+  const { X509Certificate } = await import('node:crypto');
+  const { rootCertificates } = await import('node:tls');
+  const { BUNDLED_CA, sslOptions } = await import('./lib/db.mjs');
+  const pem = readFileSync(join(ROOT, 'scripts', 'certs', 'supabase-root-2021-ca.crt'), 'utf8');
+  assert.equal(BUNDLED_CA, join(ROOT, 'scripts', 'certs', 'supabase-root-2021-ca.crt'));
+  const cert = new X509Certificate(pem);
+  assert.equal(cert.fingerprint256, '80:70:25:AD:50:D4:ED:21:9D:2C:9C:7D:29:9C:00:4F:82:4E:B0:0C:F7:F6:5A:FE:F6:07:D0:7B:72:E6:CA:FA');
+  assert.match(cert.subject, /CN=Supabase Root 2021 CA/);
+  assert.equal(cert.subject, cert.issuer, 'a self-signed root');
+  assert.equal(cert.ca, true);
+  assert.equal(new Date(cert.validTo).toISOString().slice(0, 10), '2031-04-26');
+  assert.match(readFileSync(join(ROOT, 'scripts', 'lib', 'db.mjs'), 'utf8'), /80:70:25:AD:50:D4:ED:21:9D:2C:9C:7D:29:9C:00:4F:82:4E:B0:0C:F7:F6:5A:FE:F6:07:D0:7B:72:E6:CA:FA/);
+
+  const plain = sslOptions({});
+  assert.equal(plain.rejectUnauthorized, true);
+  assert.equal(plain.ca.length, rootCertificates.length + 1);
+  assert.equal(plain.ca.at(-1), pem);
+  const extra = join(tmp('ca'), 'extra.crt');
+  writeFileSync(extra, pem);
+  assert.equal(sslOptions({ SUPABASE_CA_CERT: extra }).ca.length, rootCertificates.length + 2, 'an override adds, never replaces');
+});
+
 test('the hidden prompt ends at the first newline, even when a paste brings it in the same chunk', () => {
   assert.deepEqual(consumeHiddenInput('', 'secret\n'), { value: 'secret', done: true });
   assert.deepEqual(consumeHiddenInput('', 'secret\r\n'), { value: 'secret', done: true });
@@ -386,6 +409,7 @@ function write(dir, path, content) {
 function installTools(dir) {
   for (const f of TOOL_FILES) cpSync(join(ROOT, 'scripts', f), join(dir, 'scripts', f));
   cpSync(join(ROOT, 'scripts', 'lib'), join(dir, 'scripts', 'lib'), { recursive: true });
+  cpSync(join(ROOT, 'scripts', 'certs'), join(dir, 'scripts', 'certs'), { recursive: true });
   writeFileSync(join(dir, 'scripts', 'lib', 'db.mjs'), FAKE_DB);
 }
 function runScript(dir, script, argv, { db, password = 'fake-password', extraEnv = {} } = {}) {
@@ -448,7 +472,7 @@ function fixture() {
   sh(home, 'commit', '-qam', 'member sidebar');
   write(home, '.env.local', 'SUPABASE_URL=https://homeref.supabase.co\n');
   sh(home, 'checkout', '-q', '-b', 'upgrade/v3.0.0');
-  sh(home, 'checkout', 'v3.0.0', '--', 'scripts/upgrade.mjs', 'scripts/lib', 'scripts/migrations-status.mjs', 'scripts/migrations-seed.mjs', 'supabase/migrations/003_schema_migrations.sql');
+  sh(home, 'checkout', 'v3.0.0', '--', 'scripts/upgrade.mjs', 'scripts/lib', 'scripts/certs', 'scripts/migrations-status.mjs', 'scripts/migrations-seed.mjs', 'supabase/migrations/003_schema_migrations.sql');
   sh(home, 'commit', '-qm', 'Bring in the upgrade tools from v3.0.0');
 
   const frontend = join(base, 'frontend');
