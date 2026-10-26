@@ -218,7 +218,8 @@ if (!toolPaths.length) console.log(`  ${tgt} carries no upgrade tools; using the
 else if (!staleTools.length) console.log(`  These tools are ${tgt}'s own copy.`);
 else {
   const cmds = [
-    ...(resuming ? [] : [`git checkout -b ${branch}`]),
+    // A real run is on the branch by now (step 4 made it); only a dry run is not.
+    ...(dry && !resuming ? [`git checkout -b ${branch}`] : []),
     `git checkout ${tgt} -- ${staleTools.map(shq).join(' ')}`,
     `git commit -m "Bring in the upgrade tools from ${tgt}"`,
     `node scripts/upgrade.mjs --to ${tgt}`,

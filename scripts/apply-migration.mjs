@@ -1,82 +1,67 @@
 #!/usr/bin/env node
 /**
- * apply-migration.mjs — run a SQL migration file against the Supabase Postgres.
+ * apply-migration.mjs — run one SQL migration file against the Supabase Postgres,
+ * in one transaction.
  *
  * Usage:
- *   SUPABASE_DB_PASSWORD=… node scripts/apply-migration.mjs path/to/migration.sql
+ *   node scripts/apply-migration.mjs path/to/migration.sql [--project-ref <ref>] [--password-stdin]
  *
- * Requires SUPABASE_DB_PASSWORD (your Supabase project's database password).
- * Tries the direct DB host first (IPv6), then the session poolers (IPv4) —
- * whichever connects wins.
+ * The project comes from SUPABASE_URL in the repo's .env.local and is printed
+ * before anything runs; pass --project-ref to have it refused unless it
+ * matches. The database password comes from SUPABASE_DB_PASSWORD, one line on
+ * stdin with --password-stdin, or a hidden prompt; never from the command.
+ * Connections verify the server's certificate (SUPABASE_CA_CERT, see
+ * scripts/lib/db.mjs) and time out on locks and long statements, as the
+ * upgrade tools do. Tries the direct DB host first (IPv6), then the session
+ * poolers (IPv4).
+ *
+ * This does not write to schema_migrations: record the file afterwards with
+ * scripts/migrations-seed.mjs.
  */
 import { readFileSync } from 'node:fs';
-import { dirname, join } from 'node:path';
-import { fileURLToPath } from 'node:url';
-import pg from 'pg';
+import { basename } from 'node:path';
+import { applyAndRecord, connect } from './lib/db.mjs';
+import { backendRoots } from './lib/context.mjs';
+import { describeEnv, getPassword, loadEnv, PASSWORD_HELP } from './lib/env.mjs';
+import { checksum, parseArgs } from './lib/migrations.mjs';
 
-const file = process.argv[2];
+let args;
+try {
+  args = parseArgs(process.argv.slice(2), ['project-ref']);
+} catch (e) {
+  console.error(e.message);
+  process.exit(1);
+}
+const file = args._[0];
 if (!file) {
-  console.error('Usage: SUPABASE_DB_PASSWORD=… node scripts/apply-migration.mjs <file.sql>');
+  console.error('Usage: node scripts/apply-migration.mjs <file.sql> [--project-ref <ref>]');
   process.exit(1);
 }
 const sql = readFileSync(file, 'utf8');
 
-const envPath = join(dirname(fileURLToPath(import.meta.url)), '..', '.env.local');
-const env = {};
-for (const line of readFileSync(envPath, 'utf8').split('\n')) {
-  const m = line.match(/^([A-Z_]+)=(.*)$/);
-  if (m) env[m[1]] = m[2].replace(/^"|"$/g, '');
+const envFile = loadEnv(backendRoots());
+console.log(`Database: ${describeEnv(envFile)}`);
+if (!envFile.ref) process.exit(1);
+if (typeof args['project-ref'] === 'string' && args['project-ref'] !== envFile.ref) {
+  console.error(`--project-ref ${args['project-ref']} does not match the database in .env.local ("${envFile.ref}"). Nothing was changed.`);
+  process.exit(2);
 }
-const ref = new URL(env.SUPABASE_URL || env.NEXT_PUBLIC_SUPABASE_URL).hostname.split('.')[0];
-const password = process.env.SUPABASE_DB_PASSWORD;
+
+const password = await getPassword(args);
 if (!password) {
-  console.error('SUPABASE_DB_PASSWORD not set (find it in your Supabase project settings)');
+  console.error(PASSWORD_HELP);
   process.exit(1);
 }
 
-const candidates = [
-  { host: `db.${ref}.supabase.co`, port: 5432, user: 'postgres' },
-  ...['ap-southeast-2', 'ap-southeast-1', 'us-east-1', 'us-west-1', 'eu-central-1'].map((r) => ({
-    host: `aws-0-${r}.pooler.supabase.com`,
-    port: 5432,
-    user: `postgres.${ref}`,
-  })),
-];
-
-let client = null;
-for (const c of candidates) {
-  const attempt = new pg.Client({
-    host: c.host,
-    port: c.port,
-    user: c.user,
-    password,
-    database: 'postgres',
-    ssl: { rejectUnauthorized: false },
-    connectionTimeoutMillis: 8000,
-  });
-  try {
-    await attempt.connect();
-    client = attempt;
-    console.log(`Connected via ${c.host}`);
-    break;
-  } catch (e) {
-    console.log(`  ${c.host}: ${e.code || e.message}`);
-  }
-}
-if (!client) {
-  console.error('Could not connect to the database on any host.');
-  process.exit(1);
-}
-
+let client;
 try {
-  await client.query('begin');
-  await client.query(sql);
-  await client.query('commit');
+  client = await connect(envFile.ref, password);
+  await applyAndRecord(client, { name: basename(file), repo: 'backend', sql, checksum: checksum(sql) }, null, false);
   console.log(`Applied ${file}`);
+  console.log('Not recorded in schema_migrations. Record it with: node scripts/migrations-seed.mjs --project-ref ' + envFile.ref + ' --yes');
 } catch (e) {
-  await client.query('rollback').catch(() => {});
-  console.error(`Migration failed (rolled back): ${e.message}`);
-  process.exit(1);
+  console.error(`Migration failed: ${e.message}`);
+  process.exitCode = 1;
 } finally {
-  await client.end();
+  await client?.end().catch(() => {});
 }

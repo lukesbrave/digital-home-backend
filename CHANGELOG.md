@@ -25,6 +25,10 @@ A Home's schema state is now recorded, and its upgrade is scripted:
 - The tools verify the database certificate (`SUPABASE_CA_CERT`), take the
   password from the environment, stdin or a hidden prompt (never the command
   line), and give each migration a 5 s lock and 60 s statement timeout.
+- `scripts/apply-migration.mjs` now uses the same connection and password
+  rules: certificate verified, no password in the command, the database ref
+  printed first, and `--project-ref <ref>` refused unless it matches. Homes
+  that used it before need `SUPABASE_CA_CERT` set.
 - `npm run test:upgrade` tests the pure parts, the gates and a full upgrade
   against throwaway git repos and a fake database.
 

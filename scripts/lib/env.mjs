@@ -71,6 +71,22 @@ function readLine(stream) {
   });
 }
 
+/**
+ * One keystroke or one paste per chunk: a pasted password usually arrives in
+ * a single chunk with its newline, so the chunk is read character by
+ * character and input ends at the first newline. Returns the value typed so
+ * far plus whether input ended, so it can be tested without a terminal.
+ */
+export function consumeHiddenInput(value, chunk) {
+  for (const ch of chunk) {
+    if (ch === '\r' || ch === '\n' || ch === '\u0004') return { value, done: true };
+    if (ch === '\u0003') return { value, done: true, cancelled: true };
+    if (ch === '\u007f' || ch === '\b') value = value.slice(0, -1);
+    else value += ch;
+  }
+  return { value, done: false };
+}
+
 function promptHidden(question) {
   return new Promise((resolve) => {
     const stdin = process.stdin;
@@ -78,19 +94,16 @@ function promptHidden(question) {
     let value = '';
     stdin.setRawMode(true);
     stdin.setEncoding('utf8');
-    const onData = (ch) => {
-      if (ch === '\r' || ch === '\n' || ch === '\u0004') {
-        stdin.setRawMode(false);
-        stdin.off('data', onData);
-        stdin.pause();
-        process.stderr.write('\n');
-        resolve(value);
-      } else if (ch === '\u0003') {
-        stdin.setRawMode(false);
-        process.stderr.write('\n');
-        process.exit(130);
-      } else if (ch === '\u007f' || ch === '\b') value = value.slice(0, -1);
-      else value += ch;
+    const onData = (chunk) => {
+      const r = consumeHiddenInput(value, chunk);
+      value = r.value;
+      if (!r.done) return;
+      stdin.setRawMode(false);
+      stdin.off('data', onData);
+      stdin.pause();
+      process.stderr.write('\n');
+      if (r.cancelled) process.exit(130);
+      resolve(value.replace(/[\r\n]+$/, ''));
     };
     stdin.on('data', onData);
     stdin.resume();

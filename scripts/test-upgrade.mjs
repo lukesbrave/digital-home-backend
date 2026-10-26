@@ -9,7 +9,7 @@ import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { after, describe, test } from 'node:test';
 import { fileURLToPath } from 'node:url';
-import { describeEnv, loadEnv, projectRefFromEnv, readEnvFile } from './lib/env.mjs';
+import { consumeHiddenInput, describeEnv, loadEnv, projectRefFromEnv, readEnvFile } from './lib/env.mjs';
 import { backendRoots } from './lib/context.mjs';
 import {
   KNOWN_MARKERS,
@@ -89,27 +89,27 @@ test('KNOWN_MARKERS match the create table statements of the backend files', () 
   }
 });
 
-// The frontend's 001-011, as their create table statements (and 011's two
-// policies) read on frontend main 0b9bd81. Vendored so this test needs no
-// frontend checkout; the next test compares with one when it is present.
-const FRONTEND_MARKERS = {
-  '001_visitors.sql': ['table visitors'],
-  '002_content_objects.sql': ['table content_objects', 'table seo_meta'],
-  '003_offers.sql': ['table offers'],
-  '004_leads_analytics.sql': ['table analytics_events', 'table leads'],
-  '005_entities.sql': ['table entities', 'table entity_relationships'],
-  '006_personalization_rules.sql': ['table personalization_rules'],
-  '007_email_system.sql': ['table email_events', 'table email_sends', 'table email_sequences'],
-  '008_conversations.sql': ['table conversations', 'table messages'],
-  '009_media_agent_logs.sql': ['table agent_logs', 'table media'],
-  '010_content_calendar.sql': ['table content_calendar'],
-  '011_security_policies.sql': ['policy "Public read active offers" on offers', 'policy "Public read published content" on content_objects'],
-};
+/** The fixture's sections, keyed by the file each came from. */
+function frontendExcerpts() {
+  const text = readFileSync(join(ROOT, 'scripts', 'fixtures', 'frontend-migrations', '0b9bd81-excerpts.sql'), 'utf8');
+  const out = {};
+  for (const part of text.split(/^-- file: /m).slice(1)) {
+    const nl = part.indexOf('\n');
+    out[part.slice(0, nl).trim()] = part.slice(nl + 1);
+  }
+  return out;
+}
 
-test('KNOWN_MARKERS frontend half matches the vendored 001-011 list', () => {
-  assert.deepEqual(Object.keys(KNOWN_MARKERS.frontend), Object.keys(FRONTEND_MARKERS));
-  for (const [name, expected] of Object.entries(FRONTEND_MARKERS)) {
-    assert.deepEqual(labels(KNOWN_MARKERS.frontend[name]), expected, name);
+test('KNOWN_MARKERS frontend half matches the marker reader run on the vendored 001-011 SQL', () => {
+  const excerpts = frontendExcerpts();
+  assert.deepEqual(Object.keys(excerpts), Object.keys(KNOWN_MARKERS.frontend));
+  for (const [name, sql] of Object.entries(excerpts)) {
+    const extracted = extractMarkers(sql);
+    const tables = extracted.filter((m) => m.kind === 'table');
+    // 011 creates no table: its policies stand in.
+    const expected = tables.length ? tables : extracted.filter((m) => m.kind === 'policy');
+    assert.ok(expected.length > 0, name);
+    assert.deepEqual(labels(KNOWN_MARKERS.frontend[name]), labels(expected), name);
   }
 });
 
@@ -117,12 +117,20 @@ test('KNOWN_MARKERS match a frontend checkout next door, when there is one', (t)
   const frontend = findFrontend(null, backendRoots(ROOT));
   if (!frontend.path) return t.skip(frontend.notice);
   for (const f of listMigrations(join(frontend.path, 'supabase', 'migrations'), 'frontend')) {
-    if (!FRONTEND_MARKERS[f.name]) continue;
+    if (!KNOWN_MARKERS.frontend[f.name]) continue;
     const extracted = extractMarkers(f.sql);
     const tables = extracted.filter((m) => m.kind === 'table');
     const expected = tables.length ? tables : extracted.filter((m) => m.kind === 'policy');
-    assert.deepEqual(labels(expected), FRONTEND_MARKERS[f.name], f.name);
+    assert.deepEqual(labels(expected), labels(KNOWN_MARKERS.frontend[f.name]), f.name);
   }
+});
+
+test('the hidden prompt ends at the first newline, even when a paste brings it in the same chunk', () => {
+  assert.deepEqual(consumeHiddenInput('', 'secret\n'), { value: 'secret', done: true });
+  assert.deepEqual(consumeHiddenInput('', 'secret\r\n'), { value: 'secret', done: true });
+  assert.deepEqual(consumeHiddenInput('sec', 'ret'), { value: 'secret', done: false });
+  assert.deepEqual(consumeHiddenInput('secrex', '\u007ft\r'), { value: 'secret', done: true });
+  assert.equal(consumeHiddenInput('', '\u0003').cancelled, true);
 });
 
 test('one file name pattern, and the files it skips are listed', () => {
@@ -540,8 +548,44 @@ describe('upgrade.mjs against a fake starter and database', () => {
     const r = runScript(f.home, 'upgrade.mjs', ['--starter-url', f.starter], { db: HOME_29 });
     assert.equal(r.status, 1, r.out);
     assert.match(r.out, /different copy of the upgrade tools/);
-    assert.match(r.out, /git checkout v3\.0\.0 -- scripts\/lib\/migrations\.mjs/);
+    // Already on upgrade/v3.0.0, so the printed commands start with the checkout of the tools.
+    const commands = r.out.slice(r.out.indexOf('then run it:')).split('\n').slice(1, 4).map((l) => l.trim());
+    assert.deepEqual(commands, [
+      'git checkout v3.0.0 -- scripts/lib/migrations.mjs',
+      'git commit -m "Bring in the upgrade tools from v3.0.0"',
+      'node scripts/upgrade.mjs --to v3.0.0',
+    ]);
     assert.ok(!r.calls.length);
+  });
+
+  test('a real run that makes the branch prints no checkout -b for stale tools; a dry run does', () => {
+    const f = fixture();
+    sh(f.home, 'checkout', '-q', 'main');
+    sh(f.home, 'branch', '-q', '-D', 'upgrade/v3.0.0'); // start before the fixture's bootstrap
+    // main has the member's sidebar and no v3.0.0 tools: these are the older tools of the Home.
+    installTools(f.home);
+    write(f.home, 'scripts/lib/migrations.mjs', readFileSync(join(f.home, 'scripts/lib/migrations.mjs'), 'utf8') + '\n// older\n');
+    sh(f.home, 'add', 'scripts');
+    sh(f.home, 'commit', '-qm', 'older tools on main');
+    let r = runScript(f.home, 'upgrade.mjs', ['--dry-run', '--starter-url', f.starter], { db: HOME_29 });
+    assert.equal(r.status, 0, r.out);
+    assert.match(r.out, /then run it:\n\s+git checkout -b upgrade\/v3\.0\.0\n\s+git checkout v3\.0\.0 -- scripts\/lib\/migrations\.mjs/);
+    r = runScript(f.home, 'upgrade.mjs', ['--starter-url', f.starter], { db: HOME_29 });
+    assert.equal(r.status, 1, r.out);
+    assert.equal(sh(f.home, 'branch', '--show-current').trim(), 'upgrade/v3.0.0');
+    assert.match(r.out, /then run it:\n\s+git checkout v3\.0\.0 -- scripts\/lib\/migrations\.mjs\n/);
+    assert.doesNotMatch(r.out, /then run it:\n\s+git checkout -b/);
+  });
+
+  test('never copies the types over uncommitted work in the frontend', () => {
+    const f = fixture();
+    sh(f.frontend, 'checkout', '-q', '-b', 'upgrade/v3.0.0');
+    write(f.frontend, 'src/types/database.ts', 'types v0 with a local edit\n');
+    const r = runScript(f.home, 'upgrade.mjs', ['--starter-url', f.starter, '--project-ref', 'homeref', '--yes', '--frontend', f.frontend, '--take-untouched'], { db: HOME_29 });
+    assert.equal(r.status, 0, r.out);
+    assert.match(r.out, /has uncommitted changes; not copying over them/);
+    assert.equal(readFileSync(join(f.frontend, 'src/types/database.ts'), 'utf8'), 'types v0 with a local edit\n');
+    assert.equal(readFileSync(join(f.home, 'src/types/database.ts'), 'utf8'), 'types v2\n');
   });
 
   test('without a password it stops before the database, and never takes one from argv', () => {
@@ -626,4 +670,24 @@ test('migrations-status.mjs needs a password and never reads one from argv', () 
   const report = JSON.parse(r.stdout);
   assert.equal(report.projectRef, 'homeref');
   assert.equal(report.historyTable, false);
+});
+
+test('apply-migration.mjs refuses a mismatched --project-ref and a missing password, applies through the shared module', () => {
+  const dir = tmp('apply');
+  installTools(dir);
+  cpSync(join(ROOT, 'scripts', 'apply-migration.mjs'), join(dir, 'scripts', 'apply-migration.mjs'));
+  writeFileSync(join(dir, '.env.local'), 'SUPABASE_URL=https://homeref.supabase.co\n');
+  writeFileSync(join(dir, 'fix.sql'), 'create table if not exists crm_tags (id int);\n');
+  let r = runScript(dir, 'apply-migration.mjs', ['fix.sql', '--project-ref', 'otherref'], { db: HOME_29 });
+  assert.equal(r.status, 2, r.out);
+  assert.match(r.out, /does not match/);
+  assert.deepEqual(r.calls, []);
+  r = runScript(dir, 'apply-migration.mjs', ['fix.sql'], { db: HOME_29, password: null });
+  assert.equal(r.status, 1);
+  assert.match(r.out, /No database password/);
+  assert.deepEqual(r.calls, []);
+  r = runScript(dir, 'apply-migration.mjs', ['fix.sql', '--project-ref', 'homeref'], { db: HOME_29 });
+  assert.equal(r.status, 0, r.out);
+  assert.match(r.out, /Database: Supabase project homeref/);
+  assert.deepEqual(r.calls.filter((c) => c.op === 'apply'), [{ op: 'apply', repo: 'backend', name: 'fix.sql', appliedBy: null, record: false }]);
 });

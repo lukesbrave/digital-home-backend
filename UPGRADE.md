@@ -73,9 +73,11 @@ backend's own starter migrations is partial; a partial frontend or member
 migration is reported and left alone. To resolve one: compare the file with the
 database (the status names what is missing). If the file is written to be
 re-run (`if not exists` throughout, as `002_crm_core.sql` is), apply it again
-with `scripts/apply-migration.mjs` after confirming the ref, then run the seed
-to record it. Otherwise create only the missing objects by hand from the file,
-then seed. Never drop what exists to start over.
+with `node scripts/apply-migration.mjs <file> --project-ref <ref>` after
+confirming the ref (it uses the same verified connection and password rules
+as the upgrade tools), then run the seed to record it. Otherwise create only
+the missing objects by hand from the file, then seed. Never drop what exists
+to start over.
 
 ### Your own migrations
 
