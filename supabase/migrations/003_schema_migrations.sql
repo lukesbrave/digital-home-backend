@@ -12,11 +12,12 @@
 -- Written to be re-runnable.
 
 create table if not exists schema_migrations (
-  name text primary key,                    -- the file name, e.g. '002_crm_core.sql'
   repo text not null check (repo in ('frontend', 'backend')),
+  name text not null,                       -- the file name, e.g. '002_crm_core.sql'
   checksum text,                            -- 'sha256:<hex>' of the file, line endings normalised
   applied_at timestamptz not null default now(),
-  applied_by text                           -- e.g. 'upgrade:v3.0.0' or 'seed:2026-10-26'
+  applied_by text,                          -- e.g. 'upgrade:v3.0.0' or 'seed:2026-10-26'
+  primary key (repo, name)                  -- both repos number from 001
 );
 
 alter table schema_migrations enable row level security;

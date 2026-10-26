@@ -11,7 +11,10 @@ import { createHash } from 'node:crypto';
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { basename, dirname, join, resolve } from 'node:path';
 
-export const MIGRATION_FILE = /^\d{3}_[a-z0-9_]+\.sql$/i;
+export const HISTORY_MIGRATION = '003_schema_migrations.sql';
+
+/** The one migration file name pattern every tool uses: NNN_name.sql. */
+export const MIGRATION_FILE = /^\d{3}_[a-z0-9_.-]+\.sql$/i;
 
 /**
  * What each starter migration creates, read from its `create table` statements
@@ -127,6 +130,12 @@ export function markersFor(repo, name, sql) {
   return KNOWN_MARKERS[repo]?.[name] ?? extractMarkers(sql ?? '');
 }
 
+/** .sql files in `dir` the tools ignore because their names do not match MIGRATION_FILE. */
+export function skippedFiles(dir) {
+  if (!existsSync(dir)) return [];
+  return readdirSync(dir).filter((f) => f.toLowerCase().endsWith('.sql') && !MIGRATION_FILE.test(f)).sort();
+}
+
 /** Every NNN_name.sql in `dir`, in order, with its checksum and markers. */
 export function listMigrations(dir, repo) {
   if (!existsSync(dir)) return [];
@@ -207,6 +216,41 @@ export function migrationState(migration, recorded, catalog) {
 export function computeStatus(migrations, history, catalog) {
   const byName = new Map((history ?? []).map((r) => [`${r.repo}/${r.name}`, r]));
   return migrations.map((m) => migrationState(m, byName.get(`${m.repo}/${m.name}`), catalog));
+}
+
+/**
+ * What an upgrade does with each migration state. `targetNames` are the
+ * backend migration files in the target release.
+ *
+ *   toApply   backend, pending, and part of the target: applied in order,
+ *             the history table's own migration first
+ *   blocking  partial among the backend's own starter migrations: nothing is
+ *             applied until a human resolves it
+ *   warnings  partial elsewhere (the frontend's, a member's 900+ file), and
+ *             starter migrations whose file changed after it was applied
+ *   notOurs   pending migrations this script does not apply
+ *   unrecorded inferred: applied before history was kept (the seed records them)
+ */
+export function planMigrations(states, targetNames) {
+  const ours = (s) => s.repo === 'backend' && (targetNames.has(s.name) || s.starterOwned);
+  // The history table goes first when it is missing, so every later migration is recorded.
+  const toApply = states
+    .filter((s) => s.repo === 'backend' && s.status === 'pending' && targetNames.has(s.name))
+    .sort((a, b) => (b.name === HISTORY_MIGRATION) - (a.name === HISTORY_MIGRATION));
+  const blocking = states.filter((s) => s.status === 'partial' && ours(s));
+  const warnings = [
+    ...states.filter((s) => s.status === 'partial' && !ours(s)).map((s) => ({
+      state: s,
+      message: `${s.repo}/${s.name} is partly applied (missing ${s.markers.missing.join(', ')}); this upgrade does not touch it`,
+    })),
+    ...states.filter((s) => s.status === 'applied' && s.checksumMatches === false && s.starterOwned).map((s) => ({
+      state: s,
+      message: `${s.repo}/${s.name} was edited after it was applied (recorded ${s.recorded.checksum.slice(0, 19)}…, file ${s.checksum.slice(0, 19)}…); the change is not applied`,
+    })),
+  ];
+  const notOurs = states.filter((s) => s.status === 'pending' && !toApply.includes(s));
+  const unrecorded = states.filter((s) => s.status === 'inferred');
+  return { toApply, blocking, warnings, notOurs, unrecorded };
 }
 
 export function summarise(states) {

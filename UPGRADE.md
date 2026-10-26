@@ -10,50 +10,81 @@ folder:
 
 ---
 
-## From 2.9.0 onwards: run the script
+## Scripted upgrades (from the first release after 2.9.0)
 
-If `VERSION` reads 2.9.0 or newer, the upgrade is scripted. Older Homes follow
-the instructions further down to reach 2.9.0 first.
+Available from the first release after 2.9.0 (not yet tagged). Until then
+follow the 2.9.0 section below. Once that release is out, its own section
+below names its tag; use that tag wherever this section says `<target tag>`.
 
-**Once, on a 2.9.0 Home** (the tools arrive with the release they upgrade to;
-use that release's tag in place of `v3.0.0`):
+**Each upgrade runs the Home's current copy of the tools,** so the first step
+of every upgrade is to take the target release's copy and commit it on the
+upgrade branch (`upgrade.mjs` stops and prints these commands if it finds an
+older copy):
 
 ```bash
 git remote add starter https://github.com/lukesbrave/digital-home-backend.git
 git fetch starter --tags
-git checkout -b upgrade/v3.0.0
-git checkout v3.0.0 -- scripts/upgrade.mjs scripts/lib scripts/migrations-status.mjs scripts/migrations-seed.mjs supabase/migrations/003_schema_migrations.sql
-git commit -m "Bring in the upgrade tools from v3.0.0"
+git checkout -b upgrade/<target tag>
+git checkout <target tag> -- scripts/upgrade.mjs scripts/lib scripts/migrations-status.mjs scripts/migrations-seed.mjs supabase/migrations/003_schema_migrations.sql
+git commit -m "Bring in the upgrade tools from <target tag>"
 ```
 
-Skip the `remote add` if `starter` already exists. Then, for every upgrade:
+Skip the `remote add` if `starter` already exists. Then:
 
-1. `node scripts/upgrade.mjs --dry-run` shows every step and changes nothing.
+1. `node scripts/upgrade.mjs --dry-run` shows every step and writes nothing
+   (no tag, branch, file or database change).
 2. Read the Supabase project ref it prints aloud and have the member confirm it
    is theirs. Never pass a ref that was not confirmed.
 3. A Home without a migration history records what it already has, once:
    `node scripts/migrations-status.mjs`, then
    `node scripts/migrations-seed.mjs --project-ref <ref> --yes`.
    Add `--frontend <path>` to both so the frontend's migrations are recorded
-   too. A `partial` migration needs a human before anything else runs.
+   too, and `--dry-run` to the seed to see its rows without writing them.
 4. `node scripts/upgrade.mjs --project-ref <ref> --yes --frontend <path>`. It
-   works on branch `upgrade/v<target>`, checks out and commits the files that
-   are new in the release, lists every changed file to merge by hand with its
-   `git diff` command, applies the release's pending migrations one
-   transaction each and records them in `schema_migrations`, copies
-   `src/types/database.ts` to the frontend, and writes `VERSION`. Without
-   `--project-ref <ref> --yes` it stops at the database (exit 2) and prints the
-   command to resume. `--take-untouched` also takes changed files the Home has
-   never edited since its last release.
+   works on branch `upgrade/<target tag>`, checks out and commits the files
+   that are new in the release, lists every changed file to merge by hand with
+   its `git diff` command, applies every pending backend migration of the
+   release one transaction each and records it in `schema_migrations`, copies
+   `src/types/database.ts` to the frontend when that checkout is clean and on
+   its own branch, and writes `VERSION`. Without `--project-ref <ref> --yes`
+   it stops at the database (exit 2) and prints the command to resume.
+   `--take-untouched` also takes changed files the Home has never edited since
+   its last release.
 5. Merge the listed files (merge, don't overwrite), then run the checks it
    prints (`npx tsc --noEmit`, `npm run build`) and commit on the branch.
-   Commit the copied types in the frontend on its own branch.
+   Commit the copied types in the frontend on its branch.
 
-The scripts need `SUPABASE_URL` in `.env.local` and `SUPABASE_DB_PASSWORD` in
-the environment, as `scripts/apply-migration.mjs` does. They never deploy,
-merge the branch or delete a file. Deploy afterwards with the member's
-approval (DEPLOYMENT.md). Read the release's own section below for any
-configuration it needs.
+The scripts read `SUPABASE_URL` from the repo's `.env.local` (a worktree uses
+the main checkout's). The database password comes from `SUPABASE_DB_PASSWORD`
+in the environment, from stdin with `--password-stdin`, or from a hidden
+prompt; never type it into the command. Certificates are verified: download
+the CA certificate from Supabase (Project Settings → Database → SSL
+Configuration) and set `SUPABASE_CA_CERT=/path/to/prod-ca-2021.crt`. Each
+migration waits at most 5 seconds for a lock and 60 seconds per statement
+(`MIGRATION_LOCK_TIMEOUT`, `MIGRATION_STATEMENT_TIMEOUT`); a migration that
+times out is rolled back. The scripts never deploy, merge the branch or delete
+a file. Deploy afterwards with the member's approval (DEPLOYMENT.md).
+
+### Partly applied migrations
+
+`partial` means some of what a migration creates exists and some does not, and
+nothing records it. The upgrade refuses to apply anything while one of the
+backend's own starter migrations is partial; a partial frontend or member
+migration is reported and left alone. To resolve one: compare the file with the
+database (the status names what is missing). If the file is written to be
+re-run (`if not exists` throughout, as `002_crm_core.sql` is), apply it again
+with `scripts/apply-migration.mjs` after confirming the ref, then run the seed
+to record it. Otherwise create only the missing objects by hand from the file,
+then seed. Never drop what exists to start over.
+
+### Your own migrations
+
+Numbers `001` to `899` are reserved for this starter and the frontend starter.
+Give your own migrations a number `900` or higher (for example
+`900_my_feature.sql`) and never reuse or renumber a starter file: the upgrade
+applies and records starter files by name, and a reused number would make it
+skip or misapply one. The tools read files named `NNN_name.sql` and list any
+other `.sql` file they ignore.
 
 ---
 

@@ -3,12 +3,14 @@
  * migrations-status.mjs — what this Home's database has applied. Read-only.
  *
  * Usage:
- *   SUPABASE_DB_PASSWORD=… node scripts/migrations-status.mjs [--frontend <path>] [--json]
+ *   node scripts/migrations-status.mjs [--frontend <path>] [--json] [--password-stdin]
  *
- * Same inputs as scripts/apply-migration.mjs: the project from SUPABASE_URL in
- * .env.local, the password from SUPABASE_DB_PASSWORD. Lists every migration in
- * this repo and in the frontend checkout (--frontend, else a sibling folder
- * named like the frontend repo, else skipped with a notice) and reports each:
+ * The project comes from SUPABASE_URL in the repo's .env.local, as
+ * scripts/apply-migration.mjs reads it. The password comes from
+ * SUPABASE_DB_PASSWORD, --password-stdin, or a hidden prompt; never from the
+ * command line. Lists every migration in this repo and in the frontend
+ * checkout (--frontend, else a sibling folder named like the frontend repo,
+ * else skipped with a notice) and reports each:
  *
  *   applied   recorded in schema_migrations
  *   inferred  not recorded, but every table/column/policy it creates exists
@@ -19,6 +21,7 @@
  */
 import { connect, readState } from './lib/db.mjs';
 import { loadContext } from './lib/context.mjs';
+import { describeEnv, getPassword, PASSWORD_HELP } from './lib/env.mjs';
 import { computeStatus, formatTable, parseArgs, statusRows, summarise } from './lib/migrations.mjs';
 
 let args;
@@ -32,16 +35,19 @@ const json = args.json === true;
 const log = json ? (...a) => console.error(...a) : console.log;
 
 const ctx = loadContext(args);
-if (!ctx.ref) {
-  console.error('Could not read the Supabase project from .env.local (SUPABASE_URL or NEXT_PUBLIC_SUPABASE_URL).');
+log(`Database: ${describeEnv(ctx.envFile)}`);
+if (!ctx.ref) process.exit(1);
+for (const n of ctx.notices) log(`Notice: ${n}`);
+
+const password = await getPassword(args);
+if (!password) {
+  console.error(PASSWORD_HELP);
   process.exit(1);
 }
-log(`Database: Supabase project ${ctx.ref} (from .env.local)`);
-if (ctx.frontend.notice) log(`Notice: ${ctx.frontend.notice}`);
 
 let client;
 try {
-  client = await connect(ctx.ref, ctx.password, log);
+  client = await connect(ctx.ref, password, log);
   const { history, catalog } = await readState(client);
   const states = computeStatus(ctx.migrations, history, catalog);
   const summary = summarise(states);
@@ -51,6 +57,7 @@ try {
       projectRef: ctx.ref,
       historyTable: history !== null,
       frontend: { path: ctx.frontend.path, notice: ctx.frontend.notice },
+      notices: ctx.notices,
       summary,
       migrations: states,
     }, null, 2));
@@ -61,11 +68,11 @@ try {
     console.log(`${summary.applied} applied, ${summary.inferred} inferred, ${summary.partial} partial, ${summary.pending} pending.`);
     if (history === null) console.log('No schema_migrations table yet: nothing is recorded, so applied migrations show as inferred.');
     if (summary.inferred > 0) console.log('Record the inferred ones once with scripts/migrations-seed.mjs.');
-    if (summary.partial > 0) console.log('A partial migration needs a human: compare its file with the database before applying anything.');
+    if (summary.partial > 0) console.log('A partial migration needs a human: see "Partly applied migrations" in UPGRADE.md.');
   }
 } catch (e) {
   console.error(e.message);
-  process.exit(1);
+  process.exitCode = 1;
 } finally {
   await client?.end().catch(() => {});
 }
