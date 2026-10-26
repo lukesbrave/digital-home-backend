@@ -10,6 +10,53 @@ folder:
 
 ---
 
+## From 2.9.0 onwards: run the script
+
+If `VERSION` reads 2.9.0 or newer, the upgrade is scripted. Older Homes follow
+the instructions further down to reach 2.9.0 first.
+
+**Once, on a 2.9.0 Home** (the tools arrive with the release they upgrade to;
+use that release's tag in place of `v3.0.0`):
+
+```bash
+git remote add starter https://github.com/lukesbrave/digital-home-backend.git
+git fetch starter --tags
+git checkout -b upgrade/v3.0.0
+git checkout v3.0.0 -- scripts/upgrade.mjs scripts/lib scripts/migrations-status.mjs scripts/migrations-seed.mjs supabase/migrations/003_schema_migrations.sql
+git commit -m "Bring in the upgrade tools from v3.0.0"
+```
+
+Skip the `remote add` if `starter` already exists. Then, for every upgrade:
+
+1. `node scripts/upgrade.mjs --dry-run` shows every step and changes nothing.
+2. Read the Supabase project ref it prints aloud and have the member confirm it
+   is theirs. Never pass a ref that was not confirmed.
+3. A Home without a migration history records what it already has, once:
+   `node scripts/migrations-status.mjs`, then
+   `node scripts/migrations-seed.mjs --project-ref <ref> --yes`.
+   Add `--frontend <path>` to both so the frontend's migrations are recorded
+   too. A `partial` migration needs a human before anything else runs.
+4. `node scripts/upgrade.mjs --project-ref <ref> --yes --frontend <path>`. It
+   works on branch `upgrade/v<target>`, checks out and commits the files that
+   are new in the release, lists every changed file to merge by hand with its
+   `git diff` command, applies the release's pending migrations one
+   transaction each and records them in `schema_migrations`, copies
+   `src/types/database.ts` to the frontend, and writes `VERSION`. Without
+   `--project-ref <ref> --yes` it stops at the database (exit 2) and prints the
+   command to resume. `--take-untouched` also takes changed files the Home has
+   never edited since its last release.
+5. Merge the listed files (merge, don't overwrite), then run the checks it
+   prints (`npx tsc --noEmit`, `npm run build`) and commit on the branch.
+   Commit the copied types in the frontend on its own branch.
+
+The scripts need `SUPABASE_URL` in `.env.local` and `SUPABASE_DB_PASSWORD` in
+the environment, as `scripts/apply-migration.mjs` does. They never deploy,
+merge the branch or delete a file. Deploy afterwards with the member's
+approval (DEPLOYMENT.md). Read the release's own section below for any
+configuration it needs.
+
+---
+
 ## Instructions for Claude
 
 You are upgrading a member's Digital Home backend — a customized fork of

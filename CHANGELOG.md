@@ -4,6 +4,27 @@ All notable changes to the Digital Home Backend Starter.
 
 ## [Unreleased]
 
+A Home's schema state is now recorded, and its upgrade is scripted:
+
+- Migration `003_schema_migrations.sql` adds `schema_migrations`, one row per
+  applied migration from either repo (name, repo, checksum, when, by whom).
+  RLS on, service role only. `src/types/database.ts` gains the table: copy it
+  to the frontend byte-identical.
+- `scripts/migrations-status.mjs` reports every frontend and backend migration
+  as applied, inferred (what it creates exists, but nothing records it),
+  partial or pending. Read-only; `--json` for agents.
+- `scripts/migrations-seed.mjs` is the one-time catch-up for 2.x Homes: it
+  records each inferred migration, creating the table first if needed. It
+  writes only with `--project-ref <ref>` matching `.env.local` and `--yes`.
+- `scripts/upgrade.mjs` does the mechanical part of an upgrade on branch
+  `upgrade/v<target>`: new files, the list of files to merge by hand, pending
+  migrations recorded as they apply (behind the same gate), the shared types
+  and `VERSION`. It stops before deploy and never merges or deletes.
+- `npm run test:upgrade` tests the pure parts and the gates without a database.
+
+UPGRADE.md opens with the scripted path for 2.9.0 and newer; the older prose
+stays below it.
+
 ## [2.9.0] — 2026-09-13
 
 - Required R2 public media for new Digital Homes, independent of optional social
