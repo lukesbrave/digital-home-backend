@@ -23,7 +23,7 @@
  *      printing the database ref and receiving --project-ref <that ref> --yes.
  *   9. Copy src/types/database.ts to the frontend checkout (--frontend),
  *      when that checkout is clean and on its own branch.
- *  10. Write VERSION.
+ *  10. Keep VERSION unchanged until the upgrade is verified.
  *  11. Print the checks to run. Deploying is a separate, approved step.
  *
  * --dry-run writes nothing: no remote, tag, branch, file, commit, FETCH_HEAD
@@ -40,7 +40,7 @@
  * resume), 1 refused or failed.
  */
 import { execFileSync } from 'node:child_process';
-import { copyFileSync, existsSync, readFileSync, writeFileSync } from 'node:fs';
+import { copyFileSync, existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { applyAndRecord, connect, readState } from './lib/db.mjs';
 import { loadContext } from './lib/context.mjs';
@@ -152,7 +152,7 @@ step('Starter remote and tags');
 const url = typeof args['starter-url'] === 'string' ? args['starter-url'] : STARTER_URL;
 const existing = git(['remote', 'get-url', 'starter'], { allowFail: true })?.trim();
 if (!existing) change(['remote', 'add', 'starter', url]);
-else if (existing !== url) console.log(`  Remote starter points at ${existing} (expected ${url}); using it as is.`);
+else if (existing !== url) stop(1, 'Starter remote differs from the expected repository. Review it and provide --starter-url explicitly if intentional.');
 else console.log(`  Remote starter: ${existing}`);
 const source = existing || (dry ? url : 'starter');
 
@@ -196,7 +196,7 @@ const R = { cur: resolveTag(cur), tgt: resolveTag(tgt) };
 if (!R.tgt) stop(1, `Tag ${tgt} not found.`);
 if (!R.cur) stop(1, `VERSION reads ${current} but tag ${cur} is not here, so the release diff cannot be computed. Follow UPGRADE.md by hand.`);
 const targetVersion = git(['show', `${R.tgt}:VERSION`], { allowFail: true })?.trim();
-if (targetVersion !== target) console.log(`  Warning: VERSION inside ${tgt} reads "${targetVersion}".`);
+if (targetVersion !== target) stop(1, `VERSION inside ${tgt} does not match its tag; refusing the upgrade.`);
 console.log(`  ${cur} → ${tgt}`);
 
 // ── 4. Branch ────────────────────────────────────────────────────────────────
@@ -292,7 +292,6 @@ const added = diff.added.filter((p) => p.startsWith(MIGRATIONS_DIR)).map((p) => 
 console.log(`  ${tgt} ${added.length ? 'adds ' + added.join(', ') : 'adds no migration'}; every pending one is checked, whichever release brought it.`);
 console.log(`  Database: ${describeEnv(ctx.envFile)}`);
 if (!ctx.ref) stop(1, 'Set SUPABASE_URL in the repo\'s .env.local so the database can be identified.');
-let migrationsPending = false;
 const password = await getPassword(args);
 if (!password) {
   if (dry) console.log(`  [dry-run] ${PASSWORD_HELP} The database was not read.`);
@@ -319,7 +318,6 @@ if (!password) {
       const gate = writeGate({ envRef: ctx.ref, projectRef: args['project-ref'], yes: args.yes });
       if (dry) {
         console.log(`  [dry-run] would apply ${mplan.toApply.length} migration(s) to ${ctx.ref}${gate ? ' once confirmed with --project-ref ' + ctx.ref + ' --yes' : ''}.`);
-        migrationsPending = true;
       } else if (gate) {
         stop(2, `${gate}\nTo resume:\n  ${resumeCommand(target)}`);
       } else {
@@ -375,13 +373,10 @@ if (typeof args.frontend !== 'string') {
   }
 }
 
-// ── 10. VERSION ──────────────────────────────────────────────────────────────
-step('VERSION');
-if (dry) console.log(`  [dry-run] would write ${target} to VERSION${migrationsPending ? ' after the migrations' : ''}.`);
-else {
-  writeFileSync(versionFile, `${target}\n`);
-  console.log(`  VERSION now reads ${target} (uncommitted: commit it with your merges).`);
-}
+// ── 10. VERSION is a completion receipt, not a preparation side effect ────────
+step('Installed version remains unchanged');
+console.log(`  VERSION stays at ${current}. Preparation is not a verified upgrade.`);
+console.log(`  Only after merges, database/media checks, preservation verification and the approved live proof pass, record ${target} in VERSION.`);
 
 // ── 11. Checks ───────────────────────────────────────────────────────────────
 step('Checks to run, then stop');

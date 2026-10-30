@@ -51,8 +51,8 @@ const NAV_ITEMS = [
     ),
   },
   {
-    href: '/crm/funnel',
-    label: 'Funnel',
+    href: '/crm/analytics',
+    label: 'Analytics',
     icon: (
       <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 shrink-0" viewBox="0 0 256 256" fill="currentColor">
         <path d="M230.6,49.53A15.81,15.81,0,0,0,216,40H40A16,16,0,0,0,28.19,66.76l.08.09L96,139.17V216a16,16,0,0,0,24.87,13.32l32-21.34A16,16,0,0,0,160,194.66V139.17l67.73-72.32.08-.09A15.8,15.8,0,0,0,230.6,49.53ZM144,132.84V194.66l-32,21.34V132.84L40,56H216Z" />
@@ -94,7 +94,7 @@ const NAV_ORDER = [
   '/crm',
   '/crm/leads',
   '/crm/pipeline',
-  '/crm/funnel',
+  '/crm/analytics',
   '/crm/workflows',
   '/content',
   '/social',

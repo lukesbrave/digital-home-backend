@@ -1,5 +1,12 @@
 # Upgrading your Digital Home Backend
 
+## Starter 3.0 development
+
+3.0 is not released. Its self-contained [existing-Simon guide](UPGRADE-3.md)
+requires no employee or training update. The current published release below
+remains 2.9.0. Never deploy an unreleased branch as latest.
+
+
 This guide is written to be executed by **Claude Code inside your own
 backend project**. Paste this into Claude Code from your backend project
 folder:
@@ -46,7 +53,7 @@ Skip the `remote add` if `starter` already exists. Then:
    its `git diff` command, applies every pending backend migration of the
    release one transaction each and records it in `schema_migrations`, copies
    `src/types/database.ts` to the frontend when that checkout is clean and on
-   its own branch, and writes `VERSION`. Without `--project-ref <ref> --yes`
+   its own branch, and keeps `VERSION` unchanged until verification completes. Without `--project-ref <ref> --yes`
    it stops at the database (exit 2) and prints the command to resume.
    `--take-untouched` also takes changed files the Home has never edited since
    its last release.
@@ -182,8 +189,8 @@ then apply this 2.7.4 → 2.8.0 step last.
   similar) and NOT the frontend. If it's the frontend, stop and say so.
 
 ### Step 1 — Preflight
-1. `git status` — if there are uncommitted changes, commit or stash them
-   first so the upgrade is revertible.
+1. `git status` — if there are uncommitted changes, preserve them on their existing branch and prepare the upgrade in an isolated
+   worktree. Never stash, reset or clean someone else’s work.
 2. Create a branch named for the release you are moving to, for example
    `git checkout -b upgrade/v2.9.0`.
 3. Add the starter as a remote if missing:

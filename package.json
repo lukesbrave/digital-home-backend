@@ -2,7 +2,7 @@
   "name": "digital-home-backend",
   "version": "0.1.0",
   "private": true,
-  "description": "The Digital Home Platform — an open-source operating system for your digital presence. Content pipeline, lead management, email sequences, analytics, and agent oversight.",
+  "description": "The Digital Home Platform \u2014 an open-source operating system for your digital presence. Content pipeline, lead management, email sequences, analytics, and agent oversight.",
   "engines": {
     "node": ">=22"
   },
@@ -19,7 +19,8 @@
     "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
     "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
     "upload": "opennextjs-cloudflare build && opennextjs-cloudflare upload",
-    "cf-typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts"
+    "cf-typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts",
+    "test:starter3": "node --experimental-strip-types --test scripts/test-preservation.mjs src/lib/analytics/*.test.ts src/lib/home/*.test.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.80.0",

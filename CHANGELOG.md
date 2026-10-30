@@ -4,6 +4,27 @@ All notable changes to the Digital Home Backend Starter.
 
 ## [Unreleased]
 
+### Starter 3.0 development — first increment, not a release
+
+- Self-contained `UPGRADE-3.md` is designed for an existing Simon without
+  changing his employee card, instructions or local training. Actual old-Simon
+  runtime rehearsal remains a release gate.
+- A local preservation receipt captures hashes/modes of member additions, edits
+  and deletions relative to their installed starter tag. Verification flags
+  changes unless an exact reviewed merge is recorded. This is code evidence,
+  not a database/media backup or a guarantee of behavioural equivalence.
+- Upgrade preparation no longer writes VERSION before review and live checks.
+  Unexpected starter remotes and mismatched tag/version pairs are refused.
+- Analytics adds website/page counts from existing analytics_events and retains
+  the existing funnel report/API. Legacy `/crm/funnel` bookmarks redirect with
+  their query parameters. No private business domains or external property IDs.
+- Authenticated `/api/home` exposes the build version and actual applied
+  migration history, using null for unavailable history; the limited discovery
+  guide explicitly does not advertise unported keys, MCP or payments.
+- Backend VERSION remains 2.9.0. The full 3.0 agent/payment/event port, complete
+  guide, type generation, recovery proof and isolated canary are still pending.
+
+
 A Home's schema state is now recorded, and its upgrade is scripted:
 
 - Migration `003_schema_migrations.sql` adds `schema_migrations`, one row per
@@ -20,7 +41,7 @@ A Home's schema state is now recorded, and its upgrade is scripted:
 - `scripts/upgrade.mjs` does the mechanical part of an upgrade on branch
   `upgrade/v<target>`: the target's own tools, new files, the list of files to
   merge by hand, every pending migration recorded as it applies (behind the
-  same gate), the shared types and `VERSION`. It stops before deploy and never
+  same gate), the shared types. VERSION is recorded only after upgrade verification. It stops before deploy and never
   merges or deletes; `--dry-run` writes nothing.
 - The tools verify the database certificate against Node's roots plus
   Supabase's own root, bundled in `scripts/certs/` (`SUPABASE_CA_CERT` adds

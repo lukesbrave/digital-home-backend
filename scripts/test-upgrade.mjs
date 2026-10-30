@@ -451,7 +451,7 @@ function fixture() {
   write(starter, 'supabase/migrations/001_backend_core.sql', BACKEND_001);
   write(starter, 'supabase/migrations/002_crm_core.sql', BACKEND_002);
   write(starter, 'VERSION', '2.9.0\n');
-  sh(starter, 'add', '-A');
+  sh(starter, 'add', '.gitignore', 'VERSION', 'src', 'supabase');
   sh(starter, 'commit', '-qm', 'v2.9.0');
   sh(starter, 'tag', 'v2.9.0');
   installTools(starter);
@@ -460,7 +460,7 @@ function fixture() {
   write(starter, 'src/components/sidebar.tsx', 'sidebar v2\n');
   write(starter, 'src/types/database.ts', 'types v2\n');
   write(starter, 'VERSION', '3.0.0\n');
-  sh(starter, 'add', '-A');
+  sh(starter, 'add', 'VERSION', 'src', 'supabase', 'scripts');
   sh(starter, 'commit', '-qm', 'v3.0.0');
   sh(starter, 'tag', '-a', '-m', 'v3.0.0', 'v3.0.0');
 
@@ -480,7 +480,7 @@ function fixture() {
   sh(frontend, 'init', '-q');
   write(frontend, 'supabase/migrations/001_visitors.sql', 'create table visitors (id uuid);\n');
   write(frontend, 'src/types/database.ts', 'types v0\n');
-  sh(frontend, 'add', '-A');
+  sh(frontend, 'add', 'src/types/database.ts', 'supabase/migrations/001_visitors.sql');
   sh(frontend, 'commit', '-qm', 'frontend');
   return { base, starter, home, frontend };
 }
@@ -498,6 +498,26 @@ function snapshot(dir) {
 }
 
 describe('upgrade.mjs against a fake starter and database', () => {
+  test('refuses an unexpected starter remote without touching files or database', () => {
+    const f = fixture();
+    sh(f.home, 'remote', 'add', 'starter', f.starter);
+    const before = snapshot(f.home);
+    const r = runScript(f.home, 'upgrade.mjs', ['--no-fetch'], { db: HOME_29 });
+    assert.equal(r.status, 1);
+    assert.match(r.out, /Starter remote differs/);
+    assert.deepEqual(snapshot(f.home), before);
+    assert.ok(!r.calls.some(c => c.op === 'apply'));
+  });
+  test('refuses a target tag whose VERSION disagrees before creating an upgrade', () => {
+    const f = fixture();
+    sh(f.home, 'tag', 'v3.1.0', 'v3.0.0^{}');
+    const before = snapshot(f.home);
+    const r = runScript(f.home, 'upgrade.mjs', ['--dry-run', '--no-fetch', '--to', 'v3.1.0', '--starter-url', f.starter], { db: HOME_29 });
+    assert.equal(r.status, 1);
+    assert.match(r.out, /does not match its tag/);
+    assert.deepEqual(snapshot(f.home), before);
+  });
+
   test('--dry-run writes no ref, file, branch or database change, even with --yes', () => {
     const f = fixture();
     sh(f.home, 'tag', '-d', 'v3.0.0'); // so the dry run has to discover the target remotely
@@ -525,7 +545,7 @@ describe('upgrade.mjs against a fake starter and database', () => {
     assert.equal(sh(f.home, 'status', '--porcelain'), '');
     assert.match(r.out, /src\/components\/sidebar\.tsx\n\s+what the starter changed: git diff v2\.9\.0 v3\.0\.0 -- src\/components\/sidebar\.tsx/);
 
-    r = runScript(f.home, 'upgrade.mjs', ['--project-ref', 'otherref', '--yes'], { db: HOME_29 });
+    r = runScript(f.home, 'upgrade.mjs', ['--starter-url', f.starter, '--project-ref', 'otherref', '--yes'], { db: HOME_29 });
     assert.equal(r.status, 2, r.out);
     assert.match(r.out, /does not match/);
     assert.ok(!r.calls.some((c) => c.op === 'apply'));
@@ -533,7 +553,7 @@ describe('upgrade.mjs against a fake starter and database', () => {
     // 002 is pending too (from an earlier release, not added by v3.0.0): both apply, in order.
     const db = { history: null, tables: rows('visitors', 'backend_settings', 'brand_context') };
     sh(f.frontend, 'checkout', '-q', '-b', 'upgrade/v3.0.0');
-    r = runScript(f.home, 'upgrade.mjs', ['--project-ref', 'homeref', '--yes', '--frontend', f.frontend, '--take-untouched'], { db });
+    r = runScript(f.home, 'upgrade.mjs', ['--starter-url', f.starter, '--project-ref', 'homeref', '--yes', '--frontend', f.frontend, '--take-untouched'], { db });
     assert.equal(r.status, 0, r.out);
     // The history table first, so 002 is recorded too.
     assert.deepEqual(r.calls.filter((c) => c.op === 'apply'), [
@@ -541,7 +561,7 @@ describe('upgrade.mjs against a fake starter and database', () => {
       { op: 'apply', repo: 'backend', name: '002_crm_core.sql', appliedBy: 'upgrade:v3.0.0', record: true },
     ]);
     assert.match(r.out, /Record them once:\n\s+node scripts\/migrations-seed\.mjs --project-ref homeref --yes/);
-    assert.equal(readFileSync(join(f.home, 'VERSION'), 'utf8'), '3.0.0\n');
+    assert.equal(readFileSync(join(f.home, 'VERSION'), 'utf8'), '2.9.0\n', 'preparation must not report a completed upgrade');
     assert.equal(readFileSync(join(f.frontend, 'src/types/database.ts'), 'utf8'), 'types v2\n');
     assert.match(r.out, /git -C .* add src\/types\/database\.ts && git -C .* commit/);
   });
