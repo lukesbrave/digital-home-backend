@@ -4,7 +4,7 @@ Not released. Branch `codex/starter-3-2026-10-30` in both starter repositories.
 Backend base 1a4b18b, frontend base 257dfe3. Existing public versions remain
 backend 2.9.0 and frontend 2.5.4. No production changes or migrations performed.
 
-## Implemented first increment
+## Implemented foundation
 
 - Existing-Simon task guide: no rehire, card update or training installation.
 - Capture/verify of customised code (including deleted files and file modes),
@@ -18,39 +18,53 @@ backend 2.9.0 and frontend 2.5.4. No production changes or migrations performed.
   state honestly. Guide and capabilities explicitly identify this limited stage.
 - Frontend companion instructions preserve the existing site and tracking choices.
 
+## Second increment — keys, events, Money and fulfilment
+
+- Optional hashed/scoped agent keys; central fail-closed route checks. Legacy
+  authentication preserved, with actual-module tests using old signed requests.
+- Events feed/stats and lead/activity/article/key receipts. Payment processing
+  receipts are atomic with webhook completion; ignored/replayed events do not
+  duplicate receipts. This is processing evidence, not revenue analytics.
+- Money page/API for products, orders, invoices, projects and deliverables;
+  Stripe signature/retry/idempotency handling and optional checkout.
+- Won-deal project hooks and draft fulfilment recipes. Reseeding preserves member
+  email copy, workflow steps/status and onboarding settings.
+- Numbered backend migrations 004–007; table-name collisions stop rather than
+  adopt or replace member tables. Shared types synced to the frontend candidate.
+- Expanded guide distinguishes code capabilities from actual schema history.
+  Scoped access outside its documented route set is deliberately unavailable.
+
 ## Proof
 
-- `npm run test:starter3`: 14/14 (customisation hashes/modes, dirty work refusal,
-  receipt overwrite refusal, legacy URL selection, metrics and unknown history).
-- `npm run test:upgrade`: 36/36 against synthetic git repositories/fake database.
-  Includes no-write dry run, project gates, interrupted preparation, partial
-  migrations, dirty frontend protection and source/tag mismatch refusal.
-- Production OpenNext backend build with synthetic public settings; no client
-  credentials, API keys, live database or deploy. See the shared plan for final
-  build/lint outcome and exact branch commit.
-- The real current frontend code, employee cards and installed training are not
-  replaced. No real older-Simon run was performed: the guide's dependency contract
-  is tested, model/runtime behaviour is still to be rehearsed.
+- Foundation/preservation: 14/14. Upgrade preparation: 36/36.
+- Money/fulfilment: 115/115. Keys/authentication: 20/20. Events: 38/38.
+- CRM suite: 14/14 (includes fulfilment tests counted above).
+- Isolated PostgreSQL (PGlite): 4/4, applying the actual original paired schema
+  and new migrations; custom tables/columns/row values/workflows/settings survive,
+  conflicting table names stop safely, role restrictions hold, and payment
+  receipts are atomic and not duplicated on repeat completion.
+- Backend production OpenNext build and TypeScript checks pass with synthetic
+  public settings. No real credentials or live database were used.
+- Frontend production OpenNext build passes with synthetic settings; targeted
+  new-module lint is clean; broader touched-file lint has no errors and two
+  pre-existing sidebar effect warnings. Frontend CRM tests: 10/10. Exact branch
+  commits are in the shared plan.
+- No actual older-Simon runtime run or Supabase/Stripe network canary yet.
 
 ## Remaining release work (not hidden behind a 3.0 version bump)
 
-1. Port generic scoped auth/keys, approvals/MCP, events, money and fulfilment from
-   the proven Home; exclude Luke-only Skool and private operator machinery.
-2. Stable numbered migrations, prerequisite ordering, safe-mode defaults and
-   complete generated types including client columns; paired frontend sync.
-3. Complete client-only guide/capability inventory, optional setup UI and
-   idempotent payment-event integration. Stripe test-mode proofs.
-4. Analytics source/device filters and broader report portability where the
-   actual client event schema supports them; current counts are recorded events,
-   not unique people, verified leads or sales. No social/Search Console promises.
-5. Complete database/media/account recovery procedure and verify restored values
-   on an isolated target, including custom schema and legacy media. Hash receipts
-   do not prove database preservation, backups or runtime behaviour.
-6. Actual old-Simon rehearsal with the standalone guide, unchanged old card and
-   unchanged training; no newer plugin API required. Fresh and customised-Home
-   canary, optional Studio and social enabled/disabled matrix, rollback proof.
-7. Review release metadata and paired versions; publication needs Luke's word.
+1. Client-neutral approvals/MCP and remaining scoped routes; finish complete
+   guide, key setup UX and optional module setup UI. No private operator/Skool.
+2. Full schema/type regeneration workflow that merges member columns; actual
+   PostgreSQL tests are now present but not hosted Supabase or Studio proof.
+3. Analytics source/device filters and remaining generic reports; current counts
+   are recorded events, not unique people, verified leads or social statistics.
+4. Complete database/media/account recovery, including custom schemas and legacy
+   Storage, on an isolated target. Code hashes do not prove full recovery.
+5. Actual unchanged-old-Simon rehearsal using UPGRADE-3.md, fresh and customised
+   Home canaries, real Stripe test mode and optional Studio/social matrix.
+6. Review paired versions/release metadata only after the above. Public versions
+   remain backend 2.9.0/frontend 2.5.4; no publication without Luke's word.
 
-For the next coding session: the readiness matrix is
-`Auto Agency/PLANS/STARTER-3-READINESS-2026-10-30.md`. Continue in these worktrees.
-Never treat this first increment or a passing unit suite as a complete 3.0 release.
+Continue in these worktrees. The main plan/readiness matrix in Auto Agency holds
+cross-repo status. This increment is not a complete 3.0 release candidate.

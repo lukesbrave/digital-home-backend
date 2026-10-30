@@ -1,3 +1,6 @@
+import { onDealWon } from "@/lib/money/engagements";
+import { moneyDb } from "@/lib/money/db";
+import { isDealWon } from "@/lib/money/state";
 import { logActivity } from "./activity";
 import { sendCrmEmail } from "./email";
 import { getCrmSettings } from "./settings";
@@ -58,6 +61,7 @@ export interface TriggerEvent {
 
 function triggerMatches(triggerConfig: Record<string, unknown>, event: TriggerEvent): boolean {
   const cfg = triggerConfig || {};
+  if (event.type === "engagement_stage_changed") return !cfg.stage || cfg.stage === event.data?.stage;
   const data = event.data || {};
   switch (event.type) {
     case "tag_added":
@@ -87,7 +91,8 @@ export async function fireTrigger(supabase: AdminClient, event: TriggerEvent): P
   const enrolled: string[] = [];
   for (const wf of workflows) {
     if (!triggerMatches((wf.trigger_config || {}) as Record<string, unknown>, event)) continue;
-    const result = await enrollLead(supabase, wf, event.lead, `trigger:${event.type}`);
+    const context = event.type === "engagement_stage_changed" ? { ...event.data } : {};
+    const result = await enrollLead(supabase, wf, event.lead, `trigger:${event.type}`, context);
     if (result.enrolled) enrolled.push(wf.id);
   }
   return enrolled;
@@ -98,7 +103,8 @@ export async function enrollLead(
   supabase: AdminClient,
   workflow: Workflow,
   lead: Lead,
-  source: string
+  source: string,
+  context: Record<string, unknown> = {}
 ): Promise<{ enrolled: boolean; reason?: string }> {
   const { data: existing } = await supabase
     .from("workflow_enrollments")
@@ -119,7 +125,7 @@ export async function enrollLead(
     status: "active",
     current_step: 0,
     next_run_at: new Date().toISOString(),
-    context: { source } as Json,
+    context: { ...context, source } as Json,
   });
   if (error) return { enrolled: false, reason: error.message };
 
@@ -225,6 +231,7 @@ export async function ensureLeadOpportunity(
         actor: opts.actor || "system",
       });
       await fireTrigger(supabase, { type: "stage_changed", lead, data: { stage_id: target.id } });
+      if (isDealWon({ stageName: target.name })) await onDealWon(moneyDb(supabase), { opportunityId: opp.id, leadId: lead.id, actor: opts.actor || "system" });
       return { action: "advanced", opportunity_id: opp.id, stage: target.name };
     }
     return { action: "exists", opportunity_id: opp.id, stage: current?.name };
@@ -246,6 +253,7 @@ export async function ensureLeadOpportunity(
     actor: opts.actor || "system",
   });
   await fireTrigger(supabase, { type: "stage_changed", lead, data: { stage_id: target.id } });
+  if (isDealWon({ stageName: target.name })) await onDealWon(moneyDb(supabase), { opportunityId: created.id, leadId: lead.id, actor: opts.actor || "system" });
   return { action: "created", opportunity_id: created.id, stage: target.name };
 }
 
@@ -383,10 +391,14 @@ async function executeStep(
       }
       if (!subject || !bodyMd) throw new Error("send_email: missing subject or body");
 
+      const engagementName = (enrollment.context as Record<string, unknown> | null)?.engagement_name;
+      const emailLead = typeof engagementName === "string"
+        ? { ...lead, custom: { ...((lead.custom || {}) as Record<string, Json>), engagement_name: engagementName } }
+        : lead;
       const result = await sendCrmEmail(
         supabase,
         {
-          lead,
+          lead: emailLead,
           subject,
           bodyMd,
           preheader,
@@ -487,15 +499,22 @@ async function executeStep(
         .eq("status", "open")
         .limit(1);
 
+      let opportunityId: string | null = null;
       if (opps && opps.length > 0) {
         await supabase.from("opportunities").update({ stage_id: stage.id, pipeline_id: stage.pipeline_id }).eq("id", opps[0].id);
+        opportunityId = opps[0].id;
       } else {
-        await supabase.from("opportunities").insert({
-          lead_id: lead.id,
-          pipeline_id: stage.pipeline_id,
-          stage_id: stage.id,
-          name: [lead.first_name, lead.last_name].filter(Boolean).join(" ") || lead.email,
-        });
+        const { data: created } = await supabase
+          .from("opportunities")
+          .insert({
+            lead_id: lead.id,
+            pipeline_id: stage.pipeline_id,
+            stage_id: stage.id,
+            name: [lead.first_name, lead.last_name].filter(Boolean).join(" ") || lead.email,
+          })
+          .select("id")
+          .single();
+        opportunityId = created?.id ?? null;
       }
       await logActivity(supabase, {
         lead_id: lead.id,
@@ -504,6 +523,7 @@ async function executeStep(
         data: { stage_id: stage.id, workflow_id: workflow.id },
       });
       await fireTrigger(supabase, { type: "stage_changed", lead, data: { stage_id: stage.id } });
+      if (opportunityId && isDealWon({ stageName: stage.name })) await onDealWon(moneyDb(supabase), { opportunityId, leadId: lead.id, actor: `workflow:${workflow.id}` });
       return { advance: true };
     }
 

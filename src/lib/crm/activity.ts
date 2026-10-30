@@ -1,3 +1,4 @@
+import { eventFromActivity, recordHomeEvent } from "@/lib/events/record";
 import type { AdminClient } from "./types";
 import type { Json } from "@/types/database";
 
@@ -20,6 +21,9 @@ export async function logActivity(supabase: AdminClient, input: ActivityInput): 
     actor: input.actor ?? "system",
   });
   if (error) console.warn("logActivity failed:", error.message);
+
+  const homeEvent = eventFromActivity(input);
+  if (homeEvent) await recordHomeEvent(supabase, homeEvent);
 
   await supabase
     .from("leads")

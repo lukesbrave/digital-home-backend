@@ -1,3 +1,11 @@
+## Unreleased — Starter 3.0 development, second increment
+
+Optional scoped agent keys with legacy-auth compatibility, activity feed, Money
+and fulfilment, numbered additive migrations with collision refusal, transactional
+payment receipts, and local PostgreSQL customisation tests. Draft recipe setup
+preserves member edits. Shared types paired with frontend development branch.
+No version bump, deployment or publication; see STARTER-3-STATUS.md for gates.
+
 # Changelog
 
 All notable changes to the Digital Home Backend Starter.

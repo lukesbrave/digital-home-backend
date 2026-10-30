@@ -95,11 +95,13 @@ export function Modal({
   onClose,
   children,
   wide,
+  subtitle,
 }: {
   title: string;
   onClose: () => void;
   children: ReactNode;
   wide?: boolean;
+  subtitle?: string;
 }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-6">
@@ -113,6 +115,7 @@ export function Modal({
             ×
           </button>
         </div>
+        {subtitle && <p className="text-sm text-minimal-muted mb-4">{subtitle}</p>}
         {children}
       </div>
     </div>

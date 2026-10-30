@@ -79,3 +79,28 @@ a release gate: a text-contract test is not proof of model behaviour. If an old
 runtime cannot execute the task, report that specific limitation; do not quietly
 replace the employee or install training. Keep the client's existing identity,
 memories, chat history and local training untouched.
+
+## Candidate migrations and new modules (not a release)
+
+Backend 004 adds agent keys, 005 events, 006 Money and 007 payment receipts.
+They follow the paired frontend 001–011 and backend 001–003 baseline. Run them
+through the history-aware upgrade tool in filename order, never by rerunning all
+SQL. The new-table migrations deliberately stop if a member already owns a table
+with that name. Review/adopt that custom schema explicitly; never drop or rename
+it automatically, skip the guard or mark an unapplied migration as complete.
+
+Do not change API_PER_KEY_SIGNING, existing keys, signing secrets or the employee
+card/training during upgrade. Legacy signed requests are tested without the new
+key table. New keys are optional and limited to the guide's reviewed route list;
+they are not a drop-in replacement for a legacy agent's complete access yet.
+
+Money requires the member's own Stripe setup as a separate approved action.
+Without it, checkout/invoice sending returns unavailable. New fulfilment recipes
+are owner-requested drafts. Seeding again preserves existing template wording,
+steps, statuses and onboarding selections. It does not activate them. The event
+`payment.processed` records webhook handling, not a sale/revenue amount.
+
+Local SQL tests cover original paired schema installation, custom row/column and
+workflow preservation, table-name collision refusal, role restrictions and payment
+receipt retries/rollback. They do not prove Supabase Auth/Storage recovery, Stripe
+network integration, installed Studio compatibility or a real old-Simon run.

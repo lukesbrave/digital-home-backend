@@ -50,6 +50,7 @@ const NAV_ITEMS = [
       </svg>
     ),
   },
+  { href: '/crm/money', label: 'Money', icon: <span className="w-5 text-center">$</span> },
   {
     href: '/crm/analytics',
     label: 'Analytics',
@@ -95,6 +96,7 @@ const NAV_ORDER = [
   '/crm/leads',
   '/crm/pipeline',
   '/crm/analytics',
+  '/crm/money',
   '/crm/workflows',
   '/content',
   '/social',

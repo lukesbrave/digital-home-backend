@@ -2346,9 +2346,545 @@ export type Database = {
         };
         Relationships: [];
       };
+      agent_keys: {
+        Row: {
+          id: string;
+          name: string;
+          key_prefix: string;
+          key_hash: string;
+          scopes: string[];
+          created_at: string;
+          created_by: string | null;
+          last_used_at: string | null;
+          revoked_at: string | null;
+          note: string | null;
+        };
+        Insert: {
+          id?: string;
+          name: string;
+          key_prefix: string;
+          key_hash: string;
+          scopes: string[];
+          created_at?: string;
+          created_by?: string | null;
+          last_used_at?: string | null;
+          revoked_at?: string | null;
+          note?: string | null;
+        };
+        Update: {
+          id?: string;
+          name?: string;
+          key_prefix?: string;
+          key_hash?: string;
+          scopes?: string[];
+          created_at?: string;
+          created_by?: string | null;
+          last_used_at?: string | null;
+          revoked_at?: string | null;
+          note?: string | null;
+        };
+        Relationships: [];
+      };
+      home_events: {
+        Row: {
+          id: string;
+          seq: number;
+          occurred_at: string;
+          actor_type: HomeEventActorType;
+          actor: string;
+          action: string;
+          subject_type: string | null;
+          subject_id: string | null;
+          lead_id: string | null;
+          payload: Json;
+          evidence: Json;
+        };
+        Insert: {
+          id?: string;
+          seq?: never;
+          occurred_at?: string;
+          actor_type: HomeEventActorType;
+          actor: string;
+          action: string;
+          subject_type?: string | null;
+          subject_id?: string | null;
+          lead_id?: string | null;
+          payload?: Json;
+          evidence?: Json;
+        };
+        Update: {
+          id?: string;
+          seq?: never;
+          occurred_at?: string;
+          actor_type?: HomeEventActorType;
+          actor?: string;
+          action?: string;
+          subject_type?: string | null;
+          subject_id?: string | null;
+          lead_id?: string | null;
+          payload?: Json;
+          evidence?: Json;
+        };
+        Relationships: [];
+      };
+      products: {
+        Row: {
+          id: string;
+          slug: string;
+          name: string;
+          description: string | null;
+          kind: ProductKind;
+          amount_minor: number;
+          currency: string;
+          interval: "month" | "year" | null;
+          active: boolean;
+          stripe_product_id: string | null;
+          stripe_price_id: string | null;
+          metadata: Json;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          slug: string;
+          name: string;
+          description?: string | null;
+          kind: ProductKind;
+          amount_minor: number;
+          currency: string;
+          interval?: "month" | "year" | null;
+          active?: boolean;
+          stripe_product_id?: string | null;
+          stripe_price_id?: string | null;
+          metadata?: Json;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          slug?: string;
+          name?: string;
+          description?: string | null;
+          kind?: ProductKind;
+          amount_minor?: number;
+          currency?: string;
+          interval?: "month" | "year" | null;
+          active?: boolean;
+          stripe_product_id?: string | null;
+          stripe_price_id?: string | null;
+          metadata?: Json;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      orders: {
+        Row: {
+          id: string;
+          lead_id: string | null;
+          email: string | null;
+          status: OrderStatus;
+          total_minor: number;
+          currency: string;
+          stripe_checkout_session_id: string | null;
+          stripe_payment_intent_id: string | null;
+          stripe_subscription_id: string | null;
+          paid_at: string | null;
+          livemode: boolean | null;
+          metadata: Json;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          lead_id?: string | null;
+          email?: string | null;
+          status?: OrderStatus;
+          total_minor?: number;
+          currency: string;
+          stripe_checkout_session_id?: string | null;
+          stripe_payment_intent_id?: string | null;
+          stripe_subscription_id?: string | null;
+          paid_at?: string | null;
+          livemode?: boolean | null;
+          metadata?: Json;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          lead_id?: string | null;
+          email?: string | null;
+          status?: OrderStatus;
+          total_minor?: number;
+          currency?: string;
+          stripe_checkout_session_id?: string | null;
+          stripe_payment_intent_id?: string | null;
+          stripe_subscription_id?: string | null;
+          paid_at?: string | null;
+          livemode?: boolean | null;
+          metadata?: Json;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "orders_lead_id_fkey";
+            columns: ["lead_id"];
+            isOneToOne: false;
+            referencedRelation: "leads";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      order_items: {
+        Row: {
+          id: string;
+          order_id: string;
+          product_id: string | null;
+          quantity: number;
+          amount_minor: number;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          order_id: string;
+          product_id?: string | null;
+          quantity?: number;
+          amount_minor: number;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          order_id?: string;
+          product_id?: string | null;
+          quantity?: number;
+          amount_minor?: number;
+          created_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "order_items_order_id_fkey";
+            columns: ["order_id"];
+            isOneToOne: false;
+            referencedRelation: "orders";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "order_items_product_id_fkey";
+            columns: ["product_id"];
+            isOneToOne: false;
+            referencedRelation: "products";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      engagements: {
+        Row: {
+          id: string;
+          lead_id: string | null;
+          opportunity_id: string | null;
+          name: string;
+          stage: EngagementStage;
+          status: EngagementStatus;
+          scope: string | null;
+          value_minor: number;
+          currency: string;
+          started_at: string | null;
+          due_at: string | null;
+          metadata: Json;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          lead_id?: string | null;
+          opportunity_id?: string | null;
+          name: string;
+          stage?: EngagementStage;
+          status?: EngagementStatus;
+          scope?: string | null;
+          value_minor?: number;
+          currency: string;
+          started_at?: string | null;
+          due_at?: string | null;
+          metadata?: Json;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          lead_id?: string | null;
+          opportunity_id?: string | null;
+          name?: string;
+          stage?: EngagementStage;
+          status?: EngagementStatus;
+          scope?: string | null;
+          value_minor?: number;
+          currency?: string;
+          started_at?: string | null;
+          due_at?: string | null;
+          metadata?: Json;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "engagements_lead_id_fkey";
+            columns: ["lead_id"];
+            isOneToOne: false;
+            referencedRelation: "leads";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      engagement_deliverables: {
+        Row: {
+          id: string;
+          engagement_id: string;
+          name: string;
+          status: DeliverableStatus;
+          due_at: string | null;
+          position: number;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          engagement_id: string;
+          name: string;
+          status?: DeliverableStatus;
+          due_at?: string | null;
+          position?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          engagement_id?: string;
+          name?: string;
+          status?: DeliverableStatus;
+          due_at?: string | null;
+          position?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "engagement_deliverables_engagement_id_fkey";
+            columns: ["engagement_id"];
+            isOneToOne: false;
+            referencedRelation: "engagements";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      invoices: {
+        Row: {
+          id: string;
+          number: string;
+          lead_id: string | null;
+          engagement_id: string | null;
+          status: InvoiceStatus;
+          due_at: string | null;
+          total_minor: number;
+          currency: string;
+          stripe_invoice_id: string | null;
+          hosted_url: string | null;
+          pdf_url: string | null;
+          paid_at: string | null;
+          metadata: Json;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          number: string;
+          lead_id?: string | null;
+          engagement_id?: string | null;
+          status?: InvoiceStatus;
+          due_at?: string | null;
+          total_minor?: number;
+          currency: string;
+          stripe_invoice_id?: string | null;
+          hosted_url?: string | null;
+          pdf_url?: string | null;
+          paid_at?: string | null;
+          metadata?: Json;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          number?: string;
+          lead_id?: string | null;
+          engagement_id?: string | null;
+          status?: InvoiceStatus;
+          due_at?: string | null;
+          total_minor?: number;
+          currency?: string;
+          stripe_invoice_id?: string | null;
+          hosted_url?: string | null;
+          pdf_url?: string | null;
+          paid_at?: string | null;
+          metadata?: Json;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "invoices_lead_id_fkey";
+            columns: ["lead_id"];
+            isOneToOne: false;
+            referencedRelation: "leads";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "invoices_engagement_id_fkey";
+            columns: ["engagement_id"];
+            isOneToOne: false;
+            referencedRelation: "engagements";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      invoice_items: {
+        Row: {
+          id: string;
+          invoice_id: string;
+          product_id: string | null;
+          description: string;
+          quantity: number;
+          amount_minor: number;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          invoice_id: string;
+          product_id?: string | null;
+          description: string;
+          quantity?: number;
+          amount_minor: number;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          invoice_id?: string;
+          product_id?: string | null;
+          description?: string;
+          quantity?: number;
+          amount_minor?: number;
+          created_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "invoice_items_invoice_id_fkey";
+            columns: ["invoice_id"];
+            isOneToOne: false;
+            referencedRelation: "invoices";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "invoice_items_product_id_fkey";
+            columns: ["product_id"];
+            isOneToOne: false;
+            referencedRelation: "products";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      payment_events: {
+        Row: {
+          id: string;
+          provider: "stripe";
+          provider_event_id: string;
+          type: string;
+          livemode: boolean | null;
+          payload: Json;
+          received_at: string;
+          claimed_at: string | null;
+          processed_at: string | null;
+          error: string | null;
+          result: Json | null;
+        };
+        Insert: {
+          id?: string;
+          provider?: "stripe";
+          provider_event_id: string;
+          type: string;
+          livemode?: boolean | null;
+          payload: Json;
+          received_at?: string;
+          claimed_at?: string | null;
+          processed_at?: string | null;
+          error?: string | null;
+          result?: Json | null;
+        };
+        Update: {
+          id?: string;
+          provider?: "stripe";
+          provider_event_id?: string;
+          type?: string;
+          livemode?: boolean | null;
+          payload?: Json;
+          received_at?: string;
+          claimed_at?: string | null;
+          processed_at?: string | null;
+          error?: string | null;
+          result?: Json | null;
+        };
+        Relationships: [];
+      };
+      payouts: {
+        Row: {
+          id: string;
+          lead_id: string | null;
+          amount_minor: number;
+          currency: string;
+          reason: string | null;
+          status: PayoutStatus;
+          stripe_transfer_id: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          lead_id?: string | null;
+          amount_minor: number;
+          currency: string;
+          reason?: string | null;
+          status?: PayoutStatus;
+          stripe_transfer_id?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          lead_id?: string | null;
+          amount_minor?: number;
+          currency?: string;
+          reason?: string | null;
+          status?: PayoutStatus;
+          stripe_transfer_id?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "payouts_lead_id_fkey";
+            columns: ["lead_id"];
+            isOneToOne: false;
+            referencedRelation: "leads";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
     };
     Views: {};
-    Functions: {};
+    Functions: {
+      home_event_counts: { Args: { since: string }; Returns: {action: string; count: number}[] };
+      scrub_home_events_for_lead: { Args: {p_lead_id: string}; Returns: number };
+    };
     Enums: {
       content_status: "draft" | "published" | "archived";
       content_type: "article" | "case_study" | "video" | "guide" | "landing_page" | "snippet";
@@ -2387,3 +2923,24 @@ export type UpdateTables<T extends keyof Database["public"]["Tables"]> =
   Database["public"]["Tables"][T]["Update"];
 export type Enums<T extends keyof Database["public"]["Enums"]> =
   Database["public"]["Enums"][T];
+
+// Domain aliases for the shared schema.
+export type ProductKind = "one_time" | "subscription" | "deposit" | "invoice_item";
+export type OrderStatus = "pending" | "trial" | "paid" | "refunded" | "void";
+export type InvoiceStatus = "draft" | "sent" | "paid" | "void";
+export type EngagementStage =
+  | "brief" | "research" | "copy" | "design" | "review" | "build" | "launch" | "care" | "closed";
+export type EngagementStatus = "active" | "paused" | "won" | "lost";
+export type DeliverableStatus = "todo" | "in_progress" | "review" | "done";
+export type PayoutStatus = "pending" | "paid" | "failed" | "void";
+
+export type HomeEventActorType = "human" | "agent" | "system" | "webhook";
+
+export type HomeEventRow = Tables<"home_events">;
+export type HomeEventInsert = InsertTables<"home_events">;
+
+export type MoneyTables = Pick<Database["public"]["Tables"],
+  | "products" | "orders" | "order_items" | "engagements" | "engagement_deliverables"
+  | "invoices" | "invoice_items" | "payment_events" | "payouts"
+>;
+export type MoneyRow<T extends keyof MoneyTables> = Tables<T>;

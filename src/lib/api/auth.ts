@@ -1,17 +1,27 @@
 import { NextRequest } from "next/server";
-import { createHmac, timingSafeEqual } from "crypto";
-import { createClient } from "@/lib/supabase/server";
+import { createAdminClient, createClient } from "@/lib/supabase/server";
+import { buildSigningPayload, computeSignature, MASTER_AGENT, signaturesMatch, signingSecretFor } from "./signing";
+import { ENV_AGENT_KEY_VARS, hasScope, isMintedKeyFormat, WILDCARD_SCOPE, type Scope } from "./agent-key-scopes";
+import { scopedRouteAllowed } from "./scoped-routes";
+import { verifyAgentKey } from "./agent-keys";
 
 /**
  * Session roles. 'admin' is the default (any user without an explicit role in
- * app_metadata). 'social' is the social media manager: full run of /social,
- * nothing else. API keys are unaffected.
+ * app_metadata — older accounts predate roles). 'social' is the social media
+ * manager: full run of /social, nothing else. API keys are unaffected.
  */
 export type SessionRole = "admin" | "social";
 
 export type AuthResult =
   | { authenticated: true; mode: "session"; userId: string; role: SessionRole }
-  | { authenticated: true; mode: "api-key"; agent: string }
+  | {
+      authenticated: true;
+      mode: "api-key";
+      agent: string;
+      /** What this key may do. The master and env-var keys hold ["*"];
+       *  a minted key (public.agent_keys) holds only what it was minted with. */
+      scopes?: string[];
+    }
   | { authenticated: false; error: string };
 
 export interface AuthOptions {
@@ -22,45 +32,51 @@ export interface AuthOptions {
 
 const DEFAULT_SIGNATURE_TTL_SECONDS = 300;
 
-function validateApiKey(key: string): AuthResult {
+type ApiKeyResult = Extract<AuthResult, { mode: "api-key" } | { authenticated: false }>;
+
+/** The master and env-var agent keys. Synchronous; no database. */
+function validateEnvApiKey(key: string): ApiKeyResult {
   if (key === process.env.API_SECRET_KEY) {
-    return { authenticated: true, mode: "api-key", agent: "master" };
+    return { authenticated: true, mode: "api-key", agent: MASTER_AGENT, scopes: [WILDCARD_SCOPE] };
   }
 
-  const agentKeys: Record<string, string | undefined> = {
-    content_agent: process.env.CONTENT_AGENT_API_KEY,
-    seo_agent: process.env.SEO_AGENT_API_KEY,
-    analytics_agent: process.env.ANALYTICS_AGENT_API_KEY,
-    email_agent: process.env.EMAIL_AGENT_API_KEY,
-    openclawd: process.env.OPENCLAWD_API_KEY,
-  };
-
-  for (const [agent, agentKey] of Object.entries(agentKeys)) {
+  for (const [agent, envVar] of Object.entries(ENV_AGENT_KEY_VARS)) {
+    const agentKey = process.env[envVar];
     if (agentKey && key === agentKey) {
-      return { authenticated: true, mode: "api-key", agent };
+      return { authenticated: true, mode: "api-key", agent, scopes: [WILDCARD_SCOPE] };
     }
   }
 
   return { authenticated: false, error: "Invalid API key" };
 }
 
+/**
+ * Env keys first, then a minted key from public.agent_keys. `minted` tells
+ * the signature check that the key signs with itself.
+ */
+async function validateApiKey(key: string): Promise<{ result: ApiKeyResult; minted: boolean }> {
+  const envResult = validateEnvApiKey(key);
+  if (envResult.authenticated || !isMintedKeyFormat(key)) {
+    return { result: envResult, minted: false };
+  }
+
+  try {
+    const minted = await verifyAgentKey(createAdminClient(), key);
+    if (minted) {
+      return {
+        result: { authenticated: true, mode: "api-key", agent: minted.name, scopes: minted.scopes },
+        minted: true,
+      };
+    }
+  } catch {
+    // A database hiccup is a failed key, never an open door.
+  }
+  return { result: envResult, minted: false };
+}
+
 function getSignatureTtlSeconds(): number {
   const raw = Number(process.env.API_REQUEST_SIGNATURE_TTL_SECONDS || DEFAULT_SIGNATURE_TTL_SECONDS);
   return Number.isFinite(raw) && raw > 0 ? raw : DEFAULT_SIGNATURE_TTL_SECONDS;
-}
-
-function signaturesMatch(expected: string, actual: string): boolean {
-  const normalizedActual = actual.replace(/^sha256=/, "").trim().toLowerCase();
-  const normalizedExpected = expected.trim().toLowerCase();
-
-  if (!normalizedActual || normalizedActual.length !== normalizedExpected.length) {
-    return false;
-  }
-
-  return timingSafeEqual(
-    Buffer.from(normalizedExpected, "utf8"),
-    Buffer.from(normalizedActual, "utf8")
-  );
 }
 
 async function validateApiSignature(request: NextRequest): Promise<AuthResult> {
@@ -69,13 +85,13 @@ async function validateApiSignature(request: NextRequest): Promise<AuthResult> {
     return { authenticated: false, error: "Missing x-api-key" };
   }
 
-  const keyValidation = validateApiKey(apiKey);
+  const { result: keyValidation, minted } = await validateApiKey(apiKey);
   if (!keyValidation.authenticated) {
     return keyValidation;
   }
 
   const signatureRequired = (process.env.API_SIGNATURE_REQUIRED || "true").toLowerCase() !== "false";
-  if (!signatureRequired) {
+  if (!signatureRequired && !minted) {
     return keyValidation;
   }
 
@@ -100,23 +116,19 @@ async function validateApiSignature(request: NextRequest): Promise<AuthResult> {
     return { authenticated: false, error: "Expired x-timestamp" };
   }
 
-  const signingSecret = process.env.API_REQUEST_SIGNING_SECRET || process.env.API_SECRET_KEY;
+  // With API_PER_KEY_SIGNING on, a named agent key must have signed with its
+  // own key; only the master key signs with the shared signing secret. Off
+  // (the default), every env key signs with the shared secret as before. A
+  // minted key always signs with itself.
+  const signingSecret = signingSecretFor(keyValidation.agent, apiKey, process.env, { minted });
   if (!signingSecret) {
     return { authenticated: false, error: "API request signing secret is not configured" };
   }
 
   const bodyText = await request.clone().text();
   const pathname = new URL(request.url).pathname;
-  const signingPayload = [
-    request.method.toUpperCase(),
-    pathname,
-    timestamp,
-    bodyText,
-  ].join(":");
-
-  const expectedSignature = createHmac("sha256", signingSecret)
-    .update(signingPayload)
-    .digest("hex");
+  const signingPayload = buildSigningPayload(request.method, pathname, timestamp, bodyText);
+  const expectedSignature = computeSignature(signingSecret, signingPayload);
 
   if (!signaturesMatch(expectedSignature, signature)) {
     return { authenticated: false, error: "Invalid x-signature" };
@@ -164,7 +176,11 @@ export async function authenticateSessionOrApiKey(
 ): Promise<AuthResult> {
   const apiKey = request.headers.get("x-api-key");
   if (apiKey) {
-    return validateApiSignature(request);
+    const auth = await validateApiSignature(request);
+    if (auth.authenticated && auth.mode === "api-key" && !scopedRouteAllowed(request.method, new URL(request.url).pathname, auth.scopes ?? [])) {
+      return { authenticated: false, error: "This key is not authorised for this route" };
+    }
+    return auth;
   }
 
   return validateSession(opts);
@@ -172,4 +188,21 @@ export async function authenticateSessionOrApiKey(
 
 export function unauthorizedResponse(error: string = "Unauthorized") {
   return Response.json({ error }, { status: 401 });
+}
+
+/**
+ * A 403 when an API key lacks `scope`, else null. Sessions pass (session
+ * roles are checked by allowRoles); so do the master and env-var keys, which
+ * hold "*". Call it right after the authenticated check:
+ *
+ *   const denied = requireScope(auth, "leads:read");
+ *   if (denied) return denied;
+ */
+export function requireScope(auth: AuthResult, scope: Scope): Response | null {
+  if (!auth.authenticated) return unauthorizedResponse(auth.error);
+  if (auth.mode === "session") return null;
+  // A result built elsewhere without scopes (lib/studio/auth.ts) is the master.
+  const scopes = auth.scopes ?? (auth.agent === MASTER_AGENT ? [WILDCARD_SCOPE] : []);
+  if (hasScope(scopes, scope)) return null;
+  return Response.json({ error: `This key does not have the ${scope} scope`, scope }, { status: 403 });
 }

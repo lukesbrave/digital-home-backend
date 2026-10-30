@@ -1,3 +1,4 @@
+import { actorFromLabel, leadUpsertEvent, recordHomeEvent } from "@/lib/events/record";
 import { logActivity } from "./activity";
 import { validUuidValues } from "./capture-validation";
 import { fireTrigger } from "./engine";
@@ -181,5 +182,6 @@ export async function upsertLead(
     }
   }
 
+  await recordHomeEvent(supabase, leadUpsertEvent(actorFromLabel(actor), lead.id, created, addedTags.length));
   return { lead, created, previous: created ? undefined : (existing as Lead) };
 }
