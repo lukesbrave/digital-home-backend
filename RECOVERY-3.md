@@ -99,3 +99,13 @@ prove hosted Supabase Auth login, Storage/R2 export/import, external integration
 Studio recovery, DNS cutover or an old Simon model executing the procedure. Those
 remain explicit release gates. No member should be told recovery is guaranteed
 until their own isolated restore and runtime checks have passed.
+
+## Old-Simon local rehearsal finding (2026-10-30)
+
+The actual unchanged-training Simon rehearsal completed local upgrade and separate-
+target restores. Some deliberately flipped-byte dump copies were accepted by
+pg_restore with exit 0. Its transaction/error flags are not an integrity check:
+always verify the entire trusted recovery receipt before invoking restore, then
+compare restored schema and values. Both pristine backup sets passed verification
+after the negative tests. See OLD-SIMON-REHEARSAL.md for scope; hosted recovery and
+application acceptance are still separate gates.

@@ -51,13 +51,11 @@ backend 2.9.0 and frontend 2.5.4. No production changes or migrations performed.
   from published Auto Agency db138ee3 was inspected (skills 2026-10-02.2): it
   already follows release UPGRADE.md. Hashes and acceptance steps are recorded in
   OLD-SIMON-REHEARSAL.md; no card/training/identity/memory was changed.
-- Native old-Simon test remains BLOCKED: the lab Buzz native executable is absent,
-  but Docker now starts with appropriate execution permission (earlier diagnosis
-  corrected). Separate pinned-source rebuild and archived-state clones are in
-  Auto Agency tools/starter3-buzz-lab. All 76 installed older training files match.
-  Actual model authentication fails despite saved login presence; owner sign-in
-  to the isolated clone is required. Conversation/recovery proof remains NOT RUN.
-  See OLD-SIMON-REHEARSAL.md; no substitute simulation or native pass claimed.
+- Actual guided old-Simon local rehearsal now PASS: archived September Simon used
+  unchanged training (76 files), real Buzz relay/ACP and shipped upgrade tools.
+  Pre/post-upgrade restores, interrupted transaction, preservation/type merge and
+  negative recovery checks executed; independent outcome checks pass. Details and
+  limitations are in OLD-SIMON-REHEARSAL.md. Native desktop UI remains untested.
 
 ## Proof
 
@@ -79,7 +77,7 @@ backend 2.9.0 and frontend 2.5.4. No production changes or migrations performed.
   lint clean. App runtime files unchanged this increment; previous builds stand.
 - PostgreSQL 18 test binaries installed locally; no system service started. The
   test creates/stops/removes only its own synthetic cluster.
-- No actual older-Simon runtime run or hosted Supabase/Stripe network canary yet.
+- Actual older-Simon guided local runtime run passed; hosted Supabase/Stripe network canary remains.
   Auth and Storage metadata in local SQL fixtures do not prove provider login or
   hosted object recovery; local byte copies do not prove R2 API transfers.
 
@@ -94,9 +92,9 @@ backend 2.9.0 and frontend 2.5.4. No production changes or migrations performed.
 4. Hosted database/media/account recovery, including actual Auth login, Storage
    and R2 transfer, on an isolated target. Local full-schema/code/media recovery
    is now tested; provider recovery, post-snapshot writes and cutover remain.
-5. Repair the isolated lab executable/runtime prerequisites, then actual
-   unchanged-old-Simon rehearsal using UPGRADE-3.md; fresh and customised
-   Home canaries, real Stripe test mode and optional Studio/social matrix.
+5. Expand the passed local old-Simon scenario to more complex member type/schema
+   customisations and fresh/customised running Home canaries, real Stripe test mode
+   and optional Studio/social matrix. No training update is required for the passed scenario.
 6. Review paired versions/release metadata only after the above. Public versions
    remain backend 2.9.0/frontend 2.5.4; no publication without Luke's word.
 

@@ -1,7 +1,41 @@
 # Unchanged older Simon — rehearsal record and next run
 
-Status: historical training inspected; native/model rehearsal BLOCKED, not passed.
-No employee, card, installed training, memory or chat was changed.
+Status: **guided local old-Simon model rehearsal PASS, 2026-10-30**.
+Original employee, card, training, memory and chat were preserved. A cloned test
+identity/state received the new rehearsal conversation; its training stayed unchanged.
+
+## Actual executed rehearsal (latest)
+
+See Auto Agency branch `codex/starter3-buzz-rehearsal-2026-10-30`,
+`tools/starter3-buzz-lab/REHEARSAL-RESULT.md` and REHEARSAL-RECEIPT.json.
+The old installed September Simon (mission 2026-09-10.1) executed 46 tool calls
+through the real private Buzz relay/ACP. All 76 training files and the archived
+prompt match before/after; training directories were read-only. Actual responding
+model was claude-sonnet-5-5 through the unchanged sonnet alias. This proves old
+training on the repaired runtime, not an old model version or native desktop UI.
+
+He created actual code/database/media backups, proved a pre-upgrade restore,
+interrupted a real migration transaction on a separate copy, then used the shipped
+upgrade tool to apply 004–007 to the fictional local database. He manually merged
+shared types while preserving the member type export, verified path-specific
+preservation approvals and kept VERSION unchanged. A second independent-target
+restore matches the upgraded source. Original data, custom schema/views/grants,
+code customisations/deletions/modes and local media survived. Independent baseline
+checks verified outcomes; full snapshot record multisets and schema match (function
+listing order differs). Both trusted artifact sets reverify with zero differences.
+
+Negative checks covered corrupt artifacts, occupied targets, receipt overwrite
+and truncated restore. pg_restore alone accepted some flipped-byte copies: the
+trusted hash gate must run first. Existing scripted tests executed by Simon:
+upgrade 37/37, integrity 3/3. These are separate from his actual rehearsal actions.
+
+Remaining limits: one explicitly guided synthetic scenario; committed custom type
+export rather than every possible custom column merge; no compiled types/app build,
+application login/form flow, hosted Auth/Storage/R2, Studio/social/Stripe, concurrent
+writer cutover or native desktop import proof. Starter 3 remains unreleased.
+Private transcripts/dumps/configuration are retained outside git; public evidence
+contains only outcomes/source pins/hashes. No deployment or training publication.
+The runtime/login limitations below are historical and superseded by this result.
 
 ## Immutable older baseline inspected (2026-10-30)
 
