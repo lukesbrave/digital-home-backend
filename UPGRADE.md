@@ -51,15 +51,16 @@ Skip the `remote add` if `starter` already exists. Then:
    works on branch `upgrade/<target tag>`, checks out and commits the files
    that are new in the release, lists every changed file to merge by hand with
    its `git diff` command, applies every pending backend migration of the
-   release one transaction each and records it in `schema_migrations`, copies
-   `src/types/database.ts` to the frontend when that checkout is clean and on
-   its own branch, and keeps `VERSION` unchanged until verification completes. Without `--project-ref <ref> --yes`
+   release one transaction each and records it in `schema_migrations`, compares
+   shared types with the frontend and requires a manual merge if they differ, and keeps `VERSION` unchanged until verification completes. Without `--project-ref <ref> --yes`
    it stops at the database (exit 2) and prints the command to resume.
    `--take-untouched` also takes changed files the Home has never edited since
    its last release.
 5. Merge the listed files (merge, don't overwrite), then run the checks it
    prints (`npx tsc --noEmit`, `npm run build`) and commit on the branch.
-   Commit the copied types in the frontend on its branch.
+   Preserve custom columns/types in both repositories, then commit the reviewed
+   merged types on their respective branches. A clean frontend can still contain
+   custom types; the upgrader never replaces a differing file automatically.
 
 The scripts read `SUPABASE_URL` from the repo's `.env.local` (a worktree uses
 the main checkout's). The database password comes from `SUPABASE_DB_PASSWORD`

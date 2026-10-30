@@ -24,7 +24,9 @@
     "test:money": "node --experimental-strip-types --test src/lib/money/*.test.ts src/lib/crm/fulfilment.test.ts",
     "test:agent-keys": "node --experimental-strip-types --test src/lib/api/*.test.ts",
     "test:events": "node --experimental-strip-types --test src/lib/events/*.test.ts",
-    "test:starter3-sql": "node --test scripts/test-starter3-sql.mjs"
+    "test:starter3-sql": "node --test scripts/test-starter3-sql.mjs",
+    "test:recovery": "node --test scripts/test-recovery-files.mjs",
+    "test:recovery-postgres": "node --test scripts/test-starter3-recovery.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.80.0",

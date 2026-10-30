@@ -1,3 +1,11 @@
+## Unreleased — Starter 3.0 recovery increment
+
+Actual local PostgreSQL dump/restore rehearsal with custom schema, data, code and
+media; private artifact integrity checks and recovery guide. Upgrade preparation
+no longer overwrites differing frontend types, even when committed/clean. Older
+Simon training was inspected without changing it; native runtime proof remains
+blocked by missing lab executables. No release or deployment.
+
 ## Unreleased — Starter 3.0 development, second increment
 
 Optional scoped agent keys with legacy-auth compatibility, activity feed, Money

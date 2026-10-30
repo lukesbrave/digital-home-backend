@@ -528,7 +528,7 @@ describe('upgrade.mjs against a fake starter and database', () => {
     assert.match(r.out, /git ls-remote --tags/);
     assert.match(r.out, /\[dry-run\] would run: git remote add starter/);
     assert.match(r.out, /\[dry-run\] would apply 1 migration\(s\) to homeref/);
-    assert.match(r.out, /is on main; not copying/);
+    assert.match(r.out, /Shared types differ: manual merge required/);
     assert.deepEqual(r.calls.map((c) => c.op), ['connect', 'readState']);
     assert.equal(readFileSync(join(f.frontend, 'src/types/database.ts'), 'utf8'), 'types v0\n');
   });
@@ -562,8 +562,8 @@ describe('upgrade.mjs against a fake starter and database', () => {
     ]);
     assert.match(r.out, /Record them once:\n\s+node scripts\/migrations-seed\.mjs --project-ref homeref --yes/);
     assert.equal(readFileSync(join(f.home, 'VERSION'), 'utf8'), '2.9.0\n', 'preparation must not report a completed upgrade');
-    assert.equal(readFileSync(join(f.frontend, 'src/types/database.ts'), 'utf8'), 'types v2\n');
-    assert.match(r.out, /git -C .* add src\/types\/database\.ts && git -C .* commit/);
+    assert.equal(readFileSync(join(f.frontend, 'src/types/database.ts'), 'utf8'), 'types v0\n');
+    assert.match(r.out, /Shared types differ: manual merge required/);
   });
 
   test('a partial frontend or member migration warns; a partial starter backend one refuses', () => {
@@ -630,6 +630,21 @@ describe('upgrade.mjs against a fake starter and database', () => {
     assert.match(r.out, /has uncommitted changes; not copying over them/);
     assert.equal(readFileSync(join(f.frontend, 'src/types/database.ts'), 'utf8'), 'types v0 with a local edit\n');
     assert.equal(readFileSync(join(f.home, 'src/types/database.ts'), 'utf8'), 'types v2\n');
+  });
+
+  test('committed custom frontend types survive upgrade preparation on a clean branch', () => {
+    const f = fixture();
+    sh(f.frontend, 'checkout', '-q', '-b', 'member-upgrade');
+    write(f.frontend, 'src/types/database.ts', 'types v0 with member_segment and custom schema\n');
+    sh(f.frontend, 'add', 'src/types/database.ts');
+    sh(f.frontend, 'commit', '-qm', 'Member schema customisation');
+    const before = sh(f.frontend, 'rev-parse', 'HEAD');
+    const r = runScript(f.home, 'upgrade.mjs', ['--starter-url', f.starter, '--project-ref', 'homeref', '--yes', '--frontend', f.frontend, '--take-untouched'], { db: HOME_29 });
+    assert.equal(r.status, 0, r.out);
+    assert.match(r.out, /Shared types differ: manual merge required/);
+    assert.equal(readFileSync(join(f.frontend, 'src/types/database.ts'), 'utf8'), 'types v0 with member_segment and custom schema\n');
+    assert.equal(sh(f.frontend, 'rev-parse', 'HEAD'), before);
+    assert.equal(sh(f.frontend, 'status', '--porcelain'), '');
   });
 
   test('without a password it stops before the database, and never takes one from argv', () => {

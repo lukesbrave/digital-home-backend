@@ -34,9 +34,30 @@ backend 2.9.0 and frontend 2.5.4. No production changes or migrations performed.
 - Expanded guide distinguishes code capabilities from actual schema history.
   Scoped access outside its documented route set is deliberately unavailable.
 
+## Third increment — recovery and unchanged-Simon compatibility
+
+- A real PostgreSQL dump/restore rehearsal now runs against a disposable private
+  Unix-socket cluster (no TCP listener, production credentials or live services).
+  It restores full custom schema, values, permissions, sequences, code bundles,
+  deleted pages/executable modes and local media/configuration fixtures.
+- Interrupted migrations, corrupt artifacts, nonempty restore targets, linked
+  files and receipt overwrite attempts have explicit failure checks.
+- Private artifact integrity tool compares bytes, permissions, directories and
+  unexpected/missing files; it is not itself a backup or completeness proof.
+- Fixed a real upgrade hazard: a clean frontend could contain committed custom
+  types. The upgrader now leaves differing frontend types untouched and requests
+  a reviewed merge instead of automatically copying over them.
+- RECOVERY-3.md is linked from the existing-Simon guide. Historical Simon source
+  from published Auto Agency db138ee3 was inspected (skills 2026-10-02.2): it
+  already follows release UPGRADE.md. Hashes and acceptance steps are recorded in
+  OLD-SIMON-REHEARSAL.md; no card/training/identity/memory was changed.
+- Native old-Simon test remains BLOCKED: the lab Buzz native executable is absent,
+  Docker has no service socket, and the installed Desktop launcher fails with
+  kLSNoExecutableErr. No substitute model run is claimed as a native pass.
+
 ## Proof
 
-- Foundation/preservation: 14/14. Upgrade preparation: 36/36.
+- Foundation/preservation: 14/14. Upgrade preparation: 37/37 (including committed frontend custom types).
 - Money/fulfilment: 115/115. Keys/authentication: 20/20. Events: 38/38.
 - CRM suite: 14/14 (includes fulfilment tests counted above).
 - Isolated PostgreSQL (PGlite): 4/4, applying the actual original paired schema
@@ -49,7 +70,14 @@ backend 2.9.0 and frontend 2.5.4. No production changes or migrations performed.
   new-module lint is clean; broader touched-file lint has no errors and two
   pre-existing sidebar effect warnings. Frontend CRM tests: 10/10. Exact branch
   commits are in the shared plan.
-- No actual older-Simon runtime run or Supabase/Stripe network canary yet.
+- Recovery integrity tests: 3/3. Actual PostgreSQL recovery runner: 6/6 (five
+  scenarios plus parent). Foundation/preservation 14/14 rerun; targeted script
+  lint clean. App runtime files unchanged this increment; previous builds stand.
+- PostgreSQL 18 test binaries installed locally; no system service started. The
+  test creates/stops/removes only its own synthetic cluster.
+- No actual older-Simon runtime run or hosted Supabase/Stripe network canary yet.
+  Auth and Storage metadata in local SQL fixtures do not prove provider login or
+  hosted object recovery; local byte copies do not prove R2 API transfers.
 
 ## Remaining release work (not hidden behind a 3.0 version bump)
 
@@ -59,9 +87,11 @@ backend 2.9.0 and frontend 2.5.4. No production changes or migrations performed.
    PostgreSQL tests are now present but not hosted Supabase or Studio proof.
 3. Analytics source/device filters and remaining generic reports; current counts
    are recorded events, not unique people, verified leads or social statistics.
-4. Complete database/media/account recovery, including custom schemas and legacy
-   Storage, on an isolated target. Code hashes do not prove full recovery.
-5. Actual unchanged-old-Simon rehearsal using UPGRADE-3.md, fresh and customised
+4. Hosted database/media/account recovery, including actual Auth login, Storage
+   and R2 transfer, on an isolated target. Local full-schema/code/media recovery
+   is now tested; provider recovery, post-snapshot writes and cutover remain.
+5. Repair the isolated lab executable/runtime prerequisites, then actual
+   unchanged-old-Simon rehearsal using UPGRADE-3.md; fresh and customised
    Home canaries, real Stripe test mode and optional Studio/social matrix.
 6. Review paired versions/release metadata only after the above. Public versions
    remain backend 2.9.0/frontend 2.5.4; no publication without Luke's word.

@@ -21,7 +21,8 @@ me the result before deploying. Keep your current instructions and training.”
 2. Read the project's own rules. Inspect both git states. Preserve dirty work;
    never stash, reset, clean or overwrite it. Work on named branches in separate
    `.worktrees/` checkouts. Existing client branches, designs and domains remain.
-3. Before edits, make a recoverable code/database/media backup. Include custom
+3. Follow [the recovery procedure](RECOVERY-3.md) before edits and prove an
+   isolated restore. Make a recoverable code/database/media backup. Include custom
    schema, legacy storage and account/configuration recovery. Record proof of
    recovery separately; the preservation tool below is only code evidence.
    Test against an isolated copy with outbound sends and real payments disabled.
@@ -104,3 +105,9 @@ Local SQL tests cover original paired schema installation, custom row/column and
 workflow preservation, table-name collision refusal, role restrictions and payment
 receipt retries/rollback. They do not prove Supabase Auth/Storage recovery, Stripe
 network integration, installed Studio compatibility or a real old-Simon run.
+
+The upgrader now leaves differing frontend database types untouched even when
+they are committed and the checkout is clean. Merge member columns/types in both
+repositories and verify them; never copy the backend file over the frontend merely
+to make them match. See OLD-SIMON-REHEARSAL.md for the inspected older training
+baseline, the native-runtime blocker and the remaining model-behaviour proof.
