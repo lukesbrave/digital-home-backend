@@ -27,15 +27,28 @@ must use an already-trained older Simon and verify hashes before and after.
 
 ## Runtime limitation observed
 
-The previously isolated Buzz lab has saved build/state records but its native
-`target/debug/buzz-desktop` executable is absent. Docker has no running socket;
-opening its installed Desktop application fails with macOS `kLSNoExecutableErr`
-(the executable is missing). Do not claim that a conversation ran. Do not work
-around this by using a live client employee, copying production credentials into
-an unfenced process, replacing the installed old employee, or calling a different
-Codex/Claude simulation a native old-Simon pass. The saved active-case metadata
-also points to historical tests and a later Blaze volume; verify the intended
-Simon identity/training explicitly before resuming anything.
+Correction after isolated repair on 2026-10-30: Docker Desktop launches with
+appropriate execution permission; the earlier missing-executable interpretation
+was incorrect for Docker. Archived native Buzz binaries and lab images are absent.
+The separate Auto Agency worktree `starter3-buzz-rehearsal-2026-10-30` contains
+`tools/starter3-buzz-lab`, rebuilding exact archived Buzz source b8aa0233 and
+cloning the old home/database/storage. No original lab volume was written.
+
+The selected installed Simon is case 20260910-033002, mission training
+2026-09-10.1, model alias sonnet. This is distinct from the October published
+source audit above. All 76 training files match the original; manifest SHA-256
+`4c5f8938bf095574ecc53d1e07f37eff6d8a16ec308c0401ff2be990a8ba41ab`.
+Card/system prompt matches its archived snapshot; SHA-256
+`131c71bb74b7188e04713885c764678144ee23b451028ac8b917941c272fca88`.
+Cloned database, Redis and storage health checks pass with no host ports.
+
+Saved login status reports present, but an actual tool-free model connection
+fails authentication. Luke must personally sign into the isolated cloned home;
+see the harness README. No production login may be copied to bypass this.
+The actual old-Simon upgrade/recovery conversation remains NOT RUN. A rebuilt
+container relay/ACP conversation will be real Buzz execution but is distinct
+from native desktop UI/import acceptance; do not conflate them. No employee
+training was changed, and no release was published.
 
 ## Prepared owner task for an isolated run
 

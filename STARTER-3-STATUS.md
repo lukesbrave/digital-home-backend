@@ -52,8 +52,12 @@ backend 2.9.0 and frontend 2.5.4. No production changes or migrations performed.
   already follows release UPGRADE.md. Hashes and acceptance steps are recorded in
   OLD-SIMON-REHEARSAL.md; no card/training/identity/memory was changed.
 - Native old-Simon test remains BLOCKED: the lab Buzz native executable is absent,
-  Docker has no service socket, and the installed Desktop launcher fails with
-  kLSNoExecutableErr. No substitute model run is claimed as a native pass.
+  but Docker now starts with appropriate execution permission (earlier diagnosis
+  corrected). Separate pinned-source rebuild and archived-state clones are in
+  Auto Agency tools/starter3-buzz-lab. All 76 installed older training files match.
+  Actual model authentication fails despite saved login presence; owner sign-in
+  to the isolated clone is required. Conversation/recovery proof remains NOT RUN.
+  See OLD-SIMON-REHEARSAL.md; no substitute simulation or native pass claimed.
 
 ## Proof
 
