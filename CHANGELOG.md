@@ -4,6 +4,10 @@ All notable changes to the Digital Home Backend Starter.
 
 ## [Unreleased]
 
+- Lead detail reads its appointment clock after loading and refreshes it every
+  minute outside render. This fixes the React purity lint error and lets past
+  appointments drop out while the page stays open. No schema/configuration change.
+
 A Home's schema state is now recorded, and its upgrade is scripted:
 
 - Migration `003_schema_migrations.sql` adds `schema_migrations`, one row per

@@ -129,6 +129,7 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
   const router = useRouter();
   const { show, node: toastNode } = useToast();
   const [detail, setDetail] = useState<Detail | null>(null);
+  const [nowMs, setNowMs] = useState(0);
   const [note, setNote] = useState('');
   const [savingNote, setSavingNote] = useState(false);
   const [tagInput, setTagInput] = useState('');
@@ -149,7 +150,9 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
 
   const load = useCallback(async () => {
     try {
-      setDetail(await api<Detail>(`/api/crm/leads/${id}`));
+      const loaded = await api<Detail>(`/api/crm/leads/${id}`);
+      setNowMs(Date.now());
+      setDetail(loaded);
     } catch (e) {
       show(e instanceof Error ? e.message : 'Failed to load lead', 'err');
     }
@@ -157,6 +160,9 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
 
   useEffect(() => {
     load();
+    // Refresh the appointment clock outside render, including while this page stays open.
+    const clock = window.setInterval(() => setNowMs(Date.now()), 60_000);
+    return () => window.clearInterval(clock);
   }, [load]);
 
   const patch = async (updates: Record<string, unknown>, okMsg = 'Saved') => {
@@ -220,7 +226,6 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
   const ft = detail.funnel_first_touch;
 
   // At-a-glance: what's next for this lead.
-  const nowMs = Date.now();
   const nextAppt =
     [...detail.appointments]
       .filter((a) => a.status === 'scheduled' && new Date(a.starts_at).getTime() > nowMs)
