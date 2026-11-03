@@ -25,7 +25,7 @@ backend 2.9.0 and frontend 2.5.4. No production changes or migrations performed.
 - Events feed/stats and lead/activity/article/key receipts. Payment processing
   receipts are atomic with webhook completion; ignored/replayed events do not
   duplicate receipts. This is processing evidence, not revenue analytics.
-- Money page/API for products, orders, invoices, projects and deliverables;
+- Payment APIs for products, orders, invoices, projects and deliverables;
   Stripe signature/retry/idempotency handling and optional checkout.
 - Won-deal project hooks and draft fulfilment recipes. Reseeding preserves member
   email copy, workflow steps/status and onboarding settings.
@@ -100,3 +100,15 @@ backend 2.9.0 and frontend 2.5.4. No production changes or migrations performed.
 
 Continue in these worktrees. The main plan/readiness matrix in Auto Agency holds
 cross-repo status. This increment is not a complete 3.0 release candidate.
+
+## 2026-11-03 scope correction
+
+Luke approved payment capabilities without a bundled Money screen. Removed the
+candidate page and navigation; APIs, schema and processing remain. Existing
+member interfaces must survive upgrades. Both candidate setup guides now specify
+900–999 and reviewed handling of previously applied custom migrations and types.
+Release remains pending the gates above.
+
+Validation for this change: payment 115/115, upgrade 37/37, production OpenNext
+build passed. Compiled route manifest has no Money page and retains products API.
+No hosted account/database tests or deployment performed in this increment.

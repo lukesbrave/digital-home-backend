@@ -41,7 +41,7 @@ me the result before deploying. Keep your current instructions and training.”
    UPGRADE.md. Run the dry run first. Confirm the database project with the owner
    before any write; never pass passwords or keys as command arguments. A partly
    applied migration blocks progress. Preserve existing migration files/checksums
-   and member 900+ migrations. Read and review new SQL before approval.
+   and member migrations (new files use 900–999; existing files need review before any renumbering). Read and review new SQL before approval.
 6. Run the preparation tool. Merge listed files by hand; do not replace whole
    configuration, sidebar, auth or shared type files. Keep custom columns/types,
    bindings, routes, site design and the member's social activation choice.
@@ -111,3 +111,9 @@ they are committed and the checkout is clean. Merge member columns/types in both
 repositories and verify them; never copy the backend file over the frontend merely
 to make them match. See OLD-SIMON-REHEARSAL.md for the inspected older training
 baseline, the native-runtime blocker and the remaining model-behaviour proof.
+
+## Optional payment interfaces
+
+The candidate provides payment and fulfilment APIs without a default Money page.
+Preserve any existing member Money page, navigation, records and integrations.
+Do not delete a member interface merely because it is absent from the starter.

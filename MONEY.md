@@ -1,7 +1,10 @@
 # Money and fulfilment — Starter 3.0 candidate
 
-`/crm/money` groups products, orders, invoices, projects and deliverables in the
-member's own Home. Migration 006 is additive; existing table-name collisions stop
+Payment and fulfilment APIs provide products, orders, invoices, projects and
+deliverables in the member’s own Home. The starter deliberately ships no Money
+page or navigation item. Agents can use the APIs, and members can commission
+an interface appropriate to their business. Existing member-built screens must
+be preserved during upgrades. Migration 006 is additive; existing table-name collisions stop
 for a reviewed adoption. Payouts have a schema only; no automatic transfers.
 
 Money records can be managed without Stripe. Hosted checkout and invoice sending
