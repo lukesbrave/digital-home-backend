@@ -83,12 +83,17 @@ to start over.
 
 ### Your own migrations
 
-Numbers `001` to `899` are reserved for this starter and the frontend starter.
-Give your own migrations a number `900` or higher (for example
-`900_my_feature.sql`) and never reuse or renumber a starter file: the upgrade
-applies and records starter files by name, and a reused number would make it
-skip or misapply one. The tools read files named `NNN_name.sql` and list any
-other `.sql` file they ignore.
+Keep official starter migration filenames and contents unchanged. Numbers
+`001`–`899` are reserved for official migrations in each repository. For a new
+member migration use an unused three-digit number `900`–`999`, for example
+`900_my_feature.sql`. Current tools require `NNN_name.sql`; four-digit and
+timestamp filenames are ignored. History identifies repository plus full filename,
+so both repositories can start at `001`. The backend upgrader applies target-release
+backend migrations; member migrations require separate review and application.
+If custom migrations already use reserved numbers, inspect their SQL, actual schema
+and applied history before deciding a mapping. Do not blindly rename or replay
+applied migrations, or rewrite history. See the backend `UPGRADE.md`.
+
 
 ---
 
