@@ -4,6 +4,38 @@ All notable changes to the Digital Home Backend Starter.
 
 ## [Unreleased]
 
+A Home's schema state is now recorded, and its upgrade is scripted:
+
+- Migration `003_schema_migrations.sql` adds `schema_migrations`, one row per
+  applied migration from either repo, keyed by (repo, name), with checksum,
+  when and by whom. RLS on, service role only. `src/types/database.ts` gains
+  the table: copy it to the frontend byte-identical.
+- `scripts/migrations-status.mjs` reports every frontend and backend migration
+  as applied, inferred (what it creates exists, but nothing records it),
+  partial or pending. Read-only; `--json` for agents.
+- `scripts/migrations-seed.mjs` is the one-time catch-up for 2.x Homes: it
+  records each inferred migration, creating the table first if needed. It
+  writes only with `--project-ref <ref>` matching `.env.local` and `--yes`;
+  `--dry-run` never writes.
+- `scripts/upgrade.mjs` does the mechanical part of an upgrade on branch
+  `upgrade/v<target>`: the target's own tools, new files, the list of files to
+  merge by hand, every pending migration recorded as it applies (behind the
+  same gate), the shared types and `VERSION`. It stops before deploy and never
+  merges or deletes; `--dry-run` writes nothing.
+- The tools verify the database certificate against Node's roots plus
+  Supabase's own root, bundled in `scripts/certs/` (`SUPABASE_CA_CERT` adds
+  another), take the password from the environment, stdin or a hidden prompt
+  (never the command line), and give each migration a 5 s lock and 60 s
+  statement timeout.
+- `scripts/apply-migration.mjs` now uses the same connection and password
+  rules: certificate verified, no password in the command, the database ref
+  printed first, and `--project-ref <ref>` refused unless it matches.
+- `npm run test:upgrade` tests the pure parts, the gates and a full upgrade
+  against throwaway git repos and a fake database.
+
+UPGRADE.md opens with the scripted path, available from the first release
+after 2.9.0; the older prose stays below it.
+
 ## [2.9.0] — 2026-09-13
 
 - Required R2 public media for new Digital Homes, independent of optional social

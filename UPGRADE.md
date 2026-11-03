@@ -10,6 +10,88 @@ folder:
 
 ---
 
+## Scripted upgrades (from the first release after 2.9.0)
+
+Available from the first release after 2.9.0 (not yet tagged). Until then
+follow the 2.9.0 section below. Once that release is out, its own section
+below names its tag; use that tag wherever this section says `<target tag>`.
+
+**Each upgrade runs the Home's current copy of the tools,** so the first step
+of every upgrade is to take the target release's copy and commit it on the
+upgrade branch (`upgrade.mjs` stops and prints these commands if it finds an
+older copy):
+
+```bash
+git remote add starter https://github.com/lukesbrave/digital-home-backend.git
+git fetch starter --tags
+git checkout -b upgrade/<target tag>
+git checkout <target tag> -- scripts/upgrade.mjs scripts/lib scripts/certs scripts/migrations-status.mjs scripts/migrations-seed.mjs supabase/migrations/003_schema_migrations.sql
+git commit -m "Bring in the upgrade tools from <target tag>"
+```
+
+Skip the `remote add` if `starter` already exists. Then:
+
+1. `node scripts/upgrade.mjs --dry-run` shows every step and writes nothing
+   (no tag, branch, file or database change).
+2. Read the Supabase project ref it prints aloud and have the member confirm it
+   is theirs. Never pass a ref that was not confirmed.
+3. A Home without a migration history records what it already has, once:
+   `node scripts/migrations-status.mjs`, then
+   `node scripts/migrations-seed.mjs --project-ref <ref> --yes`.
+   Add `--frontend <path>` to both so the frontend's migrations are recorded
+   too, and `--dry-run` to the seed to see its rows without writing them.
+4. `node scripts/upgrade.mjs --project-ref <ref> --yes --frontend <path>`. It
+   works on branch `upgrade/<target tag>`, checks out and commits the files
+   that are new in the release, lists every changed file to merge by hand with
+   its `git diff` command, applies every pending backend migration of the
+   release one transaction each and records it in `schema_migrations`, copies
+   `src/types/database.ts` to the frontend when that checkout is clean and on
+   its own branch, and writes `VERSION`. Without `--project-ref <ref> --yes`
+   it stops at the database (exit 2) and prints the command to resume.
+   `--take-untouched` also takes changed files the Home has never edited since
+   its last release.
+5. Merge the listed files (merge, don't overwrite), then run the checks it
+   prints (`npx tsc --noEmit`, `npm run build`) and commit on the branch.
+   Commit the copied types in the frontend on its branch.
+
+The scripts read `SUPABASE_URL` from the repo's `.env.local` (a worktree uses
+the main checkout's). The database password comes from `SUPABASE_DB_PASSWORD`
+in the environment, from stdin with `--password-stdin`, or from a hidden
+prompt; never type it into the command. Certificates are verified against
+Node's roots plus Supabase's own root, which ships in `scripts/certs/` (its
+fingerprint is in `scripts/lib/db.mjs`; compare it with Project Settings →
+Database → SSL Configuration if you want to check). `SUPABASE_CA_CERT` adds
+another CA file if Supabase ever changes its root. Each
+migration waits at most 5 seconds for a lock and 60 seconds per statement
+(`MIGRATION_LOCK_TIMEOUT`, `MIGRATION_STATEMENT_TIMEOUT`); a migration that
+times out is rolled back. The scripts never deploy, merge the branch or delete
+a file. Deploy afterwards with the member's approval (DEPLOYMENT.md).
+
+### Partly applied migrations
+
+`partial` means some of what a migration creates exists and some does not, and
+nothing records it. The upgrade refuses to apply anything while one of the
+backend's own starter migrations is partial; a partial frontend or member
+migration is reported and left alone. To resolve one: compare the file with the
+database (the status names what is missing). If the file is written to be
+re-run (`if not exists` throughout, as `002_crm_core.sql` is), apply it again
+with `node scripts/apply-migration.mjs <file> --project-ref <ref>` after
+confirming the ref (it uses the same verified connection and password rules
+as the upgrade tools), then run the seed to record it. Otherwise create only
+the missing objects by hand from the file, then seed. Never drop what exists
+to start over.
+
+### Your own migrations
+
+Numbers `001` to `899` are reserved for this starter and the frontend starter.
+Give your own migrations a number `900` or higher (for example
+`900_my_feature.sql`) and never reuse or renumber a starter file: the upgrade
+applies and records starter files by name, and a reused number would make it
+skip or misapply one. The tools read files named `NNN_name.sql` and list any
+other `.sql` file they ignore.
+
+---
+
 ## Instructions for Claude
 
 You are upgrading a member's Digital Home backend — a customized fork of
@@ -102,7 +184,8 @@ then apply this 2.7.4 → 2.8.0 step last.
 ### Step 1 — Preflight
 1. `git status` — if there are uncommitted changes, commit or stash them
    first so the upgrade is revertible.
-2. Create a branch: `git checkout -b upgrade/v2.8.0`.
+2. Create a branch named for the release you are moving to, for example
+   `git checkout -b upgrade/v2.9.0`.
 3. Add the starter as a remote if missing:
    `git remote add starter https://github.com/lukesbrave/digital-home-backend.git`
    then `git fetch starter --tags`.
@@ -110,7 +193,7 @@ then apply this 2.7.4 → 2.8.0 step last.
 ### Step 2 — Bring in the latest version
 1. Diff `git diff HEAD..v2.8.0 --stat` to see scope.
 2. New files (the vast majority) can be checked out directly:
-   `git checkout v2.6.0 -- <path>` for: `src/lib/crm/`, `src/lib/social/`,
+   `git checkout v2.8.0 -- <path>` for: `src/lib/crm/`, `src/lib/social/`,
    `src/app/brand/`, `brand/`,
    `src/app/api/crm/`, `src/app/api/social/`, `src/app/api/settings/`,
    `src/app/api/webhooks/`, `src/app/crm/`, `src/app/social/`,
@@ -135,7 +218,7 @@ then apply this 2.7.4 → 2.8.0 step last.
 2. Apply `supabase/migrations/002_crm_core.sql` to their Supabase project
    (use `scripts/apply-migration.mjs` or the Supabase SQL editor).
    It is additive — no destructive changes.
-2. **Frontend pairing:** copy `src/types/database.ts` byte-identical into
+3. **Frontend pairing:** copy `src/types/database.ts` byte-identical into
    their frontend project (`digital-home-frontend` fork), commit
    there too. Both repos share one Supabase — types must match.
 
@@ -159,8 +242,9 @@ then apply this 2.7.4 → 2.8.0 step last.
    activity entry and an opportunity in the first stage.
 4. Draft a 2-step test workflow, enroll yourself, run "Run engine now" —
    the send appears as `simulated` in the sent-email viewer.
-5. Commit, merge the branch, deploy. Done — `VERSION` should read `2.7.4`
-   (it comes along with the checkout).
+5. Commit, merge the branch, deploy. `VERSION` should read `2.8.0` (it
+   comes along with the checkout). Then apply the 2.9.0 section at the top
+   of this guide; the upgrade is done when `VERSION` reads `2.9.0`.
 
 ### If something breaks
 Revert is always available: `git checkout main` (the upgrade lives on its

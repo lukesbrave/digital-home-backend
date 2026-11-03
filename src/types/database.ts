@@ -2283,6 +2283,30 @@ export type Database = {
         };
         Relationships: [];
       };
+      schema_migrations: {
+        Row: {
+          name: string;
+          repo: "frontend" | "backend";
+          checksum: string | null;
+          applied_at: string;
+          applied_by: string | null;
+        };
+        Insert: {
+          name: string;
+          repo: "frontend" | "backend";
+          checksum?: string | null;
+          applied_at?: string;
+          applied_by?: string | null;
+        };
+        Update: {
+          name?: string;
+          repo?: "frontend" | "backend";
+          checksum?: string | null;
+          applied_at?: string;
+          applied_by?: string | null;
+        };
+        Relationships: [];
+      };
       funnel_events: {
         Row: {
           id: string;
