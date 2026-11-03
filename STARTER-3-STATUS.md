@@ -185,3 +185,14 @@ readiness and form-to-lead, complete browser acceptance, optional Studio/social
 compatibility and final release review/metadata. No production Home deploy or
 release publication. Shared plan contains the receipts and proposed isolated
 canary deployment, which needs Luke's per-deploy word under Auto Agency AGENTS.md.
+
+## Deployed browser findings — 2026-11-03
+
+Approved dedicated Cloudflare canaries passed deployed owner/auth, scoped MCP,
+form capture through service binding (one lead on repeated capture), approval,
+key revocation, social-off and actual public R2 image-readiness probes. Browser
+login, owner approval and rejection also passed. Browser testing found narrow
+mobile layout overflow and a stale proposed card after execution error; fixed
+responsive sidebar defaults (explicit choices preserved), constrained key inputs
+and refresh after decision failure. TypeScript/MCP 63 pass; only pre-existing
+ThemeToggle lint warning remains. Canary redeploy/browser verification follows.
