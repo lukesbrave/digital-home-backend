@@ -135,3 +135,24 @@ actual generated types from the hosted schema; final browser and production
 build rerun, paired metadata and release review. Luke asked us to find an empty
 project; account inventory is being checked. No deploy, database mutation,
 version bump or publication performed. This is not yet release-ready.
+
+## Hosted schema and runtime proof — 2026-11-03
+
+Luke created test project `iotldbnwtnzpwpyhwgmo` in Brave Test. Empty-schema
+preflight passed, then all 19 paired candidate migrations applied atomically.
+Verified 50 public tables, 19 history entries and restricted approval/key grants.
+Actual generated schema types now replace inherited optional Studio/private
+table placeholders in both clean starter candidates. Member upgrade guidance
+still generates from each member's full actual schema and preserves aliases.
+Fixed nullable calendar/dates/activity handling and validated text status/platform
+values at runtime. Both app TypeScript checks pass against generated types.
+
+Real hosted Auth password sign-in, private Storage byte hash roundtrip and anon
+denial passed. Local candidate Next runtime against hosted Supabase passed owner
+session, scoped key creation, MCP discovery, article proposal/approval, duplicate
+approval refusal and anonymous queue denial. Synthetic records only; fernhollow's
+four leads and one user untouched. Receipt held in shared readiness evidence.
+This does not prove a separate-project restore, Cloudflare deployment, R2 or
+Stripe. A second empty project and Stripe account selection have been requested.
+
+Final checks for generated-type increment: backend and frontend production OpenNext builds pass; payment 116, MCP 63 and upgrade 37 tests pass; touched backend lint clean. Hosted test harness is scripts/test-hosted-starter3.mjs, pinned to the test project.

@@ -56,7 +56,7 @@ export async function POST(request: NextRequest) {
   if (found.error) return NextResponse.json({ error: found.error.message }, { status: 500 });
   const product = found.data;
   if (!product) return NextResponse.json({ error: "No active product with that slug" }, { status: 404 });
-  if (!CHECKOUT_KINDS.includes(product.kind)) {
+  if (!CHECKOUT_KINDS.some(kind=>kind===product.kind)) {
     return NextResponse.json({ error: `${product.kind} products are billed on invoices, not checkout` }, { status: 400 });
   }
   if (product.stripe_price_id) {

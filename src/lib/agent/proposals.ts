@@ -149,7 +149,7 @@ const QUEUED =
 export async function calendarEntryForKeyword(
   supabase: AdminClient,
   keyword: string,
-): Promise<{ id: string; title: string; status: string } | null> {
+): Promise<{ id: string; title: string; status: string | null } | null> {
   let query = supabase
     .from("content_calendar")
     .select("id, title, status")

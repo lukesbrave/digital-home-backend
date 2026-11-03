@@ -120,8 +120,9 @@ export const leadHandlers: McpHandlers = {
       data: {
         lead: { id: lead.id, email: lead.email, name: leadName(lead) },
         entries: data,
+        pagination_unavailable: data.length===limit&&!last?.created_at,
         next_cursor:
-          data.length === limit && last ? timelineCursor(last) : null,
+          data.length === limit && last?.created_at ? timelineCursor({...last,created_at:last.created_at}) : null,
       },
       summary: `Read ${data.length} timeline entr${data.length === 1 ? "y" : "ies"} for ${lead.email}`,
     };
@@ -149,7 +150,7 @@ export const leadHandlers: McpHandlers = {
       );
     await supabase
       .from("leads")
-      .update({ last_activity_at: note.created_at })
+      .update({ last_activity_at: note.created_at ?? new Date().toISOString() })
       .eq("id", lead.id);
     return {
       data: { ok: true, note_id: note.id, lead_id: lead.id, email: lead.email },

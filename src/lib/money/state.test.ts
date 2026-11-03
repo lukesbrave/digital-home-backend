@@ -250,3 +250,5 @@ test("tag changes remove, then add, without duplicates", () => {
   assert.deepEqual(applyTagChanges(["vip", "subscriber"], ["subscription-ended", "vip"], ["subscriber"]), ["vip", "subscription-ended"]);
   assert.deepEqual(applyTagChanges([], ["customer"], []), ["customer"]);
 });
+
+test('unknown persisted payment statuses fail closed instead of indexing transition maps',()=>{for(const value of ['unexpected','constructor','__proto__']){assert.equal(transitionOrder(value,'paid').ok,false);assert.equal(transitionInvoice(value,'paid').ok,false);}});

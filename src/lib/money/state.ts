@@ -243,13 +243,15 @@ function transition<S extends string>(moves: Record<S, readonly S[]>, from: S, t
 }
 
 /** Same-status is a no-op (a replay); refunded and void are final. */
-export function transitionOrder(from: OrderStatus, to: OrderStatus): Transition<OrderStatus> {
-  return transition(ORDER_MOVES, from, to);
+export function transitionOrder(from: string, to: OrderStatus): Transition<OrderStatus> {
+  if(!Object.hasOwn(ORDER_MOVES,from))return {ok:false,reason:`Unknown order status: ${from}`};
+  return transition(ORDER_MOVES, from as OrderStatus, to);
 }
 
 /** Same-status is a no-op; paid and void are final. */
-export function transitionInvoice(from: InvoiceStatus, to: InvoiceStatus): Transition<InvoiceStatus> {
-  return transition(INVOICE_MOVES, from, to);
+export function transitionInvoice(from: string, to: InvoiceStatus): Transition<InvoiceStatus> {
+  if(!Object.hasOwn(INVOICE_MOVES,from))return {ok:false,reason:`Unknown invoice status: ${from}`};
+  return transition(INVOICE_MOVES, from as InvoiceStatus, to);
 }
 
 /** Where a plan moves the order it touches, or null when it leaves the status alone. */

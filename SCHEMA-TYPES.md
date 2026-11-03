@@ -6,7 +6,7 @@ in a committed preservation snapshot first. No database writes are needed.
 
 1. Confirm the project reference against the Home's configuration. With the
    member's own authenticated Supabase CLI, run `supabase gen types typescript
-   --project-id PROJECT_REF --schema public > /private/tmp/member-database.ts`.
+   --remote=PROJECT_REF --schema public > /private/tmp/member-database.ts`.
    Include each additional custom schema used by their app in the comma-separated
    schema list. Do not put passwords or access tokens in command arguments.
 2. Create an empty review directory outside both apps, then run:
