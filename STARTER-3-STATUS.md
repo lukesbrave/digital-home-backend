@@ -156,3 +156,32 @@ This does not prove a separate-project restore, Cloudflare deployment, R2 or
 Stripe. A second empty project and Stripe account selection have been requested.
 
 Final checks for generated-type increment: backend and frontend production OpenNext builds pass; payment 116, MCP 63 and upgrade 37 tests pass; touched backend lint clean. Hosted test harness is scripts/test-hosted-starter3.mjs, pinned to the test project.
+
+## Hosted recovery and Stripe lifecycle — 2026-11-03
+
+Luke deleted fernhollow and authorised the freed Brave Test slot and the connected
+Stripe account. Created separate recovery target `uwgpjpudrhzkskjnlqkn`. Actual
+provider schema/data dumps from the synthetic source restored transactionally.
+Same synthetic account identity/password works on target; all 19 history rows,
+completed approval and private Storage bytes recover, with anonymous denial.
+Separate custom-schema backup/restore recovered a custom table/JSON value,
+function, view, sequence and access restrictions. Occupied-target restore refuses;
+trusted hashes detect a corrupted copy before restore. Post-snapshot products
+remain absent on target, so no automatic cutover or zero-loss claim is made.
+R2 synthetic bytes match after real source-bucket export/target-bucket restore.
+
+BraveBrand LLC test-only credentials: real checkout API and signed Stripe CLI
+delivery pass. Test clocks prove subscription payment, renewal, failed renewal,
+cancellation and refund. Strengthened the harness to await processed_at, not just
+order status. A deliberately interrupted refund refused replay during its live
+claim and resumed after the five-minute lease without ledger edits. Actual
+provider payloads delivered refund-before-checkout fail retriably, release the
+claim, and settle on retry after checkout; late checkout replay cannot undo refund.
+These last ordering/retry deliveries use local test HMAC; provider forwarding is
+proved separately. Synthetic objects only, with no live-mode credentials loaded.
+
+Remaining release gates: deployed paired Cloudflare canary with public-media
+readiness and form-to-lead, complete browser acceptance, optional Studio/social
+compatibility and final release review/metadata. No production Home deploy or
+release publication. Shared plan contains the receipts and proposed isolated
+canary deployment, which needs Luke's per-deploy word under Auto Agency AGENTS.md.
