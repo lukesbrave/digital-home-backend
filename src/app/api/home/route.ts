@@ -20,5 +20,5 @@ export async function GET(request:NextRequest){
   const {data,error}=await createAdminClient().from('backend_settings').select('value').eq('key','crm_safe_mode').maybeSingle();
   if(!error && typeof data?.value==='boolean')safeMode=data.value;
  }catch{}
- return NextResponse.json(homeContract(manifest,history,safeMode),{headers:{'Cache-Control':'no-store'}});
+ return NextResponse.json({...homeContract(manifest,history,safeMode),home:{origin:request.nextUrl.origin}},{headers:{'Cache-Control':'no-store'}});
 }

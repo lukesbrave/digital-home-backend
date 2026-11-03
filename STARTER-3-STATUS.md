@@ -112,3 +112,26 @@ Release remains pending the gates above.
 Validation for this change: payment 115/115, upgrade 37/37, production OpenNext
 build passed. Compiled route manifest has no Money page and retains products API.
 No hosted account/database tests or deployment performed in this increment.
+
+## 2026-11-03 agent connection and release preparation
+
+Implemented generic MCP (14 tools), owner-only Approvals and agent-key pages,
+optional connection status, source/device Analytics filters and frontend event
+provenance. Migration 008 creates owner-only queue/audit tables and refuses
+member table collisions. Approval claims prevent duplicate execution; deal wins
+use the existing fulfilment hooks. No private operator/community tools shipped.
+SCHEMA-TYPES.md and review-only preparation tooling preserve member helper
+aliases and flag schema members missing from generated output.
+
+Validation: MCP/handlers/proposals/decision 63, keys 20, events 38, Money 115,
+upgrade 37, foundation 15, schema types 3, SQL 5, local PostgreSQL recovery 6
+pass. Paired production builds passed before final fulfilment-hook review;
+TypeScript passes after it. Synthetic-provider browser rehearsal is incomplete:
+login navigation timed out, so no browser acceptance is claimed.
+
+Remaining: hosted fresh/customised Home and separate-target Auth/Storage/R2
+restore; real Stripe test-mode matrix; optional Studio/social compatibility;
+actual generated types from the hosted schema; final browser and production
+build rerun, paired metadata and release review. Luke asked us to find an empty
+project; account inventory is being checked. No deploy, database mutation,
+version bump or publication performed. This is not yet release-ready.

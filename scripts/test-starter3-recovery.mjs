@@ -18,7 +18,7 @@ const conn=['-h',socket,'-p','55439','-U','recovery_test'];
 const query=(db,sql)=>pg('psql',[...conn,'-X','-q','-A','-t','-v','ON_ERROR_STOP=1','-d',db],sql).trim();
 const sql=file=>readFileSync(new URL('../supabase/migrations/'+file,import.meta.url),'utf8');
 const git=(cwd,args)=>execFileSync('git',args,{cwd,env:{...env,GIT_CONFIG_NOSYSTEM:'1',GIT_CONFIG_GLOBAL:'/dev/null'},encoding:'utf8',stdio:['ignore','pipe','pipe']}).trim();
-const newFiles=['004_agent_keys.sql','005_home_events.sql','006_money.sql','007_payment_receipts.sql'];
+const newFiles=['004_agent_keys.sql','005_home_events.sql','006_money.sql','007_payment_receipts.sql','008_agent_approvals.sql'];
 function initRepo(path,label){
  mkdirSync(path);git(path,['init','-b','member']);git(path,['config','user.name','Recovery fixture']);git(path,['config','user.email','fixture@example.test']);
  writeFileSync(join(path,'design.css'),'/* Member custom design */\n:root{--brand:purple}\n');

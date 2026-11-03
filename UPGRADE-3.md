@@ -117,3 +117,5 @@ baseline, the native-runtime blocker and the remaining model-behaviour proof.
 The candidate provides payment and fulfilment APIs without a default Money page.
 Preserve any existing member Money page, navigation, records and integrations.
 Do not delete a member interface merely because it is absent from the starter.
+
+For generated shared types use [SCHEMA-TYPES.md](SCHEMA-TYPES.md). For scoped agent connections and owner approvals see [MCP.md](MCP.md). Review migration 008 as part of the official backend set.

@@ -4,7 +4,7 @@ import {readFileSync} from 'node:fs';
 import {PGlite} from '@electric-sql/pglite';
 import {uuid_ossp} from '@electric-sql/pglite/contrib/uuid_ossp';
 const sql=name=>readFileSync(new URL('../supabase/migrations/'+name,import.meta.url),'utf8');
-const newFiles=['004_agent_keys.sql','005_home_events.sql','006_money.sql','007_payment_receipts.sql'];
+const newFiles=['004_agent_keys.sql','005_home_events.sql','006_money.sql','007_payment_receipts.sql','008_agent_approvals.sql'];
 async function baseline(){
  const db=new PGlite({extensions:{uuid_ossp}});
  await db.exec(`create role anon; create role authenticated; create role service_role bypassrls;
@@ -19,7 +19,7 @@ async function migrate(db){for(const file of newFiles)await db.transaction(async
 test('fresh paired starter schema installs new modules with owner-only tables',async()=>{
  const db=await baseline();try{
   await migrate(db);
-  const tables=['agent_keys','home_events','products','orders','order_items','engagements','engagement_deliverables','invoices','invoice_items','payment_events','payouts'];
+  const tables=['agent_runs','agent_actions','agent_keys','home_events','products','orders','order_items','engagements','engagement_deliverables','invoices','invoice_items','payment_events','payouts'];
   for(const table of tables){
    assert.equal((await db.query('select relrowsecurity from pg_class where oid=$1::regclass',[table])).rows[0].relrowsecurity,true);
    assert.equal((await db.query("select has_table_privilege('anon',$1,'SELECT') allowed",[table])).rows[0].allowed,false);
@@ -62,5 +62,14 @@ test('payment completion emits one receipt atomically; repeats and ignored event
   assert.equal((await db.query('select count(*)::int n from home_events')).rows[0].n,1);
   await assert.rejects(db.transaction(async tx=>{await tx.exec("insert into payment_events(provider,provider_event_id,type,payload) values('stripe','evt_rollback','invoice.paid','{}');update payment_events set processed_at=now(),result='{}' where provider_event_id='evt_rollback'");throw new Error('simulate crash');}),/simulate crash/);
   assert.equal((await db.query('select count(*)::int n from home_events')).rows[0].n,1);
+ }finally{await db.close();}
+});
+
+test('approval table collision refuses adoption and preserves member rows',async()=>{
+ const db=await baseline();try{
+  await db.exec("create table agent_actions(id integer primary key, custom text);insert into agent_actions values(1,'member action')");
+  await assert.rejects(db.transaction(tx=>tx.exec(sql('008_agent_approvals.sql'))),/already exists/);
+  assert.deepEqual((await db.query('select * from agent_actions')).rows,[{id:1,custom:'member action'}]);
+  assert.equal((await db.query("select to_regclass('agent_runs') value")).rows[0].value,null);
  }finally{await db.close();}
 });

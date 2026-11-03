@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
 const NAV_ITEMS = [
+  { href: '/crm/approvals', label: 'Approvals', icon: <span className="w-5 text-center" aria-hidden>✓</span> },
   {
     href: '/content',
     label: 'Articles',
@@ -95,6 +96,7 @@ const NAV_ORDER = [
   '/crm/leads',
   '/crm/pipeline',
   '/crm/analytics',
+  '/crm/approvals',
   '/crm/workflows',
   '/content',
   '/social',

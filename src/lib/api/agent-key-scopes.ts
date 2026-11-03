@@ -14,21 +14,8 @@ import { createHash, randomBytes } from "crypto";
 export const KEY_PREFIX = "bbk_";
 
 /** The scope vocabulary shared with GET /api/home and the starter. */
-export const SCOPES = [
-  "leads:read",
-  "leads:write",
-  "content:read",
-  "content:write",
-  "social:write",
-  "brand:read",
-  "brand:write",
-  "approvals:propose",
-  "settings:read",
-  "events:read",
-  "money:read",
-  "money:write",
-  "money:checkout",
-] as const;
+import { SCOPES } from './scope-vocabulary.ts';
+export { SCOPES };
 
 export type Scope = (typeof SCOPES)[number];
 

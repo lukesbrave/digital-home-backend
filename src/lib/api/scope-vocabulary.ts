@@ -1,0 +1,15 @@
+export const SCOPES = [
+  "leads:read",
+  "leads:write",
+  "content:read",
+  "content:write",
+  "social:write",
+  "brand:read",
+  "brand:write",
+  "approvals:propose",
+  "settings:read",
+  "events:read",
+  "money:read",
+  "money:write",
+  "money:checkout",
+] as const;
