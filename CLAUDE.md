@@ -32,6 +32,20 @@ If you haven't already, follow the Frontend CLAUDE.md Steps 1-3 to create your S
 
 Both repos share the same database. The Frontend owns the shared website schema; this repo owns `backend_settings` and `brand_context`.
 
+### Member database changes
+
+Keep official starter migration filenames and contents unchanged. Numbers
+`001`–`899` are reserved for official migrations in each repository. For a new
+member migration use an unused three-digit number `900`–`999`, for example
+`900_my_feature.sql`. Current tools require `NNN_name.sql`; four-digit and
+timestamp filenames are ignored. History identifies repository plus full filename,
+so both repositories can start at `001`. The backend upgrader applies target-release
+backend migrations; member migrations require separate review and application.
+If custom migrations already use reserved numbers, inspect their SQL, actual schema
+and applied history before deciding a mapping. Do not blindly rename or replay
+applied migrations, or rewrite history. See the backend `UPGRADE.md`.
+
+
 ### Step 2: Set Up Environment Variables
 ```bash
 cp .env.local.example .env.local
