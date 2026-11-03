@@ -1,55 +1,48 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  // worker.ts wraps OpenNext's generated handler to add `scheduled` — see the
-  // file header. Reverting to ".open-next/worker.js" disables the cron and
-  // restores stock OpenNext behaviour.
-  "main": "worker.ts",
-  "name": "digital-home-backend",
-  // The CRM engine tick + social publish tick. Was a GitHub Action; GitHub
-  // throttles scheduled workflows, which stalls onboarding email.
-  "triggers": {
-    "crons": ["*/5 * * * *"]
-  },
-  // Keep the workers.dev URL alive; add a custom-domain route here when you
-  // claim one, e.g. { "pattern": "backend.yourdomain.com", "custom_domain": true }
-  "workers_dev": true,
+  "name": "starter3-canary-backend",
   "compatibility_date": "2026-05-01",
   "compatibility_flags": [
     "nodejs_compat"
   ],
+  "main": "worker.ts",
+  "workers_dev": true,
   "assets": {
-    "directory": ".open-next/assets",
-    "binding": "ASSETS"
+    "binding": "ASSETS",
+    "directory": ".open-next/assets"
+  },
+  "observability": {
+    "enabled": true
   },
   "services": [
     {
       "binding": "WORKER_SELF_REFERENCE",
-      "service": "digital-home-backend"
+      "service": "starter3-canary-backend"
     },
     {
       "binding": "FRONTEND_WORKER",
-      "service": "digital-home-frontend"
+      "service": "starter3-canary-frontend"
     }
   ],
+  "vars": {
+    "SUPABASE_URL": "https://iotldbnwtnzpwpyhwgmo.supabase.co",
+    "NEXT_PUBLIC_SUPABASE_URL": "https://iotldbnwtnzpwpyhwgmo.supabase.co",
+    "DIGITAL_HOME_URL": "https://starter3-canary-frontend.luke-9ffworkersdev.workers.dev",
+    "NEXT_PUBLIC_DIGITAL_HOME_URL": "https://starter3-canary-frontend.luke-9ffworkersdev.workers.dev",
+    "SOCIAL_PUBLISHING_ENABLED": "false",
+    "API_SIGNATURE_REQUIRED": "true",
+    "PUBLIC_MEDIA_BASE": "https://starter3-canary-backend.luke-9ffworkersdev.workers.dev/media"
+  },
+  "triggers": {
+    "crons": []
+  },
   "images": {
     "binding": "IMAGES"
   },
-  // Public marketing media is required, independently of optional social publishing.
-  // Create this member-owned bucket first; see MEDIA.md.
-  "r2_buckets": [{ "binding": "PUBLIC_MEDIA", "bucket_name": "replace-with-your-public-media-bucket" }],
-  "observability": {
-    "enabled": true
-  },
-  // Non-secret env vars. Secrets (API keys) are set via `wrangler secret put`.
-  "vars": {
-    "SUPABASE_URL": "https://your-project.supabase.co",
-    "SUPABASE_ANON_KEY": "your-anon-key",
-    "NEXT_PUBLIC_SUPABASE_URL": "https://your-project.supabase.co",
-    "NEXT_PUBLIC_SUPABASE_ANON_KEY": "your-anon-key",
-    "DIGITAL_HOME_URL": "https://yourdomain.com",
-    "NEXT_PUBLIC_DIGITAL_HOME_URL": "https://yourdomain.com",
-    "SOCIAL_PUBLISHING_ENABLED": "false",
-    "SOCIAL_SCHEDULER_MODE": "native",
-    "R2_PUBLIC_BASE": "https://media.yourdomain.com"
-  }
+  "r2_buckets": [
+    {
+      "binding": "PUBLIC_MEDIA",
+      "bucket_name": "starter3-recovery-source-20261103"
+    }
+  ]
 }

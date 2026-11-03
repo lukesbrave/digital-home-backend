@@ -1,0 +1,6 @@
+{
+  "name": "starter3-canary-backend",
+  "main": "canary-bootstrap.ts",
+  "compatibility_date": "2026-05-01",
+  "workers_dev": true
+}
