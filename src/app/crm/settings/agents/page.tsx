@@ -93,15 +93,15 @@ export default function AgentSettings() {
             pattern="[a-z][a-z0-9_-]{1,39}"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="block p-2 bg-minimal-card border border-minimal-border rounded"
+            className="block w-full min-w-0 p-2 bg-minimal-card border border-minimal-border rounded"
             placeholder="simon"
             autoComplete="off"
           />
         </label>
-        <fieldset className="grid sm:grid-cols-2 gap-2">
+        <fieldset className="grid min-w-0 sm:grid-cols-2 gap-2">
           <legend className="mb-2">Access</legend>
           {SCOPES.map((s) => (
-            <label key={s} className="flex gap-2">
+            <label key={s} className="flex min-w-0 gap-2 break-all">
               <input
                 type="checkbox"
                 checked={scopes.includes(s)}
@@ -132,7 +132,7 @@ export default function AgentSettings() {
             readOnly
             type="password"
             value={secret}
-            className="w-full p-2 bg-minimal-card"
+            className="w-full min-w-0 p-2 bg-minimal-card"
             autoComplete="off"
           />
           <GhostBtn

@@ -115,7 +115,9 @@ export default function Approvals() {
       });
       await load();
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Decision failed");
+      const message = e instanceof Error ? e.message : "Decision failed";
+      await load();
+      setError(message);
     } finally {
       setBusy("");
     }
@@ -131,7 +133,7 @@ export default function Approvals() {
       <label>
         Show{" "}
         <select
-          className="bg-minimal-card border border-minimal-border p-2 rounded"
+          className="max-w-full bg-minimal-card border border-minimal-border p-2 rounded"
           value={status}
           onChange={(e) => setStatus(e.target.value)}
         >
@@ -172,7 +174,7 @@ export default function Approvals() {
             </p>
             <Details action={a} />
             {a.status === "proposed" && (
-              <div className="flex gap-3">
+              <div className="flex flex-wrap gap-3">
                 <PrimaryBtn
                   disabled={!!busy}
                   onClick={() => void decide(a.id, "approve")}

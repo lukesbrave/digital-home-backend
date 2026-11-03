@@ -154,9 +154,16 @@ export function Sidebar() {
   const [role, setRole] = useState<'admin' | 'social'>('admin');
 
   useEffect(() => {
-    try {
-      setCollapsed(localStorage.getItem('dh-sidebar') === 'collapsed');
-    } catch {}
+    const mobile = window.matchMedia('(max-width: 639px)');
+    const update = () => {
+      let saved: string | null = null;
+      try { saved = localStorage.getItem('dh-sidebar'); } catch {}
+      setCollapsed(saved === null ? mobile.matches : saved === 'collapsed');
+    };
+    // Respect an explicit saved choice; otherwise follow the current viewport.
+    update();
+    mobile.addEventListener('change', update);
+    return () => mobile.removeEventListener('change', update);
   }, []);
 
   // Social-role users only get the Social section — middleware enforces it,
