@@ -81,22 +81,20 @@ backend 2.9.0 and frontend 2.5.4. No production changes or migrations performed.
   Auth and Storage metadata in local SQL fixtures do not prove provider login or
   hosted object recovery; local byte copies do not prove R2 API transfers.
 
-## Remaining release work (not hidden behind a 3.0 version bump)
+## Remaining release work (current 2026-11-03)
 
-1. Client-neutral approvals/MCP and remaining scoped routes; finish complete
-   guide, key setup UX and optional module setup UI. No private operator/Skool.
-2. Full schema/type regeneration workflow that merges member columns; actual
-   PostgreSQL tests are now present but not hosted Supabase or Studio proof.
-3. Analytics source/device filters and remaining generic reports; current counts
-   are recorded events, not unique people, verified leads or social statistics.
-4. Hosted database/media/account recovery, including actual Auth login, Storage
-   and R2 transfer, on an isolated target. Local full-schema/code/media recovery
-   is now tested; provider recovery, post-snapshot writes and cutover remain.
-5. Expand the passed local old-Simon scenario to more complex member type/schema
-   customisations and fresh/customised running Home canaries, real Stripe test mode
-   and optional Studio/social matrix. No training update is required for the passed scenario.
-6. Review paired versions/release metadata only after the above. Public versions
-   remain backend 2.9.0/frontend 2.5.4; no publication without Luke's word.
+Hosted core cold-install, real Auth/Storage/custom-schema recovery, R2 transfer,
+Stripe test lifecycle/retry/order and deployed desktop/mobile checks now pass.
+Generic MCP/approvals/key UI, generated types and Analytics filters are present.
+See the latest deployed acceptance section below; earlier checkpoints are historical.
+
+1. Complete the installed Studio runtime upgrade rehearsal, preserving shared
+   navigation, generated types, dependencies and configuration. Read-only planning
+   against Studio 1.7.2 passes but is not a running upgraded Home test.
+2. Review final fresh-build and existing-member documentation, paired immutable
+   version metadata and exact release diff against recorded canary refs.
+3. Obtain Luke's word for public release publication. Current versions remain
+   backend 2.9.0/frontend 2.5.4. Test-site deployment approval is not a public tag.
 
 Continue in these worktrees. The main plan/readiness matrix in Auto Agency holds
 cross-repo status. This increment is not a complete 3.0 release candidate.
@@ -196,3 +194,28 @@ mobile layout overflow and a stale proposed card after execution error; fixed
 responsive sidebar defaults (explicit choices preserved), constrained key inputs
 and refresh after decision failure. TypeScript/MCP 63 pass; only pre-existing
 ThemeToggle lint warning remains. Canary redeploy/browser verification follows.
+
+## Deployed core canary acceptance — 2026-11-03
+
+Luke approved two isolated Cloudflare test sites. Release source backend
+`8e7008c`, frontend `a052c37`; dedicated root deployment refs backend `2a9ed7f`,
+frontend `36c3b3a`. CANARY-STATE.md in the dedicated deployment checkouts records
+Worker IDs and URLs. Provider/project/live map records are in the shared plan.
+
+- Owner login, scoped MCP, approval, duplicate refusal, key revocation and
+  unauthorized API refusal pass through the actual deployed backend.
+- Frontend form uses the authoritative backend service binding; repeated capture
+  retains one lead. Browser desktop/mobile submissions each have one lead.
+- Real public-media readiness verifies R2 storage, optimisation and public bytes.
+- Browser approve/reject/error refresh, scope validation, Analytics source/device
+  intersection, empty state and old Funnel redirect pass. No Money menu/page.
+- Mobile layouts and failed-approval refresh bugs found by the browser rehearsal
+  are fixed in `8e7008c`; TypeScript and MCP 63 checks pass, paired canary builds pass.
+- Social on with no connected provider can save an unscheduled draft locally;
+  social off refuses its API on the deployed canary. No publication attempted.
+- Studio 1.7.2 checkout planning checks 117 owned paths: none auto-replaced;
+  shared sidebar/types/config/package need manual merge. No runtime upgrade yet.
+
+Public release remains untagged; no member production Home changed. Hosted
+recovery and Stripe evidence is recorded separately in the shared plan. Canary
+frontend-only `/canary-check` is intentionally excluded from release source.
