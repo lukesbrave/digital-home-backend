@@ -12,7 +12,9 @@ and are superseded for this scope by the new owner-control-plane receipt.
 Validation: 298 backend tests and production build pass. Synthetic hosted
 MCP proposals, signed-owner queue/detail/approve/reject, preserved owner session,
 scoped/named-key and bad-signature denial, duplicate refusal and absent screen/menu
-all pass. No SQL/schema or frontend application change. Canary update follows.
+all pass. No SQL/schema or frontend application change. Dedicated canary deployed
+`c4cb0e4` (Worker `fa96b7d7-3741-4cb4-8676-e45769c10b7e`); deployed HTTP tests
+and browser navigation verify the same capability and absence of the screen.
 
 ## Current release review — 2026-11-04
 
