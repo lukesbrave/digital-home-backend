@@ -84,7 +84,9 @@ Using a separate chat for each repo helps Claude stay in the correct project con
 4. **Run the migrations in the right order**
    Use the same Supabase project as the Frontend.
    - First run Frontend migrations `001` through `011` from `digital-home-frontend/supabase/migrations/`
-   - Then run `supabase/migrations/001_backend_core.sql` from this repo
+   - Then run every official backend migration `001` through `008`, in order
+   - Complete [FRESH-INSTALL.md](FRESH-INSTALL.md): record both repos’ 19 migration
+     files/checksums and verify module discovery after deployment
 
 5. **Update `wrangler.jsonc` before deployment**
    Replace the starter defaults with your own values:

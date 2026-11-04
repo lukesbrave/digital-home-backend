@@ -28,7 +28,8 @@
     "test:recovery": "node --test scripts/test-recovery-files.mjs",
     "test:recovery-postgres": "node --test scripts/test-starter3-recovery.mjs",
     "test:mcp": "node --experimental-strip-types --test src/lib/mcp/*.test.ts src/lib/mcp/tools/*.test.ts src/lib/agent/*.test.ts",
-    "test:schema-types": "node --test scripts/test-schema-types.mjs"
+    "test:schema-types": "node --test scripts/test-schema-types.mjs",
+    "test:fresh-install": "node --experimental-strip-types --test scripts/test-fresh-install.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.80.0",

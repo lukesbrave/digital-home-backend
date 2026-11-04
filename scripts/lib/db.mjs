@@ -130,7 +130,10 @@ export async function readState(client) {
     const policies = (await client.query(
       "select tablename, policyname from pg_policies where schemaname = 'public'",
     )).rows;
-    return { history, catalog: catalogFromRows({ tables, columns, policies }) };
+    const triggers = (await client.query(
+      "select c.relname as tablename, t.tgname as triggername from pg_trigger t join pg_class c on c.oid=t.tgrelid join pg_namespace n on n.oid=c.relnamespace where n.nspname='public' and not t.tgisinternal and t.tgenabled in ('O','A')",
+    )).rows;
+    return { history, catalog: catalogFromRows({ tables, columns, policies, triggers }) };
   } finally {
     await client.query('rollback').catch(() => {});
   }

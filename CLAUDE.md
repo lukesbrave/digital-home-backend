@@ -30,6 +30,11 @@ Before anything else, check if the user has Node.js installed by running `node -
 ### Step 1: Supabase + Migrations (Frontend First)
 If you haven't already, follow the Frontend CLAUDE.md Steps 1-3 to create your Supabase project, run all Frontend migrations (`001` through `011`), and create an admin user. Then apply every migration in this repo's `supabase/migrations/`, in order.
 
+**Required completion step:** follow [FRESH-INSTALL.md](FRESH-INSTALL.md) to record
+both repositories in `schema_migrations` and verify all 19 exact files/checksums.
+Applying SQL alone does not populate history. Do this before deployment/handover;
+verify `/api/home` module schema and recorded history after deployment.
+
 Both repos share the same database. The Frontend owns the shared website schema; this repo owns backend settings, brand context, CRM, migration history, agent keys, events and payment/fulfilment records. Review the selected release’s migration files for the complete schema.
 
 ### Member database changes

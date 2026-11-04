@@ -1,6 +1,6 @@
 # Upgrade an existing Home with your current Simon
 
-Use only with the paired published 3.0.0 releases. A development branch is not “latest”.
+Use only with the paired published 3.0.1 releases. A development branch is not “latest”.
 After release, the owner gives their existing Simon the immutable release URL for
 this guide and the approved tag. No employee rehire, instruction replacement or
 training installation is needed to read and follow it. This is a task runbook,

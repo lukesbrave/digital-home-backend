@@ -3,8 +3,8 @@
   "status": "paired inventory; availability is established by published GitHub releases",
   "backend": {
     "repository": "lukesbrave/digital-home-backend",
-    "version": "3.0.0",
-    "previous_public_version": "2.9.0",
+    "version": "3.0.1",
+    "previous_public_version": "3.0.0",
     "application_baseline_commit": "98427fe3c7c2d91ce15614947f7f71b23a05f0f0",
     "migrations": [
       {
@@ -44,8 +44,8 @@
   },
   "frontend": {
     "repository": "lukesbrave/digital-home-frontend",
-    "version": "3.0.0",
-    "previous_public_version": "2.5.4",
+    "version": "3.0.1",
+    "previous_public_version": "3.0.0",
     "application_baseline_commit": "a052c37",
     "migrations": [
       {
@@ -99,5 +99,5 @@
     "next": "16.2.4",
     "react": "19.2.3"
   },
-  "member_migrations": "unused 900–999; do not renumber/replay existing applied files without review"
+  "member_migrations": "unused 900\u2013999; do not renumber/replay existing applied files without review"
 }
