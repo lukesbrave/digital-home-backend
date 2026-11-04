@@ -31,3 +31,9 @@ in a committed preservation snapshot first. No database writes are needed.
 The two generated Database blocks should match because the apps share one
 schema. Their local convenience aliases need not match. This workflow does not
 rename migrations or run any SQL.
+
+When a target release adds new exported helper aliases, merge the missing aliases
+from its types file after reviewing their definitions; preparation keeps existing
+helpers but does not add new ones automatically. An installed module must retain
+its own type consumers. A generated removal can reveal an old optional-table
+placeholder, so reconcile it against the actual schema and code before deciding.

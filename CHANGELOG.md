@@ -1,77 +1,32 @@
-## Unreleased — Starter 3.0 recovery increment
-
-Actual local PostgreSQL dump/restore rehearsal with custom schema, data, code and
-media; private artifact integrity checks and recovery guide. Upgrade preparation
-no longer overwrites differing frontend types, even when committed/clean. Older
-Simon training was inspected without changing it; native runtime proof remains
-blocked by missing lab executables. No release or deployment.
-
-## Unreleased — Starter 3.0 development, second increment
-
-Optional scoped agent keys with legacy-auth compatibility, activity feed, Money
-and fulfilment, numbered additive migrations with collision refusal, transactional
-payment receipts, and local PostgreSQL customisation tests. Draft recipe setup
-preserves member edits. Shared types paired with frontend development branch.
-No version bump, deployment or publication; see STARTER-3-STATUS.md for gates.
-
 # Changelog
 
-All notable changes to the Digital Home Backend Starter.
+## [3.0.0] — release candidate, publication pending
 
-## [Unreleased]
+- Home discovery and a client-neutral guide, scoped employee keys, 14 MCP tools,
+  owner Approvals, and a recorded activity feed. Existing master/named-key
+  authentication stays compatible; changing an employee's access is optional.
+- Analytics replaces Funnel navigation, keeps old bookmarks, and filters recorded
+  website/page events by period, page, source and device. Counts are events,
+  not unique people or cross-platform social statistics.
+- Optional Stripe payment and fulfilment APIs, signed retry-safe receipts,
+  products/orders/invoices/projects/deliverables, and draft recipes. No bundled
+  Money page/navigation. Existing member Money interfaces are preserved.
+  Payouts remain records only; automated affiliate transfers are outside scope.
+- Additive backend migrations 004–008, tracked history and collision refusal.
+  Official files use 001–899; new member files use unused 900–999. Existing
+  applied custom migrations need review before any filename/history change.
+- Reviewed schema generation for both apps; upgrade preparation preserves
+  custom files, deletions, frontend types, configuration and VERSION until
+  verification. Code/database/media recovery includes a proven restore path.
+- Optional connection status and clearer fresh-build handover. Node 22+,
+  Next.js 16; pair this backend with frontend 3.0.0.
 
-### Starter 3.0 development — first increment, not a release
-
-- Self-contained `UPGRADE-3.md` is designed for an existing Simon without
-  changing his employee card, instructions or local training. Actual old-Simon
-  runtime rehearsal remains a release gate.
-- A local preservation receipt captures hashes/modes of member additions, edits
-  and deletions relative to their installed starter tag. Verification flags
-  changes unless an exact reviewed merge is recorded. This is code evidence,
-  not a database/media backup or a guarantee of behavioural equivalence.
-- Upgrade preparation no longer writes VERSION before review and live checks.
-  Unexpected starter remotes and mismatched tag/version pairs are refused.
-- Analytics adds website/page counts from existing analytics_events and retains
-  the existing funnel report/API. Legacy `/crm/funnel` bookmarks redirect with
-  their query parameters. No private business domains or external property IDs.
-- Authenticated `/api/home` exposes the build version and actual applied
-  migration history, using null for unavailable history; the limited discovery
-  guide explicitly does not advertise unported keys, MCP or payments.
-- Backend VERSION remains 2.9.0. The full 3.0 agent/payment/event port, complete
-  guide, type generation, recovery proof and isolated canary are still pending.
-
-
-A Home's schema state is now recorded, and its upgrade is scripted:
-
-- Migration `003_schema_migrations.sql` adds `schema_migrations`, one row per
-  applied migration from either repo, keyed by (repo, name), with checksum,
-  when and by whom. RLS on, service role only. `src/types/database.ts` gains
-  the table: copy it to the frontend byte-identical.
-- `scripts/migrations-status.mjs` reports every frontend and backend migration
-  as applied, inferred (what it creates exists, but nothing records it),
-  partial or pending. Read-only; `--json` for agents.
-- `scripts/migrations-seed.mjs` is the one-time catch-up for 2.x Homes: it
-  records each inferred migration, creating the table first if needed. It
-  writes only with `--project-ref <ref>` matching `.env.local` and `--yes`;
-  `--dry-run` never writes.
-- `scripts/upgrade.mjs` does the mechanical part of an upgrade on branch
-  `upgrade/v<target>`: the target's own tools, new files, the list of files to
-  merge by hand, every pending migration recorded as it applies (behind the
-  same gate), the shared types. VERSION is recorded only after upgrade verification. It stops before deploy and never
-  merges or deletes; `--dry-run` writes nothing.
-- The tools verify the database certificate against Node's roots plus
-  Supabase's own root, bundled in `scripts/certs/` (`SUPABASE_CA_CERT` adds
-  another), take the password from the environment, stdin or a hidden prompt
-  (never the command line), and give each migration a 5 s lock and 60 s
-  statement timeout.
-- `scripts/apply-migration.mjs` now uses the same connection and password
-  rules: certificate verified, no password in the command, the database ref
-  printed first, and `--project-ref <ref>` refused unless it matches.
-- `npm run test:upgrade` tests the pure parts, the gates and a full upgrade
-  against throwaway git repos and a fake database.
-
-UPGRADE.md opens with the scripted path, available from the first release
-after 2.9.0; the older prose stays below it.
+Validation includes paired production builds, actual hosted cold install and
+Auth/Storage/custom-schema/R2 recovery, test-only Stripe lifecycle/retry/order,
+deployed desktop/mobile lead/approval/Analytics/media checks, unchanged older
+Simon rehearsal, and installed Studio 1.7.2 data/code/runtime preservation.
+Studio's existing runner was not restarted and no model spend was performed.
+See RELEASE-3.md for scope, version pairing and upgrade requirements.
 
 ## [2.9.0] — 2026-09-13
 
