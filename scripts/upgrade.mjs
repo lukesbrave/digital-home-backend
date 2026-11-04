@@ -21,9 +21,9 @@
  *   8. Read the database and apply the target's pending backend migrations,
  *      one transaction each, recording each in schema_migrations: only after
  *      printing the database ref and receiving --project-ref <that ref> --yes.
- *   9. Copy src/types/database.ts to the frontend checkout (--frontend),
- *      when that checkout is clean and on its own branch.
- *  10. Write VERSION.
+ *   9. Compare shared types with the frontend; differing files need a reviewed
+ *      merge that retains custom columns. Never overwrite the frontend types.
+ *  10. Keep VERSION unchanged until the upgrade is verified.
  *  11. Print the checks to run. Deploying is a separate, approved step.
  *
  * --dry-run writes nothing: no remote, tag, branch, file, commit, FETCH_HEAD
@@ -40,7 +40,7 @@
  * resume), 1 refused or failed.
  */
 import { execFileSync } from 'node:child_process';
-import { copyFileSync, existsSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { applyAndRecord, connect, readState } from './lib/db.mjs';
 import { loadContext } from './lib/context.mjs';
@@ -152,7 +152,7 @@ step('Starter remote and tags');
 const url = typeof args['starter-url'] === 'string' ? args['starter-url'] : STARTER_URL;
 const existing = git(['remote', 'get-url', 'starter'], { allowFail: true })?.trim();
 if (!existing) change(['remote', 'add', 'starter', url]);
-else if (existing !== url) console.log(`  Remote starter points at ${existing} (expected ${url}); using it as is.`);
+else if (existing !== url) stop(1, 'Starter remote differs from the expected repository. Review it and provide --starter-url explicitly if intentional.');
 else console.log(`  Remote starter: ${existing}`);
 const source = existing || (dry ? url : 'starter');
 
@@ -196,7 +196,7 @@ const R = { cur: resolveTag(cur), tgt: resolveTag(tgt) };
 if (!R.tgt) stop(1, `Tag ${tgt} not found.`);
 if (!R.cur) stop(1, `VERSION reads ${current} but tag ${cur} is not here, so the release diff cannot be computed. Follow UPGRADE.md by hand.`);
 const targetVersion = git(['show', `${R.tgt}:VERSION`], { allowFail: true })?.trim();
-if (targetVersion !== target) console.log(`  Warning: VERSION inside ${tgt} reads "${targetVersion}".`);
+if (targetVersion !== target) stop(1, `VERSION inside ${tgt} does not match its tag; refusing the upgrade.`);
 console.log(`  ${cur} → ${tgt}`);
 
 // ── 4. Branch ────────────────────────────────────────────────────────────────
@@ -292,7 +292,6 @@ const added = diff.added.filter((p) => p.startsWith(MIGRATIONS_DIR)).map((p) => 
 console.log(`  ${tgt} ${added.length ? 'adds ' + added.join(', ') : 'adds no migration'}; every pending one is checked, whichever release brought it.`);
 console.log(`  Database: ${describeEnv(ctx.envFile)}`);
 if (!ctx.ref) stop(1, 'Set SUPABASE_URL in the repo\'s .env.local so the database can be identified.');
-let migrationsPending = false;
 const password = await getPassword(args);
 if (!password) {
   if (dry) console.log(`  [dry-run] ${PASSWORD_HELP} The database was not read.`);
@@ -319,7 +318,6 @@ if (!password) {
       const gate = writeGate({ envRef: ctx.ref, projectRef: args['project-ref'], yes: args.yes });
       if (dry) {
         console.log(`  [dry-run] would apply ${mplan.toApply.length} migration(s) to ${ctx.ref}${gate ? ' once confirmed with --project-ref ' + ctx.ref + ' --yes' : ''}.`);
-        migrationsPending = true;
       } else if (gate) {
         stop(2, `${gate}\nTo resume:\n  ${resumeCommand(target)}`);
       } else {
@@ -347,41 +345,29 @@ if (!password) {
 step('Shared database types');
 const typesNeedWork = [...plan.merge, ...plan.conflict].includes(TYPES) ? 'its merge' : untaken.includes(TYPES) ? 'to be taken' : null;
 if (typeof args.frontend !== 'string') {
-  console.log(`  No --frontend given. ${TYPES} must stay byte-identical in the frontend: copy it there once merged.`);
+  console.log(`  No --frontend given. Review and merge ${TYPES} in both repositories, retaining every member column/type.`);
 } else if (!ctx.frontend.path) {
   console.log(`  ${ctx.frontend.notice}`);
 } else {
   const fe = ctx.frontend.path;
   const dest = join(fe, TYPES);
   const source = join(root, TYPES);
-  const feBranch = git(['branch', '--show-current'], { cwd: fe, allowFail: true })?.trim();
   const feDirty = git(['status', '--porcelain'], { cwd: fe, allowFail: true });
-  if (typesNeedWork) {
-    console.log(`  ${TYPES} still needs ${typesNeedWork} (step 7). After that: cp ${TYPES} ${shq(dest)}`);
-  } else if (existsSync(dest) && readFileSync(dest, 'utf8') === readFileSync(source, 'utf8')) {
-    console.log(`  ${dest} is already identical.`);
-  } else if (feDirty === null || feBranch === undefined) {
-    console.log(`  ${fe} is not a git checkout; not copying. Copy ${TYPES} there by hand and commit it.`);
-  } else if (feDirty.trim()) {
-    console.log(`  ${fe} has uncommitted changes; not copying over them. Commit or move them, then: cp ${TYPES} ${shq(dest)}`);
-  } else if (!feBranch || ['main', 'master'].includes(feBranch)) {
-    console.log(`  ${fe} is ${feBranch ? 'on ' + feBranch : 'not on a branch'}; not copying. First: git -C ${shq(fe)} checkout -b ${branch}, then run this again or cp ${TYPES} ${shq(dest)}`);
-  } else if (dry) {
-    console.log(`  [dry-run] would copy ${TYPES} to ${dest} (on branch ${feBranch})`);
+  if (typesNeedWork) console.log(`  Backend ${TYPES} still needs ${typesNeedWork} (step 7).`);
+  if (existsSync(dest) && readFileSync(dest, 'utf8') === readFileSync(source, 'utf8')) {
+    console.log(`  Shared types are already identical. Verify against the actual member schema before completion.`);
   } else {
-    copyFileSync(source, dest);
-    console.log(`  Copied ${TYPES} to ${dest} (branch ${feBranch}). Commit it there:`);
-    console.log(`    git -C ${shq(fe)} add ${TYPES} && git -C ${shq(fe)} commit -m "Shared database types from backend ${tgt}"`);
+    if (feDirty?.trim()) console.log(`  ${fe} has uncommitted changes; not copying over them.`);
+    console.log(`  Shared types differ: manual merge required. Frontend left untouched, including committed custom columns.`);
+    console.log(`  Compare ${TYPES} with ${shq(dest)}; retain member additions in both copies, then type-check/build both repositories.`);
+    console.log(`  Do not replace the frontend file merely to make the copies match. Preparation is not upgrade completion.`);
   }
 }
 
-// ── 10. VERSION ──────────────────────────────────────────────────────────────
-step('VERSION');
-if (dry) console.log(`  [dry-run] would write ${target} to VERSION${migrationsPending ? ' after the migrations' : ''}.`);
-else {
-  writeFileSync(versionFile, `${target}\n`);
-  console.log(`  VERSION now reads ${target} (uncommitted: commit it with your merges).`);
-}
+// ── 10. VERSION is a completion receipt, not a preparation side effect ────────
+step('Installed version remains unchanged');
+console.log(`  VERSION stays at ${current}. Preparation is not a verified upgrade.`);
+console.log(`  Only after merges, database/media checks, preservation verification and the approved live proof pass, record ${target} in VERSION.`);
 
 // ── 11. Checks ───────────────────────────────────────────────────────────────
 step('Checks to run, then stop');

@@ -125,7 +125,8 @@ export async function POST(request: NextRequest) {
       .in("id", accountIds)
       .eq("status", "active");
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-    accounts = data || [];
+    if(data?.some(a=>!["instagram","facebook","youtube"].includes(a.platform)))return NextResponse.json({error:"Unsupported connected platform"},{status:400});
+    accounts = (data || []) as typeof accounts;
     if (accounts.length !== accountIds.length) {
       return NextResponse.json({ error: "One or more accounts are not connected" }, { status: 400 });
     }

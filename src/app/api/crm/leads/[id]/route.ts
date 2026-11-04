@@ -1,3 +1,4 @@
+import { scrubHomeEventsForLead } from "@/lib/events/record";
 /**
  * GET    /api/crm/leads/[id] — full lead profile (activities, enrollments, opps, tasks, sends)
  * PATCH  /api/crm/leads/[id] — update fields; diffs are logged + fire triggers
@@ -216,5 +217,6 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
   const { error } = await supabase.from("leads").delete().eq("id", id);
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
-  return NextResponse.json({ deleted: true });
+  const scrub = await scrubHomeEventsForLead(supabase, id);
+  return NextResponse.json({ deleted: true, home_events_scrubbed: scrub.ok });
 }

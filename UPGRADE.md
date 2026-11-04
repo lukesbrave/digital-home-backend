@@ -1,20 +1,49 @@
 # Upgrading your Digital Home Backend
 
-This guide is written to be executed by **Claude Code inside your own
-backend project**. Paste this into Claude Code from your backend project
-folder:
+## Starter 3.0
 
-> Fetch https://raw.githubusercontent.com/lukesbrave/digital-home-backend/main/UPGRADE.md
-> and upgrade my backend to the latest version. My project may be
-> customized — preserve my changes while applying the upgrade.
+Verify the paired published GitHub releases before selecting this target. Pair
+backend `v3.0.0` with frontend `v3.0.0`, and use the
+[existing-Simon guide](UPGRADE-3.md) from that exact backend tag. VERSION alone
+in a development branch does not establish publication. The preceding published
+baselines are backend 2.9.0 / frontend 2.5.4. Existing employee instructions and
+training stay intact.
+
+### Upgrade to 3.0.0 after publication
+
+1. Confirm both published tags and read [RELEASE-3.md](RELEASE-3.md). Snapshot
+   both customised repositories, the actual database/account/configuration and
+   all media, and prove an isolated restore using [RECOVERY-3.md](RECOVERY-3.md).
+2. Capture customisations in both repositories before adopting the target tools.
+   Prepare the backend with the scripted procedure below, target `v3.0.0`;
+   merge the paired frontend using its own `UPGRADE.md`. Do not copy over its site.
+3. A backend already at 2.9.0 retains migrations 001–003 unchanged and applies
+   pending 004–008 through the migration/history tools. An older supported Home
+   also needs any pending earlier files, including 003. Inspect history/schema;
+   do not replay applied SQL or renumber member migrations to make a check pass.
+4. Preserve the member's shell, custom Money interfaces, domains, bindings,
+   social activation and workflows. Merge installed Studio's navigation, static
+   workspace exception/build step, dependencies and full generated database types.
+   See the optional-module checklist in UPGRADE-3.md. No Studio SQL replay or
+   runner restart is part of a Starter upgrade.
+5. Run both builds and the per-Home checks in UPGRADE-3.md. Keep the installed
+   VERSION unchanged until that member's upgrade is verified and approved.
+
+
+Run this from the member's own backend with their existing coding agent.
+After publication, use the immutable guide for the approved tag:
+
+> Read https://raw.githubusercontent.com/lukesbrave/digital-home-backend/v3.0.0/UPGRADE-3.md
+> and prepare the paired 3.0.0 upgrade. Preserve my customisations, prove recovery,
+> and show me the tested changes before deploying.
 
 ---
 
-## Scripted upgrades (from the first release after 2.9.0)
+## Scripted upgrades (3.0.0 and later)
 
-Available from the first release after 2.9.0 (not yet tagged). Until then
-follow the 2.9.0 section below. Once that release is out, its own section
-below names its tag; use that tag wherever this section says `<target tag>`.
+The first scripted release is 3.0.0. Use only after its paired publication,
+with `v3.0.0` wherever this section says `<target tag>`. The older procedures
+below are historical catch-up instructions, not the completion point for 3.0.
 
 **Each upgrade runs the Home's current copy of the tools,** so the first step
 of every upgrade is to take the target release's copy and commit it on the
@@ -44,15 +73,16 @@ Skip the `remote add` if `starter` already exists. Then:
    works on branch `upgrade/<target tag>`, checks out and commits the files
    that are new in the release, lists every changed file to merge by hand with
    its `git diff` command, applies every pending backend migration of the
-   release one transaction each and records it in `schema_migrations`, copies
-   `src/types/database.ts` to the frontend when that checkout is clean and on
-   its own branch, and writes `VERSION`. Without `--project-ref <ref> --yes`
+   release one transaction each and records it in `schema_migrations`, compares
+   shared types with the frontend and requires a manual merge if they differ, and keeps `VERSION` unchanged until verification completes. Without `--project-ref <ref> --yes`
    it stops at the database (exit 2) and prints the command to resume.
    `--take-untouched` also takes changed files the Home has never edited since
    its last release.
 5. Merge the listed files (merge, don't overwrite), then run the checks it
    prints (`npx tsc --noEmit`, `npm run build`) and commit on the branch.
-   Commit the copied types in the frontend on its branch.
+   Preserve custom columns/types in both repositories, then commit the reviewed
+   merged types on their respective branches. A clean frontend can still contain
+   custom types; the upgrader never replaces a differing file automatically.
 
 The scripts read `SUPABASE_URL` from the repo's `.env.local` (a worktree uses
 the main checkout's). The database password comes from `SUPABASE_DB_PASSWORD`
@@ -104,7 +134,7 @@ You are upgrading a member's Digital Home backend — a customized fork of
 customizations are intentional: **merge, don't overwrite.** When a file
 conflicts, prefer their copy design-wise and add the new capability into it.
 
-### Latest release: 2.9.0 — required public image storage
+### Historical release: 2.9.0 — required public image storage
 
 Read VERSION before changing anything. If it is 2.9.0, no code upgrade is
 needed. If it is 2.8.0 or the tested 2.9.0 beta, follow this section and stop;
@@ -187,8 +217,8 @@ then apply this 2.7.4 → 2.8.0 step last.
   similar) and NOT the frontend. If it's the frontend, stop and say so.
 
 ### Step 1 — Preflight
-1. `git status` — if there are uncommitted changes, commit or stash them
-   first so the upgrade is revertible.
+1. `git status` — if there are uncommitted changes, preserve them on their existing branch and prepare the upgrade in an isolated
+   worktree. Never stash, reset or clean someone else’s work.
 2. Create a branch named for the release you are moving to, for example
    `git checkout -b upgrade/v2.9.0`.
 3. Add the starter as a remote if missing:

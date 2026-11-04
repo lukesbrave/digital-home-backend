@@ -1,0 +1,103 @@
+{
+  "format": "starter_release_pair_v1",
+  "status": "paired inventory; availability is established by published GitHub releases",
+  "backend": {
+    "repository": "lukesbrave/digital-home-backend",
+    "version": "3.0.0",
+    "previous_public_version": "2.9.0",
+    "application_baseline_commit": "98427fe3c7c2d91ce15614947f7f71b23a05f0f0",
+    "migrations": [
+      {
+        "name": "001_backend_core.sql",
+        "sha256": "de2dec37431505444b46082cda417253c6f3dde22cdea7b3b7d015e984fe704f"
+      },
+      {
+        "name": "002_crm_core.sql",
+        "sha256": "c61c27dbe0940b124256b365142191c3b0d7573dfb55f61da123f459dd99ca71"
+      },
+      {
+        "name": "003_schema_migrations.sql",
+        "sha256": "de5cd492e60898eff8afac3b10f2549afc0c88669be45c20bd08cceb00addf56"
+      },
+      {
+        "name": "004_agent_keys.sql",
+        "sha256": "4440366e9d64a68b6983a7f6000d2a8eacc592c96464e699bfb55c307da64aa8"
+      },
+      {
+        "name": "005_home_events.sql",
+        "sha256": "b1a67a2796489a7c94d8aca34e74f814fc8371a5e41d21a8c27f1e504052eaa4"
+      },
+      {
+        "name": "006_money.sql",
+        "sha256": "2d001c80da6b4233a270ff517620e4a2c4bf2af051e242dfa6928884f8f89261"
+      },
+      {
+        "name": "007_payment_receipts.sql",
+        "sha256": "8262b57c7075e1498bba3acedd69b6f1b137a49879433e076f14a1efdcdbaf58"
+      },
+      {
+        "name": "008_agent_approvals.sql",
+        "sha256": "6fbc49a64a6eb1285a5150dedfd788ada87d3fd5d34b31119ec25932f20b57b6"
+      }
+    ],
+    "previous_application_baseline_commit": "8e7008c"
+  },
+  "frontend": {
+    "repository": "lukesbrave/digital-home-frontend",
+    "version": "3.0.0",
+    "previous_public_version": "2.5.4",
+    "application_baseline_commit": "a052c37",
+    "migrations": [
+      {
+        "name": "001_visitors.sql",
+        "sha256": "4f940928a4569790507930f9862703f6e879ed81156ffa5ef7e0fe1a2cb1bdc1"
+      },
+      {
+        "name": "002_content_objects.sql",
+        "sha256": "137fca10340e76b1bb566b9f3d1a64063d962a37f7d993dffa4afe3c666cced6"
+      },
+      {
+        "name": "003_offers.sql",
+        "sha256": "5553cddd50c203686fc82594f9b73f2576cb248dd322e66212b45e4a8755270c"
+      },
+      {
+        "name": "004_leads_analytics.sql",
+        "sha256": "d5748ded0b682c373f8d422f6b1cd6282b743dcb8217d2c12e069841f56385ce"
+      },
+      {
+        "name": "005_entities.sql",
+        "sha256": "34763df24f4ac20a5b6e05160b540e325a1d29d1dfbaf695ca2d11c057ea6f67"
+      },
+      {
+        "name": "006_personalization_rules.sql",
+        "sha256": "076e45bb14df3bee9a099090e0da1dc66fc46272535ac22179f582588173b400"
+      },
+      {
+        "name": "007_email_system.sql",
+        "sha256": "5da251fdc083354c93d34fdda52596d658fdb6aed8c1dfb47db3bd341e6980e1"
+      },
+      {
+        "name": "008_conversations.sql",
+        "sha256": "faec93a08e58bd4a2a4f33cb4614c133c61add14e29c711b778d9bf760f0dbd9"
+      },
+      {
+        "name": "009_media_agent_logs.sql",
+        "sha256": "b93ed0fa20cc9d9382aaf39e6e208ab14c2c73d3af4927b8ab709c9900ea268b"
+      },
+      {
+        "name": "010_content_calendar.sql",
+        "sha256": "e9152a2dfeb14197abba8e8304473320d4daee2050ee0f7e6ad2bd39b7615f75"
+      },
+      {
+        "name": "011_security_policies.sql",
+        "sha256": "dcc73e9ef7029ddeb99d277900b5d47025fe0039688619b0d36b30b06a9c2bc0"
+      }
+    ]
+  },
+  "runtime": {
+    "node": ">=22",
+    "next": "16.2.4",
+    "react": "19.2.3"
+  },
+  "member_migrations": "unused 900–999; do not renumber/replay existing applied files without review"
+}

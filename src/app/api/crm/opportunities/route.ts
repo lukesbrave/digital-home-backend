@@ -1,3 +1,6 @@
+import { onDealWon } from "@/lib/money/engagements";
+import { moneyDb } from "@/lib/money/db";
+import { isDealWon } from "@/lib/money/state";
 /**
  * GET  /api/crm/opportunities?pipeline_id=&status= — board data (joined leads)
  * POST /api/crm/opportunities — { lead_id, stage_id, name?, value_cents? }
@@ -75,5 +78,6 @@ export async function POST(request: NextRequest) {
   });
   await fireTrigger(supabase, { type: "stage_changed", lead, data: { stage_id: stage.id } });
 
+  if (isDealWon({ stageName: stage.name })) await onDealWon(moneyDb(supabase), { opportunityId: data.id, leadId: lead.id, actor: auth.mode === "session" ? "human" : `agent:${auth.agent}` });
   return NextResponse.json({ opportunity: data }, { status: 201 });
 }

@@ -26,6 +26,7 @@ export interface WorkflowStep {
 }
 
 export type TriggerType =
+  | "engagement_stage_changed"
   | "manual"
   | "lead_created"
   | "form_submitted"

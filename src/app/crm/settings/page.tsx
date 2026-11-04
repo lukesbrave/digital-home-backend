@@ -1,5 +1,7 @@
 'use client';
 
+import Link from 'next/link';
+import OptionalModules from '@/components/crm/optional-modules';
 import { useCallback, useEffect, useState } from 'react';
 import {
   api,
@@ -82,7 +84,9 @@ export default function CrmSettingsPage() {
   if (!loaded) {
     return (
       <div className="flex flex-col h-full">
-        <PageHeader title="CRM · Setup" />
+        <OptionalModules/>
+      <Link className="underline block mb-4" href="/crm/settings/agents">Manage agent access</Link>
+      <PageHeader title="CRM · Setup" />
         <Loading />
       </div>
     );

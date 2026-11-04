@@ -1,40 +1,39 @@
 # Changelog
 
-All notable changes to the Digital Home Backend Starter.
+## [3.0.0]
 
-## [Unreleased]
+- Home discovery and a client-neutral guide, scoped employee keys, 14 MCP tools,
+  approval APIs, and a recorded activity feed. Existing master/named-key
+  authentication stays compatible; changing an employee's access is optional.
+- Analytics replaces Funnel navigation, keeps old bookmarks, and filters recorded
+  website/page events by period, page, source and device. Counts are events,
+  not unique people or cross-platform social statistics.
+- Optional Stripe payment and fulfilment APIs, signed retry-safe receipts,
+  products/orders/invoices/projects/deliverables, and draft recipes. No bundled
+  Money page/navigation. Existing member Money interfaces are preserved.
+  Payouts remain records only; automated affiliate transfers are outside scope.
+- Additive backend migrations 004–008, tracked history and collision refusal.
+  Official files use 001–899; new member files use unused 900–999. Existing
+  applied custom migrations need review before any filename/history change.
+- Reviewed schema generation for both apps; upgrade preparation preserves
+  custom files, deletions, frontend types, configuration and VERSION until
+  verification. Code/database/media recovery includes a proven restore path.
+- Optional connection status and clearer fresh-build handover. Node 22+,
+  Next.js 16; pair this backend with frontend 3.0.0.
 
-A Home's schema state is now recorded, and its upgrade is scripted:
+Validation includes paired production builds, actual hosted cold install and
+Auth/Storage/custom-schema/R2 recovery, test-only Stripe lifecycle/retry/order,
+deployed desktop/mobile lead/approval/Analytics/media checks, unchanged older
+Simon rehearsal, and installed Studio 1.7.2 data/code/runtime preservation.
+Studio's existing runner was not restarted and no model spend was performed.
+See RELEASE-3.md for scope, version pairing and upgrade requirements.
 
-- Migration `003_schema_migrations.sql` adds `schema_migrations`, one row per
-  applied migration from either repo, keyed by (repo, name), with checksum,
-  when and by whom. RLS on, service role only. `src/types/database.ts` gains
-  the table: copy it to the frontend byte-identical.
-- `scripts/migrations-status.mjs` reports every frontend and backend migration
-  as applied, inferred (what it creates exists, but nothing records it),
-  partial or pending. Read-only; `--json` for agents.
-- `scripts/migrations-seed.mjs` is the one-time catch-up for 2.x Homes: it
-  records each inferred migration, creating the table first if needed. It
-  writes only with `--project-ref <ref>` matching `.env.local` and `--yes`;
-  `--dry-run` never writes.
-- `scripts/upgrade.mjs` does the mechanical part of an upgrade on branch
-  `upgrade/v<target>`: the target's own tools, new files, the list of files to
-  merge by hand, every pending migration recorded as it applies (behind the
-  same gate), the shared types and `VERSION`. It stops before deploy and never
-  merges or deletes; `--dry-run` writes nothing.
-- The tools verify the database certificate against Node's roots plus
-  Supabase's own root, bundled in `scripts/certs/` (`SUPABASE_CA_CERT` adds
-  another), take the password from the environment, stdin or a hidden prompt
-  (never the command line), and give each migration a 5 s lock and 60 s
-  statement timeout.
-- `scripts/apply-migration.mjs` now uses the same connection and password
-  rules: certificate verified, no password in the command, the database ref
-  printed first, and `--project-ref <ref>` refused unless it matches.
-- `npm run test:upgrade` tests the pure parts, the gates and a full upgrade
-  against throwaway git repos and a fake database.
+### Approval interface scope
 
-UPGRADE.md opens with the scripted path, available from the first release
-after 2.9.0; the older prose stays below it.
+No default Approvals page/menu is bundled. Proposals, owner review/decision APIs,
+scoped status access, audit events and duplicate refusal remain. Owner-authorised
+agents can carry out explicit decisions from Buzz via signed HTTP; ordinary
+employee keys cannot approve. Existing member interfaces are preserved.
 
 ## [2.9.0] — 2026-09-13
 

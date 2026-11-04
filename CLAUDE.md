@@ -24,13 +24,13 @@ the shared schema; the frontend does not need to be deployed first.
 Use one parent `digital-home` folder, separate repository folders, and the same
 Supabase project. Check the working directory before each repo-specific action.
 
-### Step 0: Check for Node.js
-Before anything else, check if the user has Node.js installed by running `node -v`. If the command fails or is not found, walk them through installing it: go to [nodejs.org](https://nodejs.org), download the LTS version, and run the installer. They need Node.js to run this project.
+### Step 0: Check for Node.js 22 or newer
+Before anything else, check if the user has Node.js installed by running `node -v`. This project requires Node.js 22 or newer. If the command fails, is not found, or reports an older version, walk them through installing a supported version: go to [nodejs.org](https://nodejs.org), download the LTS version, and run the installer. They need Node.js to run this project.
 
 ### Step 1: Supabase + Migrations (Frontend First)
 If you haven't already, follow the Frontend CLAUDE.md Steps 1-3 to create your Supabase project, run all Frontend migrations (`001` through `011`), and create an admin user. Then apply every migration in this repo's `supabase/migrations/`, in order.
 
-Both repos share the same database. The Frontend owns the shared website schema; this repo owns `backend_settings` and `brand_context`.
+Both repos share the same database. The Frontend owns the shared website schema; this repo owns backend settings, brand context, CRM, migration history, agent keys, events and payment/fulfilment records. Review the selected release’s migration files for the complete schema.
 
 ### Member database changes
 
@@ -44,7 +44,6 @@ backend migrations; member migrations require separate review and application.
 If custom migrations already use reserved numbers, inspect their SQL, actual schema
 and applied history before deciding a mapping. Do not blindly rename or replay
 applied migrations, or rewrite history. See the backend `UPGRADE.md`.
-
 
 ### Step 2: Set Up Environment Variables
 ```bash
@@ -183,7 +182,7 @@ The Backend connects to the same Supabase database as the Digital Home Frontend 
 ```
 
 ## Tech Stack
-- **Framework:** Next.js 15 (App Router, TypeScript)
+- **Framework:** Next.js 16 (App Router, TypeScript)
 - **Styling:** Tailwind CSS v4
 - **Database:** Supabase (PostgreSQL) — shared with the Digital Home
 - **Auth:** Supabase Auth (email/password, no public signup)
@@ -298,7 +297,7 @@ If `status` is `401`, the API key doesn't match between Backend and Frontend. Re
   - session-only: admin dashboard APIs (`/api/articles`, `/api/content-calendar`, `/api/publish`, `/api/reset-writing`, `/api/settings`, `/api/setup`, `/api/test-frontend`)
   - session or signed API request: machine-triggered automation routes (`/api/write-article`, `/api/write-now`, `/api/trend-scan`)
 - **Dark theme only.** This is a professional dashboard, not a consumer app.
-- **CRITICAL — Shared database types:** When you modify `src/types/database.ts` or add/change a Supabase migration, you MUST also update the same `src/types/database.ts` file in the Digital Home Frontend Starter repo. These two files must always be identical.
+- **Shared database types:** Review and merge schema changes into both repositories’ `src/types/database.ts`. Preserve member columns and custom types in both copies. A clean or committed file may still contain customisations; never replace it wholesale with starter types. Verify both builds after the merge.
 
 ## Cloudflare / OpenNext Rules
 

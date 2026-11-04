@@ -1,3 +1,6 @@
+import { onDealWon } from "@/lib/money/engagements";
+import { moneyDb } from "@/lib/money/db";
+import { isDealWon } from "@/lib/money/state";
 /**
  * PATCH  /api/crm/opportunities/[id] — move stage / set status / value
  * DELETE /api/crm/opportunities/[id]
@@ -94,6 +97,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     }
   }
 
+  if (isDealWon({ status: statusChange, stageName: movedStage?.name })) await onDealWon(moneyDb(supabase), { opportunityId: id, leadId: opp.lead_id, actor });
   return NextResponse.json({ opportunity: updated });
 }
 

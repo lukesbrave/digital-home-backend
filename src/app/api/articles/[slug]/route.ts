@@ -1,3 +1,4 @@
+import { actorFromAuth, articlePublishedEvent, recordHomeEvent } from "@/lib/events/record";
 import { verifyPublicationImage } from "@/lib/media/publication";
 /**
  * GET /api/articles/[slug] — Fetch a single article
@@ -66,6 +67,10 @@ export async function PATCH(
     contentFields.published_at = new Date().toISOString();
   }
 
+  const before = contentFields.status === "published"
+    ? (await supabase.from("content_objects").select("status").eq("slug", slug).maybeSingle()).data
+    : null;
+
   // Update content object
   const { data: article, error: contentError } = await supabase
     .from("content_objects")
@@ -80,6 +85,8 @@ export async function PATCH(
       { status: contentError ? 500 : 404 }
     );
   }
+
+  if (contentFields.status === "published" && before?.status !== "published") await recordHomeEvent(supabase, articlePublishedEvent(actorFromAuth(auth), { id: article.id, slug: article.slug }));
 
   // Sync calendar entry status when article status changes
   if (contentFields.status) {

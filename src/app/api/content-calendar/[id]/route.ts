@@ -60,7 +60,7 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
   }
 
   let contentRollback:
-    | { id: string; status: (typeof CONTENT_OBJECT_STATUSES)[number]; published_at: string | null }
+    | { id: string; status: (typeof CONTENT_OBJECT_STATUSES)[number] | null; published_at: string | null }
     | null = null;
 
   if (typeof update.status === "string") {
@@ -74,7 +74,7 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
       return NextResponse.json({ error: "Calendar entry not found" }, { status: 404 });
     }
 
-    const allowed = VALID_TRANSITIONS[current.status] || [];
+    const allowed = (current.status ? VALID_TRANSITIONS[current.status] : []) || [];
     if (!allowed.includes(update.status)) {
       return NextResponse.json(
         {
