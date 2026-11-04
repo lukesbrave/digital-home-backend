@@ -1,5 +1,15 @@
 # Starter 3.0 development status — 2026-10-30
 
+**Scope change — 2026-11-04:** Luke requested no bundled Approvals screen, with
+approval capability managed through agents in Buzz. Removed the page/navigation;
+proposal schema/MCP and execution/audit protection remain. Queue/detail/decision
+HTTP routes now accept admin sessions or the existing signed master connection;
+ordinary named/scoped employee keys cannot decide. APPROVALS.md requires exact
+owner confirmation in Buzz, explains immediate workflow effects, and distinguishes
+credential authorization from proof of a human chat message. Member-built approval
+interfaces are preserved. Final acceptance/PR receipts below predate this increment
+until the new owner-control-plane tests/build are recorded.
+
 ## Current release review — 2026-11-04
 
 The paired 3.0.0 candidate is prepared for owner publication review. Candidate

@@ -19,9 +19,9 @@ function fixture(overrides:Record<string,string>={}, grants=['events:read']) {
   './agent-keys':{verifyAgentKey:async()=>{keyLookups++;return {name:'simon',scopes:grants};}},
  };
  const js=ts.transpileModule(readFileSync(new URL('./auth.ts',import.meta.url),'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText;
- const loaded={exports:{} as {authenticateSessionOrApiKey:(request:Request)=>Promise<AuthResult>}};
+ const loaded={exports:{} as {authenticateSessionOrApiKey:(request:Request)=>Promise<AuthResult>;authenticateOwner:(request:Request)=>Promise<AuthResult>}};
  new Function('require','module','exports','process',js)((id:string)=>{assert.ok(id in dependencies,id);return dependencies[id];},loaded,loaded.exports,{env});
- return {auth:loaded.exports.authenticateSessionOrApiKey,lookups:()=>keyLookups};
+ return {auth:loaded.exports.authenticateSessionOrApiKey,owner:loaded.exports.authenticateOwner,lookups:()=>keyLookups};
 }
 function request(key:string,path='/api/events',method='GET',secret='test-signing',signed=true) {
  const time=String(Math.floor(Date.now()/1000));
@@ -56,4 +56,18 @@ test('wrong legacy signatures are rejected and owner login is unchanged',async()
 test('checkout-only key cannot read orders, mint keys, send invoices or use invented routes',()=>{
  assert.equal(scopedRouteAllowed('POST','/api/crm/checkout',['money:checkout']),true);
  for(const [method,path] of [['GET','/api/crm/orders'],['POST','/api/settings/agent-keys'],['POST','/api/crm/invoices'],['POST','/api/crm/checkout/anything']])assert.equal(scopedRouteAllowed(method,path,['money:checkout']),false);
+});
+
+test('owner approval connection permits signed master/admin and refuses ordinary employee keys',async()=>{
+ const f=fixture({}, ['approvals:propose','leads:read']);
+ for(const path of ['/api/agent/actions','/api/agent/actions/11111111-1111-4111-8111-111111111111']){
+  for(const method of ['GET','POST']){
+   assert.equal((await f.owner(request('test-master',path,method))).authenticated,true);
+   assert.equal((await f.owner(request('test-master',path,method,'wrong'))).authenticated,false);
+   assert.equal((await f.owner(request('test-old-agent',path,method))).authenticated,false);
+   assert.equal((await f.owner(request(minted,path,method,minted))).authenticated,false);
+  }
+ }
+ const session=await f.owner(new Request('https://test.invalid/api/agent/actions'));
+ assert.equal(session.authenticated,true);if(session.authenticated)assert.equal(session.mode,'session');
 });

@@ -3,7 +3,7 @@
 ## [3.0.0]
 
 - Home discovery and a client-neutral guide, scoped employee keys, 14 MCP tools,
-  owner Approvals, and a recorded activity feed. Existing master/named-key
+  approval APIs, and a recorded activity feed. Existing master/named-key
   authentication stays compatible; changing an employee's access is optional.
 - Analytics replaces Funnel navigation, keeps old bookmarks, and filters recorded
   website/page events by period, page, source and device. Counts are events,
@@ -27,6 +27,13 @@ deployed desktop/mobile lead/approval/Analytics/media checks, unchanged older
 Simon rehearsal, and installed Studio 1.7.2 data/code/runtime preservation.
 Studio's existing runner was not restarted and no model spend was performed.
 See RELEASE-3.md for scope, version pairing and upgrade requirements.
+
+### Approval interface scope
+
+No default Approvals page/menu is bundled. Proposals, owner review/decision APIs,
+scoped status access, audit events and duplicate refusal remain. Owner-authorised
+agents can carry out explicit decisions from Buzz via signed HTTP; ordinary
+employee keys cannot approve. Existing member interfaces are preserved.
 
 ## [2.9.0] — 2026-09-13
 

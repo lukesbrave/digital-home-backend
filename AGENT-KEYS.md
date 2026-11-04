@@ -25,3 +25,8 @@ Tests execute the actual auth module with synthetic credentials and provider
 boundaries. They cover old signing without database access, minted self-signing,
 wrong signatures, route confinement and unchanged owner login. They do not
 substitute for the actual unchanged-Simon rehearsal required before release.
+
+Owner approval management is a separate signed master/admin control plane,
+documented in APPROVALS.md. It is not granted by approvals:propose or by naming
+an employee key “owner”. Keep that credential confined to the owner-authorised
+connection; decisions require the owner's explicit instruction for that proposal.

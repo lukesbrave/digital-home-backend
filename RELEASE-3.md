@@ -6,10 +6,10 @@ RELEASE-PAIR.json contains the paired versions, application baselines and exact
 migration hashes. VERSION is the public
 Starter version; package.json's internal application package version is separate.
 
-The backend adds Home discovery, scoped keys, 14 MCP tools, owner Approvals,
+The backend adds Home discovery, scoped keys, 14 MCP tools, approval capabilities,
 events, Analytics, payment/fulfilment APIs and preservation/recovery tools.
-The frontend supplies matching schema types and event provenance. There is no
-bundled Money screen. Planning/project/deliverable capabilities remain available
+The frontend supplies matching schema types and event provenance. There are no
+bundled Money or Approvals screens. Planning/project/deliverable capabilities remain available
 to agents and custom interfaces. Payouts are records, not automated transfers.
 
 ## New Home
@@ -45,3 +45,7 @@ Every member still needs per-Home verification and an approved deployment.
 A database backup excludes later writes; reconcile them before cutover. Reverting
 a Worker does not reverse a migration. Publishing this Starter does not update
 existing member installations or employees automatically.
+
+Approval review/decisions can be managed by the owner's agent in Buzz through the
+backend's signed owner HTTP connection (APPROVALS.md). Ordinary employee keys
+cannot approve. Any existing member-built approval interface is preserved.

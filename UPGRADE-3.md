@@ -151,3 +151,12 @@ to accept its existing owner session/master Bearer boundary; a new Starter
 scoped key does not grant Studio access. Keep the current runner and credentials.
 A Starter update does not authorize paid model work, publishing queued jobs or
 restarting a busy runner. Test each Home's installed modules before its deploy.
+
+## Approval capability without a bundled screen
+
+Do not add a default Approvals page/menu during an upgrade. Preserve any member
+interface already present. Follow APPROVALS.md for owner decisions through the
+existing Buzz agent and signed master connection; scoped employee keys retain
+proposal/status access only. Never rotate, disclose or distribute the owner key
+as a side effect of removing the screen. Verify explicit approve/reject, denial
+for ordinary keys, duplicate refusal and the recorded result before handover.
