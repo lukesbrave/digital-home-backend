@@ -8,7 +8,11 @@ ordinary named/scoped employee keys cannot decide. APPROVALS.md requires exact
 owner confirmation in Buzz, explains immediate workflow effects, and distinguishes
 credential authorization from proof of a human chat message. Member-built approval
 interfaces are preserved. Final acceptance/PR receipts below predate this increment
-until the new owner-control-plane tests/build are recorded.
+and are superseded for this scope by the new owner-control-plane receipt.
+Validation: 298 backend tests and production build pass. Synthetic hosted
+MCP proposals, signed-owner queue/detail/approve/reject, preserved owner session,
+scoped/named-key and bad-signature denial, duplicate refusal and absent screen/menu
+all pass. No SQL/schema or frontend application change. Canary update follows.
 
 ## Current release review — 2026-11-04
 

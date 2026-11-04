@@ -5,7 +5,7 @@
     "repository": "lukesbrave/digital-home-backend",
     "version": "3.0.0",
     "previous_public_version": "2.9.0",
-    "application_baseline_commit": "8e7008c",
+    "application_baseline_commit": "98427fe3c7c2d91ce15614947f7f71b23a05f0f0",
     "migrations": [
       {
         "name": "001_backend_core.sql",
@@ -39,7 +39,8 @@
         "name": "008_agent_approvals.sql",
         "sha256": "6fbc49a64a6eb1285a5150dedfd788ada87d3fd5d34b31119ec25932f20b57b6"
       }
-    ]
+    ],
+    "previous_application_baseline_commit": "8e7008c"
   },
   "frontend": {
     "repository": "lukesbrave/digital-home-frontend",
