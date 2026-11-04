@@ -24,8 +24,8 @@ the shared schema; the frontend does not need to be deployed first.
 Use one parent `digital-home` folder, separate repository folders, and the same
 Supabase project. Check the working directory before each repo-specific action.
 
-### Step 0: Check for Node.js
-Before anything else, check if the user has Node.js installed by running `node -v`. If the command fails or is not found, walk them through installing it: go to [nodejs.org](https://nodejs.org), download the LTS version, and run the installer. They need Node.js to run this project.
+### Step 0: Check for Node.js 22 or newer
+Before anything else, check if the user has Node.js installed by running `node -v`. This project requires Node.js 22 or newer. If the command fails, is not found, or reports an older version, walk them through installing a supported version: go to [nodejs.org](https://nodejs.org), download the LTS version, and run the installer. They need Node.js to run this project.
 
 ### Step 1: Supabase + Migrations (Frontend First)
 If you haven't already, follow the Frontend CLAUDE.md Steps 1-3 to create your Supabase project, run all Frontend migrations (`001` through `011`), and create an admin user. Then apply every migration in this repo's `supabase/migrations/`, in order.
@@ -182,7 +182,7 @@ The Backend connects to the same Supabase database as the Digital Home Frontend 
 ```
 
 ## Tech Stack
-- **Framework:** Next.js 15 (App Router, TypeScript)
+- **Framework:** Next.js 16 (App Router, TypeScript)
 - **Styling:** Tailwind CSS v4
 - **Database:** Supabase (PostgreSQL) — shared with the Digital Home
 - **Auth:** Supabase Auth (email/password, no public signup)

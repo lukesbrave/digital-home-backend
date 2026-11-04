@@ -3,11 +3,11 @@
  * ?status=proposed (default) | approved | rejected | executed | failed | all
  */
 import { NextRequest, NextResponse } from "next/server";
-import { authenticateSession, unauthorizedResponse } from "@/lib/api/auth";
+import { authenticateOwner, unauthorizedResponse } from "@/lib/api/auth";
 import { createAdminClient } from "@/lib/supabase/server";
 
 export async function GET(request: NextRequest) {
-  const auth = await authenticateSession(request);
+  const auth = await authenticateOwner(request);
   if (!auth.authenticated) return unauthorizedResponse(auth.error);
 
   const status = request.nextUrl.searchParams.get("status") || "proposed";

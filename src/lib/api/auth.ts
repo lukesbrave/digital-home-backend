@@ -186,6 +186,18 @@ export async function authenticateSessionOrApiKey(
   return validateSession(opts);
 }
 
+/** Owner control plane: admin session or the signed master connection only.
+ * Ordinary named env keys and scoped employee keys cannot decide proposals.
+ * This authorizes the connection, not a human chat message: an owner agent must
+ * still obtain the owner's explicit decision for the exact proposal.
+ */
+export async function authenticateOwner(request: NextRequest): Promise<AuthResult> {
+  const auth = await authenticateSessionOrApiKey(request);
+  if (!auth.authenticated || auth.mode === "session") return auth;
+  if (auth.agent === MASTER_AGENT && auth.scopes?.includes(WILDCARD_SCOPE)) return auth;
+  return { authenticated: false, error: "Owner access required" };
+}
+
 export function unauthorizedResponse(error: string = "Unauthorized") {
   return Response.json({ error }, { status: 401 });
 }

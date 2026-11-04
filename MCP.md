@@ -21,9 +21,13 @@ calendar, Brand Playbook, proposals and proposal status. Scope checks happen for
 every call, not only discovery. There is no private operator or member-community
 integration. No tool approves its own work, publishes, deletes or charges money.
 
-Pipeline moves, article topics and social drafts enter Approvals. Only the
-owner's dashboard session can approve or reject. Approval claims the proposal
-once; repeat decisions refuse. A pipeline change also refuses if the deal moved
+Pipeline moves, article topics and social drafts create approval proposals.
+The starter ships no Approvals page. An owner-authorised agent can review the
+exact proposal, ask for the owner's decision in Buzz, then use the signed master
+HTTP control plane documented in APPROVALS.md. Ordinary scoped/named employee
+keys cannot decide; MCP itself exposes no approval-execution tool. Existing
+owner sessions remain supported for custom interfaces. Approval claims the
+proposal once; repeat decisions refuse. A pipeline change also refuses if the deal moved
 since the proposal. Approved articles await writing; social posts remain drafts.
 An action stuck in “approved” needs inspection before anyone proposes it again:
 a response or receipt failure does not prove the action did not happen.

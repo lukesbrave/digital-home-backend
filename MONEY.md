@@ -1,4 +1,4 @@
-# Money and fulfilment — Starter 3.0 candidate
+# Money and fulfilment — Starter 3.0
 
 Payment and fulfilment APIs provide products, orders, invoices, projects and
 deliverables in the member’s own Home. The starter deliberately ships no Money
@@ -13,7 +13,8 @@ through their existing secure setup. No credentials are supplied by this starter
 `/api/webhooks/stripe` verifies the raw body signature, claims provider events,
 retries failed processing and deduplicates deliveries. Test events do not affect
 a live Home unless explicitly allowed. Local tests use synthetic signatures and
-fake Stripe transport; an actual Stripe test-account rehearsal is still required.
+fake Stripe transport. Maintainer acceptance also exercises a real Stripe test
+account. Every member still needs their own test-mode checkout/webhook proof.
 
 Owner-requested `/api/crm/fulfilment` POST `{action:"seed"}` adds missing onboarding,
 project-stage and delivery-review recipes as drafts. Repeating setup preserves
@@ -25,4 +26,5 @@ workflow context for emails, without overwriting the lead's custom fields.
 
 Route scopes are in `/api/home/guide`. Checkout-only keys cannot read Money or
 send invoices. Approval advice in the guide is an agent instruction, not a new
-server-side approval queue; the approvals/MCP port remains separate work.
+server-side payment-approval queue. MCP proposals and owner Approvals handle
+only their documented action kinds; they do not approve financial operations.

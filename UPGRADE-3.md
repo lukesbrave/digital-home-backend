@@ -1,6 +1,6 @@
 # Upgrade an existing Home with your current Simon
 
-Development candidate — not released. Do not deploy this branch or use it as “latest”.
+Use only with the paired published 3.0.0 releases. A development branch is not “latest”.
 After release, the owner gives their existing Simon the immutable release URL for
 this guide and the approved tag. No employee rehire, instruction replacement or
 training installation is needed to read and follow it. This is a task runbook,
@@ -58,7 +58,7 @@ me the result before deploying. Keep your current instructions and training.”
    A reviewed deletion uses `after: null`. Never blanket-approve a report or
    generate approvals merely to silence a failing check. Changed bytes after
    approval fail again. Retain the original before-receipt.
-8. Run the candidate's tests and both production builds. Verify database history,
+8. Run the target release's tests and both production builds. Verify database history,
    owner login, public site, form-to-lead, article images, custom pages, workflows,
    social state/queued posts and optional Studio. Old credentials must continue
    working: do not rotate the master, change signing mode or require new per-agent
@@ -114,8 +114,49 @@ baseline, the native-runtime blocker and the remaining model-behaviour proof.
 
 ## Optional payment interfaces
 
-The candidate provides payment and fulfilment APIs without a default Money page.
+The release provides payment and fulfilment APIs without a default Money page.
 Preserve any existing member Money page, navigation, records and integrations.
 Do not delete a member interface merely because it is absent from the starter.
 
 For generated shared types use [SCHEMA-TYPES.md](SCHEMA-TYPES.md). For scoped agent connections and owner approvals see [MCP.md](MCP.md). Review migration 008 as part of the official backend set.
+
+## Existing Studio and other member modules
+
+Starter upgrades do not install or upgrade Studio. Preserve the module's own
+files, timestamp-named SQL and release receipt; do not rename that SQL to 900+
+or send it through the Starter migration runner. Its own signed upgrade process
+continues to own those migrations. Check for generic table-name collisions
+before applying Starter SQL; do not adopt an incompatible existing table.
+
+Merge shared files explicitly: keep the Studio navigation link, every middleware
+exception (including `/studio/workspace`), the static workspace materialisation
+build command and Static Assets routing, all member bindings, and Studio's
+required dependencies. A shared node_modules folder can hide missing package
+entries. Compare the member's package file with their verified installed-module
+manifest; install from the merged lockfile and build in an isolated checkout.
+Do not copy a vendor Home's package file or silently upgrade the Studio module.
+
+Generate types from the Home's complete actual schema. Preserve local helpers
+and add the target release's newly required helper aliases when absent; the
+preparation tool deliberately does not invent aliases or resolve domain types.
+Review each removal: the old handwritten types may name uninstalled optional
+or private tables. Verify absence and code consumers before removing a stale
+placeholder; never remove a real custom table/column to make type checking pass.
+Build both applications with the reviewed generated schema.
+
+Open a saved Studio board before/after: preserve sources, notes, desk history,
+queued jobs and graph revisions; prove a safe save and stale-edit refusal. Check
+Studio readiness and the built static-workspace route. Studio 1.7.2 continues
+to accept its existing owner session/master Bearer boundary; a new Starter
+scoped key does not grant Studio access. Keep the current runner and credentials.
+A Starter update does not authorize paid model work, publishing queued jobs or
+restarting a busy runner. Test each Home's installed modules before its deploy.
+
+## Approval capability without a bundled screen
+
+Do not add a default Approvals page/menu during an upgrade. Preserve any member
+interface already present. Follow APPROVALS.md for owner decisions through the
+existing Buzz agent and signed master connection; scoped employee keys retain
+proposal/status access only. Never rotate, disclose or distribute the owner key
+as a side effect of removing the screen. Verify explicit approve/reject, denial
+for ordinary keys, duplicate refusal and the recorded result before handover.

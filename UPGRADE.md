@@ -1,27 +1,49 @@
 # Upgrading your Digital Home Backend
 
-## Starter 3.0 development
+## Starter 3.0
 
-3.0 is not released. Its self-contained [existing-Simon guide](UPGRADE-3.md)
-requires no employee or training update. The current published release below
-remains 2.9.0. Never deploy an unreleased branch as latest.
+Verify the paired published GitHub releases before selecting this target. Pair
+backend `v3.0.0` with frontend `v3.0.0`, and use the
+[existing-Simon guide](UPGRADE-3.md) from that exact backend tag. VERSION alone
+in a development branch does not establish publication. The preceding published
+baselines are backend 2.9.0 / frontend 2.5.4. Existing employee instructions and
+training stay intact.
+
+### Upgrade to 3.0.0 after publication
+
+1. Confirm both published tags and read [RELEASE-3.md](RELEASE-3.md). Snapshot
+   both customised repositories, the actual database/account/configuration and
+   all media, and prove an isolated restore using [RECOVERY-3.md](RECOVERY-3.md).
+2. Capture customisations in both repositories before adopting the target tools.
+   Prepare the backend with the scripted procedure below, target `v3.0.0`;
+   merge the paired frontend using its own `UPGRADE.md`. Do not copy over its site.
+3. A backend already at 2.9.0 retains migrations 001–003 unchanged and applies
+   pending 004–008 through the migration/history tools. An older supported Home
+   also needs any pending earlier files, including 003. Inspect history/schema;
+   do not replay applied SQL or renumber member migrations to make a check pass.
+4. Preserve the member's shell, custom Money interfaces, domains, bindings,
+   social activation and workflows. Merge installed Studio's navigation, static
+   workspace exception/build step, dependencies and full generated database types.
+   See the optional-module checklist in UPGRADE-3.md. No Studio SQL replay or
+   runner restart is part of a Starter upgrade.
+5. Run both builds and the per-Home checks in UPGRADE-3.md. Keep the installed
+   VERSION unchanged until that member's upgrade is verified and approved.
 
 
-This guide is written to be executed by **Claude Code inside your own
-backend project**. Paste this into Claude Code from your backend project
-folder:
+Run this from the member's own backend with their existing coding agent.
+After publication, use the immutable guide for the approved tag:
 
-> Fetch https://raw.githubusercontent.com/lukesbrave/digital-home-backend/main/UPGRADE.md
-> and upgrade my backend to the latest version. My project may be
-> customized — preserve my changes while applying the upgrade.
+> Read https://raw.githubusercontent.com/lukesbrave/digital-home-backend/v3.0.0/UPGRADE-3.md
+> and prepare the paired 3.0.0 upgrade. Preserve my customisations, prove recovery,
+> and show me the tested changes before deploying.
 
 ---
 
-## Scripted upgrades (from the first release after 2.9.0)
+## Scripted upgrades (3.0.0 and later)
 
-Available from the first release after 2.9.0 (not yet tagged). Until then
-follow the 2.9.0 section below. Once that release is out, its own section
-below names its tag; use that tag wherever this section says `<target tag>`.
+The first scripted release is 3.0.0. Use only after its paired publication,
+with `v3.0.0` wherever this section says `<target tag>`. The older procedures
+below are historical catch-up instructions, not the completion point for 3.0.
 
 **Each upgrade runs the Home's current copy of the tools,** so the first step
 of every upgrade is to take the target release's copy and commit it on the
@@ -112,7 +134,7 @@ You are upgrading a member's Digital Home backend — a customized fork of
 customizations are intentional: **merge, don't overwrite.** When a file
 conflicts, prefer their copy design-wise and add the new capability into it.
 
-### Latest release: 2.9.0 — required public image storage
+### Historical release: 2.9.0 — required public image storage
 
 Read VERSION before changing anything. If it is 2.9.0, no code upgrade is
 needed. If it is 2.8.0 or the tested 2.9.0 beta, follow this section and stop;

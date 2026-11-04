@@ -4,7 +4,7 @@
  * Approve executes immediately through the trust layer (safe-mode aware).
  */
 import { NextRequest, NextResponse } from "next/server";
-import { authenticateSession, unauthorizedResponse } from "@/lib/api/auth";
+import { authenticateOwner, unauthorizedResponse } from "@/lib/api/auth";
 import { createAdminClient } from "@/lib/supabase/server";
 import {
   AgentActionDecisionError,
@@ -12,11 +12,26 @@ import {
 } from "@/lib/agent/actions";
 import { actorFromAuth } from "@/lib/events/shape";
 
+/** Read the exact proposal before asking the owner for a decision in Buzz. */
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
+) {
+  const auth = await authenticateOwner(request);
+  if (!auth.authenticated) return unauthorizedResponse(auth.error);
+  const { id } = await params;
+  const { data, error } = await createAdminClient()
+    .from("agent_actions").select("*").eq("id", id).maybeSingle();
+  if (error) return NextResponse.json({ error: "Action unavailable" }, { status: 500 });
+  if (!data) return NextResponse.json({ error: "Action not found" }, { status: 404 });
+  return NextResponse.json({ action: data }, { headers: { "Cache-Control": "no-store" } });
+}
+
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
-  const auth = await authenticateSession(request);
+  const auth = await authenticateOwner(request);
   if (!auth.authenticated) return unauthorizedResponse(auth.error);
 
   const { id } = await params;

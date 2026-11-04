@@ -22,8 +22,9 @@ export const HOME_GUIDE={
  authentication:'Existing admin session or signed API key. Existing env keys retain their signing mode. New minted keys self-sign and are restricted to explicitly reviewed routes; unknown routes are refused.',
  mcp:{path:'/api/mcp',authentication:'Bearer scoped key over HTTPS. Signed HTTP remains unchanged.',tools:MCP_TOOL_SPECS.map(t=>({name:t.name,scopes:t.scopes,approval:t.approval}))},
  routes:[
-  {method:'GET',path:'/api/agent/actions',scope:'owner session only',purpose:'Review proposed actions.',approval:'none'},
-  {method:'POST',path:'/api/agent/actions/{id}',scope:'owner session only',purpose:'Approve and execute once, or reject a proposal.',approval:'owner'},
+  {method:'GET',path:'/api/agent/actions',scope:'owner session or signed master only',purpose:'Review proposed actions through the owner connection in Buzz.',approval:'none'},
+  {method:'POST',path:'/api/agent/actions/{id}',scope:'owner session or signed master only',purpose:'Carry out the owner’s explicit approve/reject decision for this proposal; approval executes once and can trigger active workflows.',approval:'owner'},
+  {method:'GET',path:'/api/agent/actions/{id}',scope:'owner session or signed master only',purpose:'Read the full proposal and explain its effects before requesting the owner’s decision in Buzz.',approval:'none'},
   {method:'GET',path:'/api/settings/modules',scope:'owner session only',purpose:'Optional connection status; configuration presence is not a successful connection test.',approval:'none'},
   {method:'GET',scope:'settings:read',path:'/api/home',purpose:'Installed version, capabilities and actual migration history.',approval:'none'},
   {method:'GET',scope:'settings:read',path:'/api/home/guide',purpose:'This candidate’s agent route guide.',approval:'none'},
@@ -39,5 +40,5 @@ export const HOME_GUIDE={
   ...['GET','POST','DELETE'].map(method=>({method,path:'/api/settings/agent-keys',scope:'owner only',purpose:'List, mint or revoke a scoped key. Never log a mint response.',approval:'owner'})),
   ...['GET','POST'].map(method=>({method,path:'/api/crm/fulfilment',scope:'owner only',purpose:'Inspect or add missing draft recipes; existing custom recipes are preserved.',approval:'owner'})),
  ],
- coverage:'Discovery, Analytics, Money, events and key management. Capabilities mean code is present, not that migrations or payment setup are complete. Other legacy routes remain available to existing credentials; other scoped HTTP access remains restricted; MCP exposes reviewed tools and owner decisions use the approvals page.',
+ coverage:'Discovery, Analytics, Money, events and key management. Capabilities mean code is present, not that migrations or payment setup are complete. Other legacy routes remain available to existing credentials; other scoped HTTP access remains restricted; MCP exposes reviewed tools and owner decisions use the owner-authorised signed HTTP connection in Buzz; no Approvals page is bundled.',
 };

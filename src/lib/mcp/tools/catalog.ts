@@ -9,7 +9,7 @@
  *
  * Approval classes: `none` reads, or writes only inside the Home (a note on
  * a lead's timeline). `proposes` only queues an agent_actions row for the
- * owner's Approve or Reject (src/lib/agent/proposals.ts runs it on approval).
+ * owner's explicit decision in Buzz (src/lib/agent/proposals.ts runs it on approval).
  * Nothing here sends, publishes, spends or deletes.
  */
 
@@ -229,7 +229,7 @@ export const MCP_TOOL_SPECS: readonly McpToolSpec[] = [
     name: "pipeline.move",
     title: "Propose a deal move",
     description:
-      "Propose moving a deal to another stage, or closing it as won or lost. Never moves it: it queues an Approve/Reject card in the owner's approvals queue, and approving it is what moves the deal (refused if the deal moved in the meantime). One pending proposal per deal. Name the deal by opportunity_id or the lead's email (their open deal). Follow it with approvals.mine.",
+      "Propose moving a deal to another stage, or closing it as won or lost. Never moves it: it queues a proposal record in the owner's approvals queue, and approving it is what moves the deal (refused if the deal moved in the meantime). One pending proposal per deal. Name the deal by opportunity_id or the lead's email (their open deal). Follow it with approvals.mine.",
     inputSchema: {
       type: "object",
       properties: {
@@ -292,7 +292,7 @@ export const MCP_TOOL_SPECS: readonly McpToolSpec[] = [
     name: "article.propose",
     title: "Propose an article",
     description:
-      "Propose an article topic: queues an Approve/Reject card in the owner's approvals queue. Approving files it on the content calendar as approved, where it waits for the owner's Write now or a signed write-article call; rejecting files nothing. Refused when the keyword (ignoring case) is already on the calendar or already proposed.",
+      "Propose an article topic: queues a proposal record in the owner's approvals queue. Approving files it on the content calendar as approved, where it waits for the owner's Write now or a signed write-article call; rejecting files nothing. Refused when the keyword (ignoring case) is already on the calendar or already proposed.",
     inputSchema: {
       type: "object",
       properties: {
@@ -341,7 +341,7 @@ export const MCP_TOOL_SPECS: readonly McpToolSpec[] = [
     name: "social.propose",
     title: "Propose a social post",
     description:
-      "Propose a social post: queues an Approve/Reject card in the owner's approvals queue. Approving saves it as a DRAFT in the Social studio, aimed at every connected account unless narrowed; a draft never goes out by itself. Pass 1-10 hosted image URLs for an image post (Instagram and Facebook), or none for a video post.",
+      "Propose a social post: queues a proposal record in the owner's approvals queue. Approving saves it as a DRAFT in the Social studio, aimed at every connected account unless narrowed; a draft never goes out by itself. Pass 1-10 hosted image URLs for an image post (Instagram and Facebook), or none for a video post.",
     inputSchema: {
       type: "object",
       properties: {
