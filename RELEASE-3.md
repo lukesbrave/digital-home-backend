@@ -1,8 +1,9 @@
-# Digital Home Starter 3.0.0 — backend release candidate
+# Digital Home Starter 3.0.0 — backend
 
-Publication is pending. This prepared version is not the public latest release.
-Publish backend and frontend 3.0.0 together; RELEASE-PAIR.json contains the paired
-versions, application baselines and exact migration hashes. VERSION is the public
+Use this guide with the paired published GitHub releases for backend and frontend
+`v3.0.0`. A development branch alone does not establish release availability.
+RELEASE-PAIR.json contains the paired versions, application baselines and exact
+migration hashes. VERSION is the public
 Starter version; package.json's internal application package version is separate.
 
 The backend adds Home discovery, scoped keys, 14 MCP tools, owner Approvals,

@@ -1,6 +1,6 @@
 # Upgrade an existing Home with your current Simon
 
-Release candidate 3.0.0 — publication pending. Do not use this branch as “latest”.
+Use only with the paired published 3.0.0 releases. A development branch is not “latest”.
 After release, the owner gives their existing Simon the immutable release URL for
 this guide and the approved tag. No employee rehire, instruction replacement or
 training installation is needed to read and follow it. This is a task runbook,
@@ -58,7 +58,7 @@ me the result before deploying. Keep your current instructions and training.”
    A reviewed deletion uses `after: null`. Never blanket-approve a report or
    generate approvals merely to silence a failing check. Changed bytes after
    approval fail again. Retain the original before-receipt.
-8. Run the candidate's tests and both production builds. Verify database history,
+8. Run the target release's tests and both production builds. Verify database history,
    owner login, public site, form-to-lead, article images, custom pages, workflows,
    social state/queued posts and optional Studio. Old credentials must continue
    working: do not rotate the master, change signing mode or require new per-agent
@@ -114,7 +114,7 @@ baseline, the native-runtime blocker and the remaining model-behaviour proof.
 
 ## Optional payment interfaces
 
-The candidate provides payment and fulfilment APIs without a default Money page.
+The release provides payment and fulfilment APIs without a default Money page.
 Preserve any existing member Money page, navigation, records and integrations.
 Do not delete a member interface merely because it is absent from the starter.
 

@@ -1,12 +1,13 @@
 # Upgrading your Digital Home Backend
 
-## Starter 3.0 release candidate
+## Starter 3.0
 
-Publication is pending. VERSION identifies this candidate as 3.0.0; the published
-baseline remains backend 2.9.0 / frontend 2.5.4 until the paired releases appear.
-Do not select a development branch as latest. After publication, pair backend
-`v3.0.0` with frontend `v3.0.0`, and use the [existing-Simon guide](UPGRADE-3.md)
-from that exact backend tag. Existing employee instructions/training stay intact.
+Verify the paired published GitHub releases before selecting this target. Pair
+backend `v3.0.0` with frontend `v3.0.0`, and use the
+[existing-Simon guide](UPGRADE-3.md) from that exact backend tag. VERSION alone
+in a development branch does not establish publication. The preceding published
+baselines are backend 2.9.0 / frontend 2.5.4. Existing employee instructions and
+training stay intact.
 
 ### Upgrade to 3.0.0 after publication
 

@@ -1,6 +1,6 @@
 {
   "format": "starter_release_pair_v1",
-  "status": "candidate; publication pending",
+  "status": "paired inventory; availability is established by published GitHub releases",
   "backend": {
     "repository": "lukesbrave/digital-home-backend",
     "version": "3.0.0",

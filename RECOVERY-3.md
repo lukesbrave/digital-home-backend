@@ -74,7 +74,7 @@ identity directories for review. Report hashes, counts and test outcomes only.
    those writes and payment events before a real cutover; never promise zero
    loss from a stale backup. Do not reconnect domains or resume jobs automatically.
 
-## Evidence available in this candidate
+## Local recovery test evidence
 
 Run `npm run test:recovery` for integrity/refusal tests. With local PostgreSQL
 server binaries available, run:
@@ -96,9 +96,11 @@ nonempty targets, linked files and overwriting receipts are refused.
 
 These are actual local PostgreSQL and filesystem recovery proofs. They do NOT
 prove hosted Supabase Auth login, Storage/R2 export/import, external integrations,
-Studio recovery, DNS cutover or an old Simon model executing the procedure. Those
-remain explicit release gates. No member should be told recovery is guaranteed
-until their own isolated restore and runtime checks have passed.
+Studio recovery, DNS cutover or an old Simon model executing the procedure.
+Separate maintainer rehearsals cover hosted recovery, older-Simon execution and
+installed Studio preservation; see RELEASE-3.md for their limits. No member
+should be told recovery is guaranteed until their own isolated restore and
+runtime checks have passed.
 
 ## Old-Simon local rehearsal finding (2026-10-30)
 

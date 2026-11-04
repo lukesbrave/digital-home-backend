@@ -1,4 +1,4 @@
-# Activity events — Starter 3.0 candidate
+# Activity events — Starter 3.0
 
 Migration 005 adds an owner/service-role event stream. GET `/api/events` accepts a
 `since` cursor, optional `action` prefix, `lead_id` and `limit`. GET
@@ -6,9 +6,9 @@ Migration 005 adds an owner/service-role event stream. GET `/api/events` accepts
 `events:read`. Receipts contain IDs/counts/enums, not email bodies or buyer details.
 
 Wired emitters: lead upserts, selected CRM activity (stage changes and email
-sends), article PATCH publication transitions, key mint/revoke, payment processing.
-Approvals emitters and other publication paths are not yet complete. No claim of
-a complete business audit trail. The feed uses a short settling delay; unusually
+sends), article PATCH publication transitions, key mint/revoke, payment processing,
+and owner approval/rejection/execution/failure decisions. Other publication paths
+are not comprehensively covered; this is not a complete business audit trail. The feed uses a short settling delay; unusually
 long transactions can become visible behind a saved cursor. It is not a durable
 exactly-once event bus. Lead deletion scrubs linked receipts and reports success.
 

@@ -1,4 +1,4 @@
-# Agent keys — Starter 3.0 candidate
+# Agent keys — Starter 3.0
 
 Optional owner-managed keys, separate from upgrading an existing Simon.
 Existing master/env keys and their signing mode remain valid. Do not rotate them
@@ -15,8 +15,9 @@ Minted requests sign METHOD:pathname:timestamp:body with the minted key itself.
 They still require signatures if a legacy Home explicitly disabled signing.
 Scopes are checked centrally against reviewed method/path pairs; unknown routes
 are denied. Read the live `/api/home/guide` for supported route/scope pairs.
-Current coverage: discovery, Analytics, events and Money. Vocabulary for other
-modules is reserved but not yet wired; do not migrate a legacy agent to a new key
+Current signed-HTTP coverage: discovery, Analytics, events and Money. MCP
+separately exposes the reviewed tools documented in MCP.md. Other signed-HTTP
+module routes remain unavailable to minted keys; do not migrate a legacy agent to a new key
 until all routes it uses are supported and verified. An events-only key cannot
 read leads, perform payments, mint keys or invoke worker ticks.
 

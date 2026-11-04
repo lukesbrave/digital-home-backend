@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.0.0] — release candidate, publication pending
+## [3.0.0]
 
 - Home discovery and a client-neutral guide, scoped employee keys, 14 MCP tools,
   owner Approvals, and a recorded activity feed. Existing master/named-key
