@@ -1,5 +1,23 @@
 # Starter 3.0 development status — 2026-10-30
 
+## Publication authorisation — 2026-11-04
+
+Luke explicitly approved publishing both 3.0 releases after reviewing the
+screen-free approval capability. Release source pairs backend/frontend 3.0.0;
+no Money or Approvals screen is bundled. Approval APIs remain available to the
+owner-authorised agent connection. Existing members still need their own reviewed
+upgrade and approved Home deployment; this authorisation publishes Starter source,
+not a member database migration, Home deploy or employee training update.
+
+Verify the immutable published pair at:
+- https://github.com/lukesbrave/digital-home-backend/releases/tag/v3.0.0
+- https://github.com/lukesbrave/digital-home-frontend/releases/tag/v3.0.0
+
+RELEASE-PAIR.json contains the application baselines and SQL hash inventory.
+All preparation/review notes below precede this publication authorisation and
+are historical snapshots, including earlier pending-publication statements.
+
+
 **Scope change — 2026-11-04:** Luke requested no bundled Approvals screen, with
 approval capability managed through agents in Buzz. Removed the page/navigation;
 proposal schema/MCP and execution/audit protection remain. Queue/detail/decision
