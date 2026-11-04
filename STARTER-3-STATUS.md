@@ -1,5 +1,37 @@
 # Starter 3.0 development status — 2026-10-30
 
+## Current release review — 2026-11-04
+
+The paired 3.0.0 candidate is prepared for owner publication review. Candidate
+VERSION is 3.0.0 in both repos; published baselines remain backend 2.9.0 and
+frontend 2.5.4 until the paired releases are approved and published.
+
+All planned maintainer rehearsal gates now have recorded evidence: core hosted
+cold install/recovery/payments/deployed browser checks, actual unchanged older
+Simon scenario, and installed Studio 1.7.2 schema/data/code/runtime preservation.
+Studio tests compare 15 table schemas/rows across actual Starter SQL, saved-board
+snapshots across original/upgraded apps, safe/stale saves, owner/master/refusal
+boundaries, complete generated schema builds, 314 custom file checks (five
+reviewed merges), and built Cloudflare static/runtime boundary checks. The
+member's deployment configuration and Studio-owned code remain unchanged.
+
+Clean-dependency review found missing Studio package declarations in the old
+canary, hidden by shared node_modules; the isolated specimen reconciles the
+installed release requirements. Upgrade guidance now calls this out and explains
+that type preparation retains old helpers but new release aliases need review.
+No existing Studio runner was restarted; no model work or public deployment.
+
+Final core validation: 297 backend tests, 10 frontend tests, both production
+builds; installed-Studio paired builds and 58 module checks pass. Final release
+pair inventories/hash checks match; existing official SQL is unchanged. Browser
+assets contain none of the private synthetic server credentials checked.
+RELEASE-3.md, RELEASE-PAIR.json and the release PRs hold the handover. Remaining
+step: Luke's publication word, then promote/tag/publish the exact reviewed pair
+and verify their downloadable artifacts. Each member still needs their own
+recovery, reviewed merges and approved deploy. The progress notes below are
+historical; their earlier pending gates/version statements are superseded here.
+
+
 Not released. Branch `codex/starter-3-2026-10-30` in both starter repositories.
 Backend base 1a4b18b, frontend base 257dfe3. Existing public versions remain
 backend 2.9.0 and frontend 2.5.4. No production changes or migrations performed.
