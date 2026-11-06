@@ -7,9 +7,9 @@ before selecting them; a preparation branch is not a release. The immutable
 Fresh setup must apply all 11 frontend and 8 backend migration files, then
 record their full repository/filename/checksum identities before handover.
 The backend's `FRESH-INSTALL.md` provides a Management API workflow and a
-protected direct-connection alternative. The new history-only SQL generator
-checks the exact release inventory, required schema markers and conflicting
-history; it never replays the schema SQL. The status/seed tools now recognise
+protected direct-connection alternative. Both installation paths validate both VERSION files and release manifests before the first write,
+retain project-bound receipts after each successful file and run the same atomic history check.
+It verifies required columns, row security, policies, triggers and conflicting history; it never replays the schema SQL. The status/seed tools now recognise
 enabled database triggers, including migration 007's payment receipt trigger.
 The frontend setup documents now point to the full backend sequence.
 

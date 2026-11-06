@@ -19,11 +19,7 @@ This project uses **@opennextjs/cloudflare** (OpenNext) to run Next.js on Cloudf
 
 ## Step 1: Supabase Setup
 
-Apply the frontend starter migrations first, then every migration in this
-repo's `supabase/migrations/`, in order, to the same verified Supabase project.
-Check each result before continuing. The frontend does not need to be deployed yet.
-Then complete [FRESH-INSTALL.md](FRESH-INSTALL.md): record and verify both
-repositories’ migration history before deploying. SQL application alone is incomplete.
+Follow [FRESH-INSTALL.md](FRESH-INSTALL.md) before creating the admin user. Run its paired preflight and fresh installer against the verified empty project. Continue after all 19 exact records pass readback.
 
 ## Step 2: Create Admin User
 

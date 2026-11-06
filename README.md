@@ -78,15 +78,11 @@ Using a separate chat for each repo helps Claude stay in the correct project con
    ```
    Fill in your Supabase credentials, Worker runtime duplicates (`SUPABASE_URL`, `SUPABASE_ANON_KEY`), API keys, and Frontend URL. Leave signed machine requests enabled unless you have a temporary migration reason to disable them.
 
-3. **Create an admin user**
-   Go to your Supabase dashboard → Authentication → Users → Add user. There is no public signup — admin users are created directly in Supabase.
+3. **Install the paired database**
+   Follow [FRESH-INSTALL.md](FRESH-INSTALL.md) before any SQL or owner setup on the new, empty project. Verify all 11 frontend and 8 backend files.
 
-4. **Run the migrations in the right order**
-   Use the same Supabase project as the Frontend.
-   - First run Frontend migrations `001` through `011` from `digital-home-frontend/supabase/migrations/`
-   - Then run every official backend migration `001` through `008`, in order
-   - Complete [FRESH-INSTALL.md](FRESH-INSTALL.md): record both repos’ 19 migration
-     files/checksums and verify module discovery after deployment
+4. **Create an admin user**
+   In Supabase Authentication, create the owner login and grant admin access as described in DEPLOYMENT.md.
 
 5. **Update `wrangler.jsonc` before deployment**
    Replace the starter defaults with your own values:
