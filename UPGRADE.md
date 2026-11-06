@@ -3,19 +3,30 @@
 ## Starter 3.0
 
 Verify the paired published GitHub releases before selecting this target. Pair
-backend `v3.0.0` with frontend `v3.0.0`, and use the
+backend `v3.0.1` with frontend `v3.0.1`, and use the
 [existing-Simon guide](UPGRADE-3.md) from that exact backend tag. VERSION alone
 in a development branch does not establish publication. The preceding published
 baselines are backend 2.9.0 / frontend 2.5.4. Existing employee instructions and
 training stay intact.
 
-### Upgrade to 3.0.0 after publication
+### Homes already running 3.0.0
+
+This patch adds no schema migration or required application deployment. Review
+and adopt the corrected history tools on an isolated branch, preserving local
+changes. Run status with the paired frontend path. If all 19 exact files are
+recorded, checksums match and markers exist, no database write is needed. If SQL
+was applied but history is missing, inspect each result and actual schema first,
+then use the existing status/seed procedure below. The corrected reader checks
+the enabled payment receipt trigger too. Do not replay starter SQL or use the
+fresh-install helper to adopt a customised Home.
+
+### Upgrade to 3.0.1 after publication
 
 1. Confirm both published tags and read [RELEASE-3.md](RELEASE-3.md). Snapshot
    both customised repositories, the actual database/account/configuration and
    all media, and prove an isolated restore using [RECOVERY-3.md](RECOVERY-3.md).
 2. Capture customisations in both repositories before adopting the target tools.
-   Prepare the backend with the scripted procedure below, target `v3.0.0`;
+   Prepare the backend with the scripted procedure below, target `v3.0.1`;
    merge the paired frontend using its own `UPGRADE.md`. Do not copy over its site.
 3. A backend already at 2.9.0 retains migrations 001–003 unchanged and applies
    pending 004–008 through the migration/history tools. An older supported Home
@@ -33,16 +44,16 @@ training stay intact.
 Run this from the member's own backend with their existing coding agent.
 After publication, use the immutable guide for the approved tag:
 
-> Read https://raw.githubusercontent.com/lukesbrave/digital-home-backend/v3.0.0/UPGRADE-3.md
-> and prepare the paired 3.0.0 upgrade. Preserve my customisations, prove recovery,
+> Read https://raw.githubusercontent.com/lukesbrave/digital-home-backend/v3.0.1/UPGRADE-3.md
+> and prepare the paired 3.0.1 upgrade. Preserve my customisations, prove recovery,
 > and show me the tested changes before deploying.
 
 ---
 
 ## Scripted upgrades (3.0.0 and later)
 
-The first scripted release is 3.0.0. Use only after its paired publication,
-with `v3.0.0` wherever this section says `<target tag>`. The older procedures
+The first scripted release was 3.0.0. For this correction use only after paired
+3.0.1 publication, with `v3.0.1` wherever this section says `<target tag>`. The older procedures
 below are historical catch-up instructions, not the completion point for 3.0.
 
 **Each upgrade runs the Home's current copy of the tools,** so the first step

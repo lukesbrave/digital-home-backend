@@ -66,6 +66,7 @@ function policy(tableName, name) {
 export function markerLabel(m) {
   if (m.kind === 'table') return `table ${m.name}`;
   if (m.kind === 'column') return `column ${m.table}.${m.name}`;
+  if (m.kind === 'trigger') return `trigger ${m.name} on ${m.table}`;
   return `policy "${m.name}" on ${m.table}`;
 }
 
@@ -92,7 +93,7 @@ function unquote(identifier) {
   return identifier.startsWith('"') ? identifier.slice(1, -1) : identifier.toLowerCase();
 }
 
-/** The tables, added columns and policies a migration's SQL creates. */
+/** The tables, added columns, policies and triggers a migration's SQL creates. */
 export function extractMarkers(sql) {
   const text = stripSqlComments(sql);
   const markers = [];
@@ -122,6 +123,9 @@ export function extractMarkers(sql) {
 
   const createPolicy = new RegExp(String.raw`\bcreate\s+policy\s+(${IDENT})\s+on\s+${QUALIFIED}`, 'gi');
   for (const m of text.matchAll(createPolicy)) add(policy(unquote(m[2]), unquote(m[1])));
+
+  const createTrigger = new RegExp(String.raw`\bcreate\s+(?:or\s+replace\s+)?trigger\s+(${IDENT})\s+[^;]*?\bon\s+${QUALIFIED}`, 'gi');
+  for (const m of text.matchAll(createTrigger)) add({kind: 'trigger', table: unquote(m[2]), name: unquote(m[1])});
 
   return markers;
 }
@@ -159,20 +163,22 @@ export function listMigrations(dir, repo) {
 
 /**
  * A snapshot of what exists in the database's public schema, as Sets of
- * `table`, `table.column` and `table|policy` keys. Built from query rows by
+ * `table`, `table.column`, `table|policy` and `table|trigger` keys. Built from query rows by
  * catalogFromRows() so the rest stays testable.
  */
-export function catalogFromRows({ tables = [], columns = [], policies = [] }) {
+export function catalogFromRows({ tables = [], columns = [], policies = [], triggers = [] }) {
   return {
     tables: new Set(tables.map((r) => r.table_name)),
     columns: new Set(columns.map((r) => `${r.table_name}.${r.column_name}`)),
     policies: new Set(policies.map((r) => `${r.tablename}|${r.policyname}`)),
+    triggers: new Set(triggers.map((r) => `${r.tablename}|${r.triggername}`)),
   };
 }
 
 export function markerPresent(m, catalog) {
   if (m.kind === 'table') return catalog.tables.has(m.name);
   if (m.kind === 'column') return catalog.columns.has(`${m.table}.${m.name}`);
+  if (m.kind === 'trigger') return catalog.triggers?.has(`${m.table}|${m.name}`) ?? false;
   return catalog.policies.has(`${m.table}|${m.name}`);
 }
 

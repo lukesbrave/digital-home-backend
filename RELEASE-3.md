@@ -1,7 +1,7 @@
-# Digital Home Starter 3.0.0 — backend
+# Digital Home Starter 3.0.1 — backend
 
 Use this guide with the paired published GitHub releases for backend and frontend
-`v3.0.0`. A development branch alone does not establish release availability.
+`v3.0.1`. A development branch alone does not establish release availability.
 RELEASE-PAIR.json contains the paired versions, application baselines and exact
 migration hashes. VERSION is the public
 Starter version; package.json's internal application package version is separate.
@@ -16,7 +16,8 @@ to agents and custom interfaces. Payouts are records, not automated transfers.
 
 Use the released pair, Node 22+ and the setup guides in their exact tags. Apply
 frontend 001–011 first, then backend 001–008 to the same empty Supabase project;
-verify tracked history. Configure the member's own accounts and public media.
+complete [FRESH-INSTALL.md](FRESH-INSTALL.md) to record and verify all 19 migration
+files/checksums, then check `/api/home` module schema after deployment. Configure the member's own accounts and public media.
 Prove owner login, their public pages/images and form-to-one-CRM-lead before
 handover. Email, social, payments, brand work, custom design and Studio are later
 choices; missing optional services do not block a verified foundation.

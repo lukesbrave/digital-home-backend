@@ -28,7 +28,7 @@ Supabase project. Check the working directory before each repo-specific action.
 Before anything else, check if the user has Node.js installed by running `node -v`. This project requires Node.js 22 or newer. If the command fails, is not found, or reports an older version, walk them through installing a supported version: go to [nodejs.org](https://nodejs.org), download the LTS version, and run the installer. They need Node.js to run this project.
 
 ### Step 1: Supabase + Migrations (Frontend First)
-If you haven't already, follow the Frontend CLAUDE.md Steps 1-3 to create your Supabase project, run all Frontend migrations (`001` through `011`), and create an admin user. Then apply every migration in this repo's `supabase/migrations/`, in order.
+Create a new empty Supabase project. Before running any SQL or creating an admin user, follow [FRESH-INSTALL.md](FRESH-INSTALL.md) from the backend checkout with both release tags. Its runner validates the pair, applies and records all 19 files, and verifies history. Then create the owner login. After deployment, verify the signed-in Home reports all five modules.
 
 Both repos share the same database. The Frontend owns the shared website schema; this repo owns backend settings, brand context, CRM, migration history, agent keys, events and payment/fulfilment records. Review the selected release’s migration files for the complete schema.
 
