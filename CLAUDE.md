@@ -295,7 +295,7 @@ If `status` is `401`, the API key doesn't match between Backend and Frontend. Re
 - **Digital Home API** for content writes that need shared-site side effects (e.g., publishing content triggers SEO metadata generation in the Frontend).
 - **Route auth split:**
   - session-only: admin dashboard APIs (`/api/articles`, `/api/content-calendar`, `/api/publish`, `/api/reset-writing`, `/api/settings`, `/api/setup`, `/api/test-frontend`)
-  - session or signed API request: machine-triggered automation routes (`/api/write-article`, `/api/write-now`, `/api/trend-scan`)
+  - session or signed API request: machine-triggered automation routes (`/api/write-article`, `/api/write-now`, `/api/trend-scan`, `/api/seo/sync-rankings`)
 - **Dark theme only.** This is a professional dashboard, not a consumer app.
 - **Shared database types:** Review and merge schema changes into both repositories’ `src/types/database.ts`. Preserve member columns and custom types in both copies. A clean or committed file may still contain customisations; never replace it wholesale with starter types. Verify both builds after the merge.
 
